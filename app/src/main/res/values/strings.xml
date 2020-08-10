@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">Siac Mobile</string>
+    <string name="action_settings">Settings</string>
+    <string name="zenitech">© Zenitech</string>
+    <string name="searchable">Procurar por</string>
+
+    <!--Principal-->
+    <string name="title_activity_main">Siac Mobile</string>
+    <string name="txt_btn_vendas">VENDAS</string>
+    <string name="txt_btn_contas_receber">CONTAS A RECEBER</string>
+    <string name="txt_btn_relatorios">RELATÓRIOS</string>
+    <string name="txt_btn_enviar_bd">ENVIAR BANCO DE DADOS</string>
+
+    <string name="title_home">Principal</string>
+    <string name="title_dashboard">Relatórios</string>
+    <string name="title_notifications">Gerenciar</string>
+
+    <!--Login-->
+    <string name="title_activity_login">Login</string>
+    <string name="prompt_id">Id</string>
+    <string name="prompt_login">login</string>
+    <string name="prompt_password">Senha</string>
+    <string name="action_sign_in_short">Entrar</string>
+    <string name="action_sign_in">Entrar</string>
+
+    <!--Unidades-->
+    <string name="title_activity_unidades">Unidades</string>
+    <string name="txt_unidades">Selecione a Unidade</string>
+    <string name="txt_btn_baixarBD">Baixar Banco de Dados</string>
+
+    <!--Vendas-->
+    <string name="vendas_title_activity_vendas">Vendas</string>
+    <string name="vendas_subtitle_activity_vendas">Siac Mobile</string>
+    <string name="vendas_tit_produto">Produto</string>
+    <string name="vendas_tit_itens">Itens</string>
+    <string name="title_activity_financeiro_da_venda">Financeiro Da Venda</string>
+
+    <!--Consultar -->
+    <string name="title_activity_contas_receber_consultar_cliente">Consultar Cliente</string>
+    <string name="title_activity_contas_receber_cliente">Contas Receber Cliente</string>
+    <string name="title_activity_contas_receber_baixar_conta">Baixar Conta</string>
+    <string name="title_activity_download_manager">DownloadManager</string>
+    <string name="title_activity_vendas_consultar_clientes">Consultar Clientes Venda</string>
+    <string name="title_activity_relatorio_vendas">Relatório de Vendas</string>
+    <string name="title_activity_relatorio_vendas_cliente">Relatório Vendas Cliente</string>
+    <string name="title_activity_relatorio_contas_receber">Relatório Contas Receber</string>
+    <string name="title_activity_principal2">MainActivity</string>
+    <string name="title_activity_teste">Enviar Dados</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_sincronizar_banco_dados">Sincronizar Banco de Dados</string>
+
+
+    <!-- MSG Sincronismo -->
+    <string name="sincronizando">Sincronizando</string>
+    <string name="gerando_banco_de_dados">Gerando banco de dados…\nEsta ação pode demorar um pouco!</string>
+    <string name="fazendo_dowloand_do_banco">Fazendo download dos dados…\nAguarde um pouco mais!</string>
+    <string name="inportando_banco">Importando banco de dados…</string>
+    <string name="verificando_serial">Validando serial…</string>
+    <string name="ativando_serial">Ativando POS…</string>
+    <string name="informe_um_serial">Informe um serial válido!</string>
+    <string name="sincronizado">Tudo Certo!</string>
+    <string name="oops">Oops!</string>
+    <string name="txt_app_finalizado">App Finalizado!\nPressione \"BAIXAR BANCO DE DADOS\", para carregar novos dados.</string>
+    <string name="serial">Serial</string>
+    <string name="sincronizar">BAIXAR BANCO DE DADOS</string>
+
+    <!---->
+    <string name="zeros">00,00</string>
+    <string name="zero">0</string>
+
+</resources>

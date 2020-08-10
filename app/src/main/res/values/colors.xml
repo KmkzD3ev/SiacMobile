@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#009688</color>
+    <color name="colorPrimaryDark">#00796B</color>
+    <!--<color name="colorAccent">#ef5350</color>-->
+    <color name="colorAccent">#F19135</color>
+    <color name="icons">#747474</color>
+    <color name="transparente">#00ffffff</color>
+    <color name="erro">#ffd2d2</color>
+
+    <!-- Buttom -->
+    <color name="btnBorda">#dedede</color>
+    <color name="btnCorStart">#dedede</color>
+    <color name="btnCorEnd">#d1d1d1</color>
+</resources>

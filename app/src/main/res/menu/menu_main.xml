@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="br.com.zenitech.siacmobile.Principal">
+    <item
+        android:id="@+id/action_sair"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_clear"
+        android:title="Sair"
+        app:showAsAction="always" />
+</menu>

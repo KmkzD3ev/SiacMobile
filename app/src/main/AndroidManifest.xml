@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="br.com.zenitech.siacmobile"
+    android:installLocation="internalOnly">
+
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:replace="allowBackup"
+        tools:targetApi="q">
+        <activity
+            android:name=".SincronizarBancoDados"
+            android:label="@string/title_activity_sincronizar_banco_dados"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".EnviarDadosServidor"
+            android:label="@string/title_activity_teste"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Principal2"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_principal2" />
+        <activity
+            android:name=".Login"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Principal"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Unidades"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label=""
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SplashScreen"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Sincronizar"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="Login" />
+        <activity
+            android:name=".Vendas"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/vendas_title_activity_vendas"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".FinanceiroDaVenda"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_financeiro_da_venda"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ContasReceberConsultarCliente"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_contas_receber_consultar_cliente"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ContasReceberCliente"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_contas_receber_cliente"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ContasReceberBaixarConta"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_contas_receber_baixar_conta"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Download"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_download_manager"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".VendasConsultarClientes"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_vendas_consultar_clientes"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value=".VendasConsultarClientes" />
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".RelatorioVendas"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_relatorio_vendas"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".RelatorioVendasCliente"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_relatorio_vendas_cliente"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".RelatorioContasReceber"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_relatorio_contas_receber"
+            android:theme="@style/AppTheme.NoActionBar" />
+    </application>
+
+</manifest>
