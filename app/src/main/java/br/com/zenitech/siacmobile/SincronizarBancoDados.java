@@ -600,6 +600,8 @@ public class SincronizarBancoDados extends AppCompatActivity {
         ll_sincronizar.setVisibility(View.GONE);
         ll_sincronizando.setVisibility(View.GONE);
         ll_sucesso.setVisibility(View.VISIBLE);
+
+        prefs.edit().putString("data_movimento_atual", new ClassAuxiliar().inserirDataAtual()).apply();
         new Handler().postDelayed(() -> {
             prefs.edit().putBoolean("sincronizado", true).apply();
 

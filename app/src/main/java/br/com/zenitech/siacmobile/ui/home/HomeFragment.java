@@ -1,26 +1,38 @@
 package br.com.zenitech.siacmobile.ui.home;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.Objects;
 
+import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.ContasReceberConsultarCliente;
 import br.com.zenitech.siacmobile.DatabaseHelper;
+import br.com.zenitech.siacmobile.EnviarDadosServidor;
+import br.com.zenitech.siacmobile.FinanceiroDaVenda;
+import br.com.zenitech.siacmobile.Principal2;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class HomeFragment extends Fragment {
 /*
@@ -46,6 +58,10 @@ public class HomeFragment extends Fragment {
 */
 
     private DatabaseHelper bd;
+    SharedPreferences prefs;
+    ClassAuxiliar aux;
+    private AlertDialog alerta;
+    Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,7 +72,10 @@ public class HomeFragment extends Fragment {
         setHasOptionsMenu(true);
 
         //
-        bd = new DatabaseHelper(getContext());
+        context = view.getContext();
+        bd = new DatabaseHelper(context);
+        prefs = context.getSharedPreferences("preferencias", MODE_PRIVATE);
+        aux = new ClassAuxiliar();
 
         try {
             String[] dados_venda = bd.getUltimaVendasCliente();
@@ -88,15 +107,16 @@ public class HomeFragment extends Fragment {
         });
 
         //INICIAR VENDAS
-        view.findViewById(R.id.cv_venda).setOnClickListener(view1 -> startActivity(new Intent(getContext(), VendasConsultarClientes.class)));
-
-        //CONSULTAR CLIENTE CONTAS RECEBER
-        view.findViewById(R.id.cv_contas_receber).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class));
+        view.findViewById(R.id.cv_venda).setOnClickListener(view1 -> {
+            if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
+                startActivity(new Intent(getContext(), VendasConsultarClientes.class));
+            } else {
+                alerta();
             }
         });
+
+        //CONSULTAR CLIENTE CONTAS RECEBER
+        view.findViewById(R.id.cv_contas_receber).setOnClickListener(view13 -> startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class)));
 
         //CONSULTAR CLIENTE CONTAS RECEBER
         view.findViewById(R.id.cv_emissor_notas).setOnClickListener(view12 -> {
@@ -111,5 +131,26 @@ public class HomeFragment extends Fragment {
 
 
         return view;
+    }
+
+    private void alerta() {
+
+        //Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setIcon(R.drawable.logosiac);
+        //define o titulo
+        builder.setTitle("Atenção");
+        //define a mensagem
+        builder.setMessage("Não foi possível iniciar uma nova venda, sincronismo pendente!");
+        //define um botão como positivo
+        builder.setPositiveButton("Gerenciar", (arg0, arg1) -> startActivity(new Intent(context, EnviarDadosServidor.class)));
+        //define um botão como negativo.
+        /*builder.setNegativeButton("Não", (arg0, arg1) -> {
+            //Toast.makeText(InformacoesVagas.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+        });*/
+        //cria o AlertDialog
+        alerta = builder.create();
+        //Exibe alerta
+        alerta.show();
     }
 }
