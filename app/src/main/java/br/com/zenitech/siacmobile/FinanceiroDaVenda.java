@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -15,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,18 +32,22 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.maps.android.SphericalUtil;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.FinanceiroVendasAdapter;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import dmax.dialog.SpotsDialog;
 
 public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     //
@@ -78,6 +84,23 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private String produto_emissor;
     private String quantidade_emissor;
     private String valor_unit_emissor;
+    private Context context;
+
+    // DADOS DE CORDENADAS *********
+    double coord_latitude_pedido = 0;
+    double coord_longitude_pedido = 0;
+    GPStracker coord;
+    Button btnFinalizarEntrega;
+    LatLng posicaoInicial;
+    LatLng posicaiFinal;
+    double distance;
+
+    // DADOS CLIENTE
+    String idCliente;
+    double coordCliLat, coordCliLon;
+    // DADOS DE CORDENADAS *********
+
+    private SpotsDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +112,13 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         //
         classAuxiliar = new ClassAuxiliar();
+        context = this;
+        coord = new GPStracker(context);
+        dialog = (SpotsDialog) new SpotsDialog.Builder()
+                .setContext(context)
+                .setTheme(R.style.Custom)
+                .setCancelable(false)
+                .build();
 
         //
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
@@ -127,7 +157,13 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //
         txtVencimentoFormaPagamento = findViewById(R.id.txtVencimentoFormaPagamento);
         txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
-        txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> showDatePickerDialog(v));
+        /*if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> showDatePickerDialog(v));
+        } else {
+            txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> showDatePickerDialog(v));
+        }*/
+        //txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> Mask.insert("##/##/####", txtVencimentoFormaPagamento));
+        txtVencimentoFormaPagamento.addTextChangedListener(classAuxiliar.maskData("##/##/####", txtVencimentoFormaPagamento));
 
         txtTotalItemFinanceiro = findViewById(R.id.txtTotalItemFinanceiro);
 
@@ -302,6 +338,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         newFragment.show(getSupportFragmentManager(), "dataPicker");
     }
 
+    public void showDatePickerDialogAndroid10Plus(View v) {
+        DialogFragment newFragment = new DialogFragment();
+        newFragment.show(getSupportFragmentManager(), "dataPicker");
+    }
+
     public void mostrarMsg() {
 
         //Cria o gerador do AlertDialog
@@ -375,7 +416,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         sql += codigo_cliente + "\n";//CODIGO_CLIENTE_FINANCEIRO
         sql += fPag[0] + "\n";//sql += spFormasPagamentoCliente.getSelectedItem().toString() + "\n";//FPAGAMENTO_FINANCEIRO
         sql += txtDocumentoFormaPagamento.getText().toString() + "\n";//DOCUMENTO_FINANCEIRO
-        sql += String.valueOf(classAuxiliar.inserirData(txtVencimentoFormaPagamento.getText().toString())) + "\n";//VENCIMENTO_FINANCEIRO
+        sql += String.valueOf(classAuxiliar.inserirData(classAuxiliar.formatarData(classAuxiliar.soNumeros(txtVencimentoFormaPagamento.getText().toString())))) + "\n";//VENCIMENTO_FINANCEIRO
         sql += String.valueOf(classAuxiliar.converterValores(txtValorFormaPagamento.getText().toString())) + "\n";//VALOR_FINANCEIRO
         sql += "0" + "\n";//STATUS_AUTORIZACAO
         sql += "0" + "\n";//PAGO
@@ -397,7 +438,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 codigo_cliente,//CODIGO_CLIENTE_FINANCEIRO
                 fPag[0],//spFormasPagamentoCliente.getSelectedItem().toString(),//FPAGAMENTO_FINANCEIRO
                 txtDocumentoFormaPagamento.getText().toString(),//DOCUMENTO_FINANCEIRO
-                String.valueOf(classAuxiliar.inserirData(txtVencimentoFormaPagamento.getText().toString())),//VENCIMENTO_FINANCEIRO
+                String.valueOf(classAuxiliar.inserirData(classAuxiliar.formatarData(classAuxiliar.soNumeros(txtVencimentoFormaPagamento.getText().toString())))),//VENCIMENTO_FINANCEIRO
                 String.valueOf(classAuxiliar.converterValores(txtValorFormaPagamento.getText().toString())),//VALOR_FINANCEIRO
                 "0",//STATUS_AUTORIZACAO
                 "0",//PAGO
@@ -471,14 +512,12 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 runOnUiThread(() -> tilVencimento.setVisibility(View.VISIBLE));
             }
         } else {
-            runOnUiThread(new Runnable() {
+            runOnUiThread(() -> {
+                tilDocumento.setVisibility(View.GONE);
+                tilVencimento.setVisibility(View.GONE);
+                txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
 
-                @Override
-                public void run() {
-                    tilDocumento.setVisibility(View.GONE);
-                    tilVencimento.setVisibility(View.GONE);
-                    txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
-                }
+                Log.i("Fin", classAuxiliar.formatarData(classAuxiliar.soNumeros(txtVencimentoFormaPagamento.getText().toString())));
             });
         }
     }
@@ -600,6 +639,123 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         alerta = builder.create();
         //Exibe alerta
         alerta.show();
+    }
+
+
+
+    /////////// ***********************************************
+
+
+    public boolean raio(double latIni, double lonIni) {
+        boolean result = false;
+
+        posicaoInicial = new LatLng(latIni, lonIni);
+        try {
+            posicaiFinal = new LatLng(coordCliLat, coordCliLon);
+        } catch (Exception ignored) {
+            posicaiFinal = new LatLng(0.0, 0.0);
+        }
+        distance = SphericalUtil.computeDistanceBetween(posicaoInicial, posicaiFinal);
+
+        //Log.e("LOG", "A Distancia é = " + (distance));
+        Locale mL = new Locale("pt", "BR");
+        //String.format(mL, "%4.3f%s", distance, unit);
+        String unit = "m";
+        if (distance >= 1000) {
+            distance /= 1000;
+            unit = "km";
+        }
+        Log.e("Distancia", "A Distancia é = " + String.format(mL, "%4.3f%s", distance, unit));
+
+        if (distance <= 150) {
+            result = true;
+        }else{
+            msg("Você parece estar a uns " + String.format(mL, "%4.3f%s", distance, unit) +" de onde o cliente está. Chegue mais perto para finalizar a entrega!");
+        }
+
+        return result;
+    }
+
+    /**
+     * P1: PEGA AS CORDENADAS
+     * P2: VERIFICAR SE TEM INTERNET
+     * P3: TEM INTERNET! VERIFICA SE O CLIENTE JÁ POSSUI AS CORDENADAS DA SUA CASA
+     * P3.1: CLIENTE NÃO TEM COREDENAS! ATUALIZA O CADASTRO COM AS CORDENAS INFORMADA ANTERIORMENTE
+     * P4: CALCULAR O RAIO DA CASA DO CLIENTE COM A POSIÇÃO DO ENTREGADOR
+     */
+
+    // PEGAR AS CORDENADAS DO ENTREGADOR
+    private void verifCordenadas() {
+        //barra de progresso pontos
+        dialog.show();
+
+        //msg(String.valueOf(coord_latitude_pedido));
+        // VERIFICA SE A ACTIVITY ESTÁ VISÍVEL
+        if (VerificarActivityAtiva.isActivityVisible()) {
+            new Handler().postDelayed(() -> {
+
+                String[] c = coord.getLatLon().split(",");
+                coord_latitude_pedido = Double.valueOf(c[0]);
+                coord_longitude_pedido = Double.valueOf(c[1]);
+
+                // VERIFICA SE AS CORDENADAS DO ENTREGADOR FORAM RECONHECIDAS
+                if (coord_latitude_pedido != 0.0) {
+
+                    //msg("Peguei a latitude: " + coord_latitude_pedido);
+                    verifClienteCordenada();
+                } else {
+                    verifCordenadas();
+                }
+
+            }, 3000);
+        }
+    }
+
+    // VERIFICAR AS CORDENADAS DO CLIENTE
+    private void verifClienteCordenada() {
+
+        //msg("Cordenadas do cliente: " + coordCliLat);
+
+        if (coordCliLat == 0.0) {
+            /*if (online.isOnline(context)) {
+                //msg("Com internet!");
+
+                // ATUALIZA A LOCALIZAÇÃO DO CLIENTE
+                atualizarLocalCliente();
+            } else {
+                //msg("Sem intenet!");
+
+                // DEFINE A LOCALIZAÇÃO DO CLIENTE COM A CORDENADA ATUAL DO ENTREGADOR
+                coordCliLat = coord_latitude_pedido;
+                coordCliLon = coord_longitude_pedido;
+
+                //
+                verifRaio();
+            }*/
+        } else {
+
+            //
+            verifRaio();
+        }
+    }
+
+    //
+    private void verifRaio() {
+        if (raio(coord_latitude_pedido, coord_longitude_pedido)) {
+
+            // FINALIZA O PEDIDO
+            //finalizarPedido(id_pedido, "E");
+        } else {
+            //msg("Você parece não está próximo ao cliente! Tente novamente.");
+
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+
+    private void msg(String msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 
 }

@@ -36,8 +36,9 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_gravity="center"
-                        android:tint="@color/icons"
-                        app:srcCompat="@drawable/ic_database" />
+                        android:contentDescription="@string/app_name"
+                        app:srcCompat="@drawable/ic_database"
+                        app:tint="@color/icons" />
 
                 </FrameLayout>
 
@@ -51,14 +52,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ENVIAR DADOS"
+                        android:text="@string/enviar_dados"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Enviar todo o movimento atual"
+                        android:text="@string/enviar_todo_o_movimento_atual"
                         android:textSize="16sp" />
 
                 </LinearLayout>
@@ -91,8 +92,8 @@
                         android:layout_height="50dp"
                         android:layout_gravity="center"
                         android:contentDescription="@string/app_name"
-                        android:tint="@color/icons"
-                        app:srcCompat="@drawable/ic_database" />
+                        app:srcCompat="@drawable/ic_database"
+                        app:tint="@color/icons" />
 
                 </FrameLayout>
 
@@ -106,14 +107,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="REENVIAR DADOS"
+                        android:text="@string/reenviar_dados"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Renviar vendas não processadas"
+                        android:text="@string/renviar_vendas_nao_processadas"
                         android:textSize="16sp" />
 
                 </LinearLayout>

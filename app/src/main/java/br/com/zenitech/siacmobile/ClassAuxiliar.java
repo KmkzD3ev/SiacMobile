@@ -1,6 +1,9 @@
 package br.com.zenitech.siacmobile;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.widget.EditText;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,6 +45,20 @@ public class ClassAuxiliar {
         return dataAtual;
     }
 
+    //FORMATAR DATA
+    public String formatarData(String data) {
+        String CurrentString = data;
+
+        String dia = CurrentString.substring(0, 2);
+        String mes = CurrentString.substring(2, 4);
+        String ano = CurrentString.substring(4, 8);
+
+        data = dia + "/" + mes + "/" + ano;
+        Log.i("Fin", data);
+
+        return data;
+    }
+
     //EXIBIR DATA
     public String exibirData(String data) {
         String CurrentString = data;
@@ -51,7 +68,7 @@ public class ClassAuxiliar {
         return data;
     }
 
-    //EXIBIR DATA
+    //INSERIR DATA
     public String inserirData(String data) {
         String CurrentString = data;
         String[] separated = CurrentString.split("/");
@@ -213,5 +230,76 @@ public class ClassAuxiliar {
         palavra = Character.toUpperCase(palavra.charAt(0)) + palavra.substring(1);
         //return palavra.substring(0, 1).toUpperCase() + palavra.substring(1);
         return palavra;
+    }
+
+
+    ////////////////////////////
+    public TextWatcher maskData(final String mask, final EditText et) {
+        return new TextWatcher() {
+            boolean isUpdating;
+            String oldTxt = "";
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                /*String str = unmask(s.toString());
+                String maskCurrent = "";
+                if (isUpdating) {
+                    oldTxt = str;
+                    isUpdating = false;
+                    return;
+                }
+                int i = 0;
+                for (char m : mask.toCharArray()) {
+                    if (m != '#' && str.length() > oldTxt.length()) {
+                        maskCurrent += m;
+                        continue;
+                    }
+                    try {
+                        maskCurrent += str.charAt(i);
+                    } catch (Exception e) {
+                        break;
+                    }
+                    i++;
+                }
+                isUpdating = true;
+                et.setText(maskCurrent);
+                et.setSelection(maskCurrent.length());*/
+            }
+
+            public void beforeTextChanged(
+                    CharSequence s, int start, int count, int after) {
+            }
+
+            public void afterTextChanged(Editable s) {
+                String str = unmask(s.toString());
+                String maskCurrent = "";
+                if (isUpdating) {
+                    oldTxt = str;
+                    isUpdating = false;
+                    return;
+                }
+                int i = 0;
+                for (char m : mask.toCharArray()) {
+                    if (m != '#' && str.length() > oldTxt.length()) {
+                        maskCurrent += m;
+                        continue;
+                    }
+                    try {
+                        maskCurrent += str.charAt(i);
+                    } catch (Exception e) {
+                        break;
+                    }
+                    i++;
+                }
+                isUpdating = true;
+                et.setText(maskCurrent);
+                et.setSelection(maskCurrent.length());
+            }
+        };
+    }
+
+    private String unmask(String s) {
+        return s.replaceAll("[.]", "").replaceAll("[-]", "")
+                .replaceAll("[/]", "").replaceAll("[(]", "")
+                .replaceAll("[)]", "");
     }
 }

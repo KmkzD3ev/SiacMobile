@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/sentiment_satisfied_alt/baseline_sentiment_satisfied_alt_24.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/exit_to_app/baseline_exit_to_app_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_baseline_sentiment_satisfied_alt_24" />
+                            <entry key="outputName" value="ic_exit_to_app" />
                             <entry key="sourceFile" value="C:\Users\kma_s\Documents\PROJETOS ANDROID\ZENITECH\SIAC_MOBILE - LOGGAS\SiacMobile" />
                           </map>
                         </option>
