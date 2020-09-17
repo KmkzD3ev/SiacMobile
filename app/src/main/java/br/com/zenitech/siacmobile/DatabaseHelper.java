@@ -36,8 +36,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABELA_CLIENTES = "clientes";
     private static final String CODIGO_CLIENTE = "codigo_cliente";
     private static final String NOME_CLIENTE = "nome_cliente";
+    private static final String LATITUDE_CLIENTE = "latitude_cliente";
+    private static final String LONGITUDE_CLIENTE = "longitude_cliente";
 
-    private static final String[] COLUNAS_CLIENTES = {CODIGO_CLIENTE, NOME_CLIENTE};
+    private static final String[] COLUNAS_CLIENTES = {CODIGO_CLIENTE, NOME_CLIENTE, LATITUDE_CLIENTE, LONGITUDE_CLIENTE};
 
     //CONSTANTES PRODUTOS
     private static final String TABELA_PRODUTOS = "produtos";
@@ -192,10 +194,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private Clientes cursorToCliente(Cursor cursor) {
-        Clientes clientes = new Clientes(null, null);
+        Clientes clientes = new Clientes(null, null, null, null);
         //clientes.setCodigo(Integer.parseInt(cursor.getString(0)));
         clientes.setCodigo(cursor.getString(0));
         clientes.setNome(cursor.getString(1));
+        clientes.setLatitude_cliente(cursor.getString(2));
+        clientes.setLongitude_cliente(cursor.getString(3));
         return clientes;
     }
 
@@ -204,7 +208,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ArrayList<Clientes> listaClientes = new ArrayList<>();
 
         String query = "SELECT * FROM " + TABELA_CLIENTES + " ORDER BY " + NOME_CLIENTE;
-        Log.i("SQL_APP", query);
+        //Log.i("SQL_APP", query);
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
@@ -212,6 +216,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Clientes clientes = cursorToCliente(cursor);
+                //Log.i("SQL_APP", clientes.getCodigo());
+                //Log.i("SQL_APP", clientes.getLatitude_cliente());
+                //Log.i("SQL_APP", clientes.getLongitude_cliente());
                 listaClientes.add(clientes);
             } while (cursor.moveToNext());
         }

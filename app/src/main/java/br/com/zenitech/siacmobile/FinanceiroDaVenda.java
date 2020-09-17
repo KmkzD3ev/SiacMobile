@@ -1,5 +1,6 @@
 package br.com.zenitech.siacmobile;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -87,17 +89,15 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private Context context;
 
     // DADOS DE CORDENADAS *********
-    double coord_latitude_pedido = 0;
-    double coord_longitude_pedido = 0;
+    double coord_latitude = 0.0;
+    double coord_longitude = 0.0;
     GPStracker coord;
-    Button btnFinalizarEntrega;
     LatLng posicaoInicial;
     LatLng posicaiFinal;
     double distance;
 
     // DADOS CLIENTE
-    String idCliente;
-    double coordCliLat, coordCliLon;
+    double coordCliLat = 0.0, coordCliLon = 0.0;
     // DADOS DE CORDENADAS *********
 
     private SpotsDialog dialog;
@@ -114,6 +114,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         classAuxiliar = new ClassAuxiliar();
         context = this;
         coord = new GPStracker(context);
+        // VERIFICA SE O GPS ESTÁ ATIVO
+        if (coord.isGPSEnabled()) {
+            coord.getLocation();
+            //gps.getLatLon();
+        }
         dialog = (SpotsDialog) new SpotsDialog.Builder()
                 .setContext(context)
                 .setTheme(R.style.Custom)
@@ -223,7 +228,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 Toast.makeText(FinanceiroDaVenda.this, "O valor do financeiro está diferente da venda.", Toast.LENGTH_LONG).show();
             } else {
 
-                bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
+
+                verifCordenadas();
+
+                /*bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
 
                 Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(FinanceiroDaVenda.this, Principal2.class);
@@ -231,7 +239,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
 
-                super.finish();
+                super.finish();*/
                 //mostrarMsg();
                 //
                 /*Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
@@ -275,8 +283,16 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 //getSupportActionBar().setSubtitle("R$ " + params.getString("valorVenda"));// + "  " + prefs.getInt("id_venda_app", 1)
 
                 //
+                Log.i("Financeiro", params.getString("latitude_cliente"));
                 //nome_cliente
                 codigo_cliente = params.getString("codigo_cliente");
+                if (!params.getString("latitude_cliente").equalsIgnoreCase("") &&
+                        !params.getString("longitude_cliente").equalsIgnoreCase("")
+                ) {
+                    coordCliLat = Double.parseDouble(params.getString("latitude_cliente"));
+                    coordCliLon = Double.parseDouble(params.getString("longitude_cliente"));
+                }
+
                 //txtNomeClienteFinanceiro.setText(params.getString("nome_cliente"));
                 txtTotalFinanceiro.setText(params.getString("valorVenda"));
 
@@ -303,6 +319,27 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
 
         atualizarValFin();
+
+        // Verificar se o GPS foi aceito pelo entregador
+        isGPSEnabled();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VerificarActivityAtiva.activityResumed();
+        // Verificar se o GPS foi aceito pelo operador
+        isGPSEnabled();
+        /*if (coord.isGPSEnabled()) {
+            coord.getLocation();
+            //gps.getLatLon();
+        }*/
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        VerificarActivityAtiva.activityPaused();
     }
 
     private void atualizarValFin() {
@@ -642,7 +679,6 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     }
 
 
-
     /////////// ***********************************************
 
 
@@ -669,8 +705,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         if (distance <= 150) {
             result = true;
-        }else{
-            msg("Você parece estar a uns " + String.format(mL, "%4.3f%s", distance, unit) +" de onde o cliente está. Chegue mais perto para finalizar a entrega!");
+        } else {
+            msg("Você parece estar a uns " + String.format(mL, "%4.3f%s", distance, unit) + " de onde o cliente está. Chegue mais perto para finalizar a entrega!");
         }
 
         return result;
@@ -692,18 +728,23 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //msg(String.valueOf(coord_latitude_pedido));
         // VERIFICA SE A ACTIVITY ESTÁ VISÍVEL
         if (VerificarActivityAtiva.isActivityVisible()) {
+
+
+            String[] c = coord.getLatLon().split(",");
+            coord_latitude = Double.parseDouble(c[0]);
+            coord_longitude = Double.parseDouble(c[1]);
+
+            Log.i("POS", c[0] + ", " + c[1]);
+            // VERIFICA SE AS CORDENADAS DO ENTREGADOR FORAM RECONHECIDAS
+            if (coord_latitude != 0.0) {
+
+                msg("Peguei a latitude: " + coord_latitude + ", " + coord_longitude);
+                verifClienteCordenada();
+            }
+
             new Handler().postDelayed(() -> {
-
-                String[] c = coord.getLatLon().split(",");
-                coord_latitude_pedido = Double.valueOf(c[0]);
-                coord_longitude_pedido = Double.valueOf(c[1]);
-
                 // VERIFICA SE AS CORDENADAS DO ENTREGADOR FORAM RECONHECIDAS
-                if (coord_latitude_pedido != 0.0) {
-
-                    //msg("Peguei a latitude: " + coord_latitude_pedido);
-                    verifClienteCordenada();
-                } else {
+                if (coord_latitude == 0.0) {
                     verifCordenadas();
                 }
 
@@ -714,39 +755,26 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     // VERIFICAR AS CORDENADAS DO CLIENTE
     private void verifClienteCordenada() {
 
-        //msg("Cordenadas do cliente: " + coordCliLat);
+        msg("Cordenadas do cliente: " + coordCliLat + ", " + coordCliLon);
 
-        if (coordCliLat == 0.0) {
-            /*if (online.isOnline(context)) {
-                //msg("Com internet!");
-
-                // ATUALIZA A LOCALIZAÇÃO DO CLIENTE
-                atualizarLocalCliente();
-            } else {
-                //msg("Sem intenet!");
-
-                // DEFINE A LOCALIZAÇÃO DO CLIENTE COM A CORDENADA ATUAL DO ENTREGADOR
-                coordCliLat = coord_latitude_pedido;
-                coordCliLon = coord_longitude_pedido;
-
-                //
-                verifRaio();
-            }*/
-        } else {
-
-            //
+        if (coordCliLat != 0.0) {
             verifRaio();
         }
     }
 
     //
     private void verifRaio() {
-        if (raio(coord_latitude_pedido, coord_longitude_pedido)) {
+        if (raio(coord_latitude, coord_longitude)) {
+            msg("Fim!");
+
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
 
             // FINALIZA O PEDIDO
             //finalizarPedido(id_pedido, "E");
         } else {
-            //msg("Você parece não está próximo ao cliente! Tente novamente.");
+            msg("Você parece não está próximo ao cliente! Tente novamente.");
 
             if (dialog.isShowing()) {
                 dialog.dismiss();
@@ -758,4 +786,26 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 
+
+    private void isGPSEnabled() {
+        if (!coord.isGPSEnabled()) {
+            Log.i("principal", "GPS Desativado!");
+        } else {
+            isGPSPermisson();
+        }
+    }
+
+    private void isGPSPermisson() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            // ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            // public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            // int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+
+        }
+    }
 }

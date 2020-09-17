@@ -59,6 +59,8 @@ public class Vendas extends AppCompatActivity {
     int totalVenda = 0;
     String id_cliente = "";
     String nome_cliente = "";
+    String latitude_cliente = "";
+    String longitude_cliente = "";
     int id = 1;
     int id_venda_app = 1;
     private String total_venda = "0.0";
@@ -163,6 +165,8 @@ public class Vendas extends AppCompatActivity {
 
                     id_cliente = params.getString("codigo");
                     nome_cliente = params.getString("nome");
+                    latitude_cliente = params.getString("latitude_cliente");
+                    longitude_cliente = params.getString("longitude_cliente");
                 }
                 //SE FOR EDITAR A ÚLTIMA VENDA REALIZADA
                 else {
@@ -173,6 +177,8 @@ public class Vendas extends AppCompatActivity {
 
                     id_cliente = params.getString("codigo");
                     nome_cliente = params.getString("nome");
+                    latitude_cliente = params.getString("latitude_cliente");
+                    longitude_cliente = params.getString("longitude_cliente");
                 }
 
                 //
@@ -193,6 +199,8 @@ public class Vendas extends AppCompatActivity {
                 Intent intent1 = new Intent(Vendas.this, FinanceiroDaVenda.class);
                 intent1.putExtra("codigo_cliente", id_cliente);
                 intent1.putExtra("nome_cliente", nome_cliente);
+                intent1.putExtra("latitude_cliente", latitude_cliente);
+                intent1.putExtra("longitude_cliente", longitude_cliente);
                 intent1.putExtra("valorVenda", txtTotalVenda.getText().toString());
 
                 //DADOS EMISSOR WEB

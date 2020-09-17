@@ -2,8 +2,10 @@ package br.com.zenitech.siacmobile.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,20 +60,21 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
 
         //
         TextView nome = holder.tvNome;
-        nome.setText(clientes.getNome());
+        nome.setText(clientes.getNome() + " " + clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente());
 
-        holder.LlList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent in = new Intent(context, Vendas.class);
-                in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                in.putExtra("id_venda", "");
-                in.putExtra("codigo", clientes.getCodigo());
-                in.putExtra("nome", clientes.getNome());
-                context.startActivity(in);
+        holder.LlList.setOnClickListener(v -> {
 
-                ((VendasConsultarClientes) context).finish();
-            }
+            Log.e("Pos_Cliente", clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente());
+            Intent in = new Intent(context, Vendas.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            in.putExtra("id_venda", "");
+            in.putExtra("codigo", clientes.getCodigo());
+            in.putExtra("nome", clientes.getNome());
+            in.putExtra("latitude_cliente", clientes.getLatitude_cliente());
+            in.putExtra("longitude_cliente", clientes.getLongitude_cliente());
+            context.startActivity(in);
+
+            ((VendasConsultarClientes) context).finish();
         });
     }
 
