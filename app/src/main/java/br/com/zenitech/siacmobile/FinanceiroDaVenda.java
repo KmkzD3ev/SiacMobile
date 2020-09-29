@@ -229,7 +229,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             } else {
 
 
-                verifCordenadas();
+                if (coordCliLat != 0.0) {
+                    verifCordenadas();
+                } else {
+                    finalizarFinanceiroVenda();
+                }
 
                 /*bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
 
@@ -279,7 +283,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             if (params != null) {
 
                 //
-                getSupportActionBar().setTitle("Financeiro");
+                if (!params.getString("saldo").equalsIgnoreCase("")) {
+                    getSupportActionBar().setTitle("Saldo: " + classAuxiliar.maskMoney(classAuxiliar.converterValores(params.getString("saldo"))));
+                } else {
+                    getSupportActionBar().setTitle("Financeiro");
+                }
                 //getSupportActionBar().setSubtitle("R$ " + params.getString("valorVenda"));// + "  " + prefs.getInt("id_venda_app", 1)
 
                 //
@@ -330,10 +338,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         VerificarActivityAtiva.activityResumed();
         // Verificar se o GPS foi aceito pelo operador
         isGPSEnabled();
-        /*if (coord.isGPSEnabled()) {
+        if (coord.isGPSEnabled()) {
             coord.getLocation();
             //gps.getLatLon();
-        }*/
+        }
     }
 
     @Override
@@ -425,12 +433,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         });
 
         //define um botão como negativo.
-        builder.setNegativeButton("NÃO", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
-
-                sair();
-            }
-        });
+        builder.setNegativeButton("NÃO", (arg0, arg1) -> sair());
         //cria o AlertDialog
         alerta = builder.create();
         //Exibe alerta
@@ -568,7 +571,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         private final WeakReference<EditText> editTextWeakReference;
 
         public MoneyTextWatcher(EditText editText) {
-            editTextWeakReference = new WeakReference<EditText>(editText);
+            editTextWeakReference = new WeakReference<>(editText);
         }
 
         @Override
@@ -659,7 +662,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             int i = bd.deleteVenda(prefs.getInt("id_venda_app", 0));
             if (i != 0) {
                 //
-                Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
+                Toast.makeText(FinanceiroDaVenda.this, "Esta Venda foi Cancelada!", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(FinanceiroDaVenda.this, Principal2.class);
                 //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -701,12 +704,13 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             distance /= 1000;
             unit = "km";
         }
-        Log.e("Distancia", "A Distancia é = " + String.format(mL, "%4.3f%s", distance, unit));
+        //Log.e("Distancia", "A Distancia é = " + String.format(mL, "%4.3f%s", distance, unit));
+        //Log.e("Distancia", "A Distancia é = " + distance);
 
-        if (distance <= 150) {
+        if (distance <= 0.1) {
             result = true;
         } else {
-            msg("Você parece estar a uns " + String.format(mL, "%4.3f%s", distance, unit) + " de onde o cliente está. Chegue mais perto para finalizar a entrega!");
+            msg("Você parece estar a uns " + String.format(mL, "%4.3f%s", distance, unit) + " de onde o cliente está. Chegue mais perto para finalizar a venda!");
         }
 
         return result;
@@ -734,11 +738,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             coord_latitude = Double.parseDouble(c[0]);
             coord_longitude = Double.parseDouble(c[1]);
 
-            Log.i("POS", c[0] + ", " + c[1]);
+            //Log.i("POS", c[0] + ", " + c[1]);
             // VERIFICA SE AS CORDENADAS DO ENTREGADOR FORAM RECONHECIDAS
             if (coord_latitude != 0.0) {
 
-                msg("Peguei a latitude: " + coord_latitude + ", " + coord_longitude);
+                //msg("Peguei a latitude: " + coord_latitude + ", " + coord_longitude);
                 verifClienteCordenada();
             }
 
@@ -755,7 +759,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     // VERIFICAR AS CORDENADAS DO CLIENTE
     private void verifClienteCordenada() {
 
-        msg("Cordenadas do cliente: " + coordCliLat + ", " + coordCliLon);
+        //msg("Cordenadas do cliente: " + coordCliLat + ", " + coordCliLon);
 
         if (coordCliLat != 0.0) {
             verifRaio();
@@ -765,16 +769,15 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     //
     private void verifRaio() {
         if (raio(coord_latitude, coord_longitude)) {
-            msg("Fim!");
 
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
 
             // FINALIZA O PEDIDO
-            //finalizarPedido(id_pedido, "E");
+            finalizarFinanceiroVenda();
         } else {
-            msg("Você parece não está próximo ao cliente! Tente novamente.");
+            //msg("Você parece não está próximo ao cliente! Tente novamente.");
 
             if (dialog.isShowing()) {
                 dialog.dismiss();
@@ -807,5 +810,18 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
         }
+    }
+
+    private void finalizarFinanceiroVenda() {
+        bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
+
+        msg("Venda Finalizada Com Sucesso.");
+
+        Intent intent = new Intent(FinanceiroDaVenda.this, Principal2.class);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+
+        super.finish();
     }
 }

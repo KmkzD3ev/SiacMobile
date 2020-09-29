@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -35,27 +34,6 @@ import br.com.zenitech.siacmobile.VendasConsultarClientes;
 import static android.content.Context.MODE_PRIVATE;
 
 public class HomeFragment extends Fragment {
-/*
-
-    private HomeViewModel homeViewModel;
-
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                ViewModelProviders.of(this).get(HomeViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-
-        final TextView textView = root.findViewById(R.id.text_home);
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        return root;
-    }
-
-
-
-
-
-
-*/
 
     private DatabaseHelper bd;
     SharedPreferences prefs;
@@ -100,6 +78,8 @@ public class HomeFragment extends Fragment {
                 in.putExtra("id_venda_app", dados_venda[1]);
                 in.putExtra("codigo", dados_venda[2]);
                 in.putExtra("nome", dados_venda[3]);
+                in.putExtra("latitude_cliente", prefs.getString("latitude_cliente", ""));
+                in.putExtra("longitude_cliente", prefs.getString("longitude_cliente", ""));
                 requireContext().startActivity(in);
             } catch (Exception ignored) {
 

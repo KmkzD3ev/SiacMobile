@@ -64,6 +64,7 @@ public class Vendas extends AppCompatActivity {
     int id = 1;
     int id_venda_app = 1;
     private String total_venda = "0.0";
+    String saldo = "";
     private ClassAuxiliar classAuxiliar;
 
     //DADOS PARA PASSAR AO EMISSOR WEB
@@ -167,6 +168,7 @@ public class Vendas extends AppCompatActivity {
                     nome_cliente = params.getString("nome");
                     latitude_cliente = params.getString("latitude_cliente");
                     longitude_cliente = params.getString("longitude_cliente");
+                    saldo = params.getString("saldo");
                 }
                 //SE FOR EDITAR A ÚLTIMA VENDA REALIZADA
                 else {
@@ -179,6 +181,7 @@ public class Vendas extends AppCompatActivity {
                     nome_cliente = params.getString("nome");
                     latitude_cliente = params.getString("latitude_cliente");
                     longitude_cliente = params.getString("longitude_cliente");
+                    saldo = params.getString("saldo");
                 }
 
                 //
@@ -207,6 +210,7 @@ public class Vendas extends AppCompatActivity {
                 intent1.putExtra("produto", produto_emissor);
                 intent1.putExtra("quantidade", quantidade_emissor);
                 intent1.putExtra("valor_unit", valor_unit_emissor);
+                intent1.putExtra("saldo", saldo);
 
                 startActivity(intent1);
 
@@ -397,6 +401,7 @@ public class Vendas extends AppCompatActivity {
             //Toast.makeText(InformacoesVagas.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
             int i = bd.deleteVenda(prefs.getInt("id_venda_app", 0));
             if (i != 0) {
+                Toast.makeText(Vendas.this, "Esta Venda foi Cancelada!", Toast.LENGTH_LONG).show();
                 finish();
             } else if (textTotalItens.getText().toString().equals("0")) {
                 finish();

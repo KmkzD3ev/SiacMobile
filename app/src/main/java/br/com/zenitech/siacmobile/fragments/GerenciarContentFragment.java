@@ -3,8 +3,10 @@ package br.com.zenitech.siacmobile.fragments;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 //import androidx.core.app.Fragment;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -127,6 +130,12 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
         classAuxiliar = new ClassAuxiliar();
         context = this.getContext();
         bd = new DatabaseHelper(context);
+
+        // kleilson
+        if(bd.getAllVendas().size() > 0){
+
+        }
+
 
         // Create a temporary file. You can use this to upload
         //createDummyFile();
@@ -653,4 +662,61 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
 
         return false;
     }
+
+    /*public void mostrarMsg() {
+
+        //Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.logo_emissor_web);
+        //define o titulo
+        builder.setTitle("Emissor Web");
+        //define a mensagem
+        String msg = "Deseja emitir a NFC-e?";
+        builder.setMessage(msg);
+        //define um botão como positivo
+        builder.setPositiveButton("SIM", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+                //Toast.makeText(InformacoesVagas.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+
+                *//*//*
+                Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(FinanceiroDaVenda.this, Principal.class);
+                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                *//*
+
+                //sair(); //
+                //listaVendas = bd.getVendasCliente(prefs.getInt("id_venda_app", 1));
+                //ArrayList<Produtos> listaProdutos;
+                //listaProdutos = bd.getAllProdutos();
+                //i.putExtra("produtos", listaProdutos);
+
+                PackageManager packageManager = getPackageManager();
+                String packageName = "br.com.zenitech.emissorweb";
+                Intent i = packageManager.getLaunchIntentForPackage(packageName);
+                //DADOS EMISSOR WEB
+                i.putExtra("siac", "1");
+                i.putExtra("produto", produto_emissor);
+                i.putExtra("quantidade", quantidade_emissor);
+                i.putExtra("valor_unit", valor_unit_emissor);
+                i.putExtra("forma_pagamento", "DINHEIRO");
+
+                startActivity(i);
+                finish();
+            }
+        });
+
+        //define um botão como negativo.
+        builder.setNegativeButton("NÃO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+
+                sair();
+            }
+        });
+        //cria o AlertDialog
+        alerta = builder.create();
+        //Exibe alerta
+        alerta.show();
+    }*/
 }

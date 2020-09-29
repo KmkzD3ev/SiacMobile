@@ -112,12 +112,13 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         //
         txtVencimentoFormaPagamentoReceber = (EditText) findViewById(R.id.txtVencimentoFormaPagamento);
         txtVencimentoFormaPagamentoReceber.setText(classAuxiliar.exibirDataAtual());
-        txtVencimentoFormaPagamentoReceber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        txtVencimentoFormaPagamentoReceber.addTextChangedListener(classAuxiliar.maskData("##/##/####", txtVencimentoFormaPagamentoReceber));
+        /*txtVencimentoFormaPagamentoReceber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 showDatePickerDialog(v);
             }
-        });
+        });*/
 
         txtTotalItemFinanceiroReceber = findViewById(R.id.txtTotalItemFinanceiroReceber);
 
@@ -176,11 +177,11 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
                 Toast.makeText(getBaseContext(), "Adicione pelo menos uma forma de pagamento ao financeiro.", Toast.LENGTH_LONG).show();
             } else if (!txtTotalItemFinanceiroReceber.getText().equals(txtTotalFinanceiroReceber.getText())) {
                 //
-                Toast.makeText(getBaseContext(), "O valor do financeiro está diferente da venda.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "O valor do financeiro está diferente da conta a receber.", Toast.LENGTH_LONG).show();
             } else {
                 //
-                Toast.makeText(getBaseContext(), "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getBaseContext(), Principal.class);
+                Toast.makeText(getBaseContext(), "Operação Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getBaseContext(), Principal2.class);
                 //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);

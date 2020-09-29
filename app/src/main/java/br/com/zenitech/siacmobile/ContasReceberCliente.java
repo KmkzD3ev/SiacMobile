@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.adapters.ContasReceberClientesAdapter;
 import br.com.zenitech.siacmobile.domains.FinanceiroReceberClientes;
+import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 
 public class ContasReceberCliente extends AppCompatActivity {
     //
@@ -58,10 +60,16 @@ public class ContasReceberCliente extends AppCompatActivity {
         //
         id = prefs.getInt("id_venda", 1);
 
-        id_baixa_app = (prefs.getInt("id_baixa_app", 1) + 1);
-        ed.putInt("id_baixa_app", id_baixa_app).apply();
 
         bd = new DatabaseHelper(this);
+        ArrayList<FinanceiroVendasDomain> financeiroVendasDomains = bd.getRelatorioContasReceber();
+        if (financeiroVendasDomains.size() > 0) {
+            id_baixa_app = financeiroVendasDomains.size() + 1;
+            ed.putInt("id_baixa_app", id_baixa_app).apply();
+        } else {
+            id_baixa_app = prefs.getInt("id_baixa_app", 1);
+            ed.putInt("id_baixa_app", id_baixa_app).apply();
+        }
 
         //
         classAuxiliar = new ClassAuxiliar();

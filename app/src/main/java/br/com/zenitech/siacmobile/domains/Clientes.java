@@ -5,12 +5,14 @@ public class Clientes {
     private String nome;
     private String latitude_cliente;
     private String longitude_cliente;
+    private String saldo;
 
-    public Clientes(String codigo, String nome, String latitude_cliente, String longitude_cliente) {
+    public Clientes(String codigo, String nome, String latitude_cliente, String longitude_cliente, String saldo) {
         this.codigo = codigo;
         this.nome = nome;
         this.latitude_cliente = latitude_cliente;
         this.longitude_cliente = longitude_cliente;
+        this.saldo = saldo;
     }
 
     public String getCodigo() {
@@ -43,5 +45,13 @@ public class Clientes {
 
     public void setLongitude_cliente(String longitude_cliente) {
         this.longitude_cliente = longitude_cliente;
+    }
+
+    public String getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(String saldo) {
+        this.saldo = saldo;
     }
 }

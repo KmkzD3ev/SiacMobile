@@ -194,12 +194,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private Clientes cursorToCliente(Cursor cursor) {
-        Clientes clientes = new Clientes(null, null, null, null);
+        Clientes clientes = new Clientes(null, null, null, null, null);
         //clientes.setCodigo(Integer.parseInt(cursor.getString(0)));
         clientes.setCodigo(cursor.getString(0));
         clientes.setNome(cursor.getString(1));
         clientes.setLatitude_cliente(cursor.getString(2));
         clientes.setLongitude_cliente(cursor.getString(3));
+        clientes.setSaldo(cursor.getString(4));
         return clientes;
     }
 
@@ -474,6 +475,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "cli." + NOME_CLIENTE +
                 " FROM " + TABELA_VENDAS + " ven" +
                 " INNER JOIN " + TABELA_CLIENTES + " cli ON cli." + CODIGO_CLIENTE + " = ven." + CODIGO_CLIENTE_VENDA +
+                " WHERE ven." + VENDA_FINALIZADA_APP + " = 1" +
                 " ORDER BY " + "ven." + CODIGO_VENDA_APP + " DESC" +
                 " LIMIT 1";
 
@@ -828,6 +830,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
 
+
         return listaVendas;
     }
 
@@ -876,6 +879,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return formasPagamentoDomain;
     }
 
+    // ######### POS #############################
+    public String getPosBaixaPrazo() {
+        String baixa_a_prazo = "0";
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.beginTransaction();
+
+        //
+        String selectQuery = "SELECT * " +
+                "FROM pos ";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    baixa_a_prazo = cursor.getString(cursor.getColumnIndex("baixa_a_prazo"));
+                }
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //db.endTransaction();
+            //db.close();
+        }
+
+        db.endTransaction();
+        db.close();
+        return baixa_a_prazo;
+    }
 
 //########## FORMAS PAGAMENTO CLIENTE ############
 
@@ -908,8 +939,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return formasPagamentoClienteDomain;
     }
 
+    // Kleilson Teste
     public ArrayList<String> getFormasPagamentoCliente(String codigoCliente) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
+        String baixa = this.getPosBaixaPrazo();
+        //
         SQLiteDatabase db = this.getReadableDatabase();
         db.beginTransaction();
 
@@ -924,18 +958,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         INNER JOIN formas_pagamento_cliente fpc ON fpc.pagamento_cliente = fpg.descricao_forma_pagamento
         WHERE fpc.cliente_pagamento = '813'
          */
-
         //
         String selectQuery = "SELECT fpg.codigo_pagamento, fpg.descricao_forma_pagamento, fpg.tipo_forma_pagamento, fpg.auto_num_pagamento, fpg.baixa_forma_pagamento,\n" +
                 "fpg.usuario_atual, fpg.data_cadastro, fpg.ativo, fpg.conta_bancaria\n" +
                 "FROM formas_pagamento fpg\n" +
-                "WHERE fpg.tipo_forma_pagamento = 'A VISTA'\n" +
-                "UNION ALL\n" +
-                "SELECT fpg.codigo_pagamento, fpg.descricao_forma_pagamento, fpg.tipo_forma_pagamento, fpg.auto_num_pagamento, fpg.baixa_forma_pagamento,\n" +
-                "fpg.usuario_atual, fpg.data_cadastro, fpg.ativo, fpg.conta_bancaria\n" +
-                "FROM formas_pagamento fpg\n" +
-                "INNER JOIN formas_pagamento_cliente fpc ON fpc.pagamento_cliente = fpg.descricao_forma_pagamento\n" +
-                "WHERE fpc.cliente_pagamento = '" + codigoCliente + "'";
+                "WHERE fpg.tipo_forma_pagamento = 'A VISTA'";
+
+        //String baixa = this.getPosBaixaPrazo();
+        if (baixa.equalsIgnoreCase("1")) {
+            selectQuery += "\n" +
+                    "UNION ALL\n" +
+                    "SELECT fpg.codigo_pagamento, fpg.descricao_forma_pagamento, fpg.tipo_forma_pagamento, fpg.auto_num_pagamento, fpg.baixa_forma_pagamento,\n" +
+                    "fpg.usuario_atual, fpg.data_cadastro, fpg.ativo, fpg.conta_bancaria\n" +
+                    "FROM formas_pagamento fpg\n" +
+                    "INNER JOIN formas_pagamento_cliente fpc ON fpc.pagamento_cliente = fpg.descricao_forma_pagamento\n" +
+                    "WHERE fpc.cliente_pagamento = '" + codigoCliente + "'";
+        }
+
+
         Cursor cursor = db.rawQuery(selectQuery, null);
         //list.add("DINHEIRO" + " _ " + "A VISTA");// + " _ " + "1"
         try {
