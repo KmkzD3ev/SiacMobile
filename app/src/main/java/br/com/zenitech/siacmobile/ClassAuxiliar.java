@@ -40,9 +40,7 @@ public class ClassAuxiliar {
     public String inserirDataAtual() {
         cal.setTime(data);
         Date data_atual = cal.getTime();
-        String dataAtual = inserirDataFormat.format(data_atual);
-
-        return dataAtual;
+        return inserirDataFormat.format(data_atual);
     }
 
     //FORMATAR DATA
@@ -297,7 +295,7 @@ public class ClassAuxiliar {
         };
     }
 
-    private String unmask(String s) {
+    public String unmask(String s) {
         return s.replaceAll("[.]", "").replaceAll("[-]", "")
                 .replaceAll("[/]", "").replaceAll("[(]", "")
                 .replaceAll("[)]", "");

@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'zenitech'
             keyPassword 'Zenitech2017!#!'
-            storeFile file('C:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE/SiacMobile/KeyStore_Zenitech_Eventos.jks')
+            storeFile file('C:\\Users\\kma_s\\Documents\\PROJETOS ANDROID\\ZENITECH\\SIAC_MOBILE_VERSIONADO\\keystore_siac_mobile.jks')
             storePassword 'Zenitech2017!#!'
         }
     }
@@ -15,8 +15,8 @@ android {
         applicationId "br.com.zenitech.siacmobile"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 14
-        versionName '1.6.8'
+        versionCode 19
+        versionName '1.7.4'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config
@@ -25,6 +25,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
         debug {
             signingConfig signingConfigs.config
@@ -41,8 +42,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'androidx.navigation:navigation-fragment:2.3.0'
-    implementation 'androidx.navigation:navigation-ui:2.3.0'
+    implementation 'androidx.navigation:navigation-fragment:2.3.1'
+    implementation 'androidx.navigation:navigation-ui:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.3.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -57,16 +58,16 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.11.0'
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.1'
 
     // Autenticação por impressão digital
     implementation 'androidx.biometric:biometric:1.0.1'
 
     // Localização
     implementation 'com.google.maps.android:android-maps-utils:2.0.3'
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.1.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     //

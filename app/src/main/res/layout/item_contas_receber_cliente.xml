@@ -21,20 +21,21 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:baselineAligned="false"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingBottom="16dp"
-            android:paddingEnd="16dp"
-            android:paddingLeft="34dp"
-            android:paddingRight="16dp"
             android:paddingStart="34dp"
-            android:paddingTop="16dp">
+            android:paddingLeft="34dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_height="wrap_content">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/fpgItemContaReceberCliente"
@@ -46,16 +47,32 @@
                     android:id="@+id/fpgItemContaReceberVencimento"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="11sp"
-                    android:text="Venc. 01/03/2017" />
+                    android:text="Venc. 01/03/2017"
+                    android:textSize="11sp" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/vfpgItemContaReceberCliente"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0,00" />
+                android:gravity="right"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/vfpgItemContaReceberCliente"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0,00" />
+
+                <TextView
+                    android:id="@+id/vfpgItemContaReceberClientePago"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="- 0,00"
+                    android:textColor="@color/biometric_error_color"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

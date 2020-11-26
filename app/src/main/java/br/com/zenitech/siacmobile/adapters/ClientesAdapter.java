@@ -61,9 +61,9 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
         TextView codigo = holder.tvCodigo;
         codigo.setText(clientes.getCodigo());
 
-        //
+        // + " " + clientes.getSaldo() + ", " + clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente()
         TextView nome = holder.tvNome;
-        nome.setText(clientes.getNome() + " " + clientes.getSaldo() + ", " + clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente());
+        nome.setText(clientes.getNome());
 
         holder.LlList.setOnClickListener(v -> {
 

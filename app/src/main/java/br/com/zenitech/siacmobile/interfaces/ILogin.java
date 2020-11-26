@@ -2,6 +2,7 @@ package br.com.zenitech.siacmobile.interfaces;
 
 import br.com.zenitech.siacmobile.Configuracoes;
 import br.com.zenitech.siacmobile.domains.Conta;
+import br.com.zenitech.siacmobile.domains.Sincronizador;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -32,6 +33,18 @@ public interface ILogin {
             @Field("usuario") String usuario,
             @Field("senha") String senha,
             @Field("conta") String conta,
+            @Field("serial") String serial
+    );
+
+    //ENVIAR LOG
+    @FormUrlEncoded
+    @POST("log_app.php")
+    Call<Conta> enviarLog(
+            @Field("posCli") String posCli,
+            @Field("posVen") String posVen,
+            @Field("raio") String raio,
+            @Field("precisao") String precisao,
+            @Field("aparelho") String aparelho,
             @Field("serial") String serial
     );
 

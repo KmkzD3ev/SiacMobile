@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,6 +26,8 @@ class GPStracker {
     private double lat = 0;
     private double lon = 0;
 
+    private float precisao = 0;
+
     GPStracker(Context c) {
         context = c;
     }
@@ -39,6 +42,9 @@ class GPStracker {
                 public void onLocationChanged(Location location) {
                     lat = location.getLatitude();
                     lon = location.getLongitude();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        precisao = location.getVerticalAccuracyMeters();
+                    }
 
                     Log.d(TAG, location.getLatitude() + "," + location.getLongitude());
 
@@ -98,6 +104,10 @@ class GPStracker {
 
     String getLatLon() {
         return lat + "," + lon;
+    }
+
+    String getPrecisao(){
+        return String.valueOf(precisao);
     }
 
     // RETORNA SE O GPS ESTÁ ATIVO OU INATIVO

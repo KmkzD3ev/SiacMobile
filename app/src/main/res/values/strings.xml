@@ -80,5 +80,7 @@
     <string name="enviar_dados">ENVIAR DADOS</string>
     <string name="retornar_o_app_ao_estado_inicial">Retornar o app ao estado inicial</string>
     <string name="finalizar_app">FINALIZAR APP</string>
+    <string name="pagamento">PAGAMENTO</string>
+    <string name="zero_reais">0,00</string>
 
 </resources>

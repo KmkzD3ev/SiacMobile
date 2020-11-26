@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SIAC_MOBILE_VERSIONADO.iml" filepath="$PROJECT_DIR$/.idea/modules/SIAC_MOBILE_VERSIONADO.iml" group="SIAC_MOBILE_VERSIONADO" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="SIAC_MOBILE_VERSIONADO/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SIAC_MOBILE_VERSIONADO.iml" filepath="$PROJECT_DIR$/.idea/modules/SIAC_MOBILE_VERSIONADO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.iml" />
     </modules>
   </component>
 </project>

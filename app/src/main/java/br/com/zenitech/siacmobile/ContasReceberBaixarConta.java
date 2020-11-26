@@ -1,17 +1,19 @@
 package br.com.zenitech.siacmobile;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -32,51 +34,64 @@ import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import br.com.zenitech.siacmobile.adapters.FinanceiroContasReceberAdapter;
+import br.com.zenitech.siacmobile.domains.FinanceiroReceberClientes;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+
+import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
 
 public class ContasReceberBaixarConta extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     //
     private SharedPreferences prefs;
     private SharedPreferences.Editor ed;
+    private ClassAuxiliar cAux;
 
     public static String totalFinanceiro;
     public static TextView txtTotalFinanceiroReceber;
     public static TextView txtTotalItemFinanceiroReceber;
-    private ArrayList<String> listaFormasPagamentoCliente;
+    public static EditText txtVencimentoFormaPagamentoReceber, txtValorFormaPagamento;
+    public static LinearLayout bgTotalReceber;
+
+    //
+    ArrayList<String> listaFormasPagamentoCliente;
     private DatabaseHelper bd;
     private Spinner spFormasPagamentoCliente;
     private String codigo_cliente = "";
     private EditText txtDocumentoFormaPagamento;
-    public static EditText txtVencimentoFormaPagamentoReceber, txtValorFormaPagamento;
-    public static LinearLayout bgTotalReceber;
 
     //LISTAR VENDAS
     private ArrayList<FinanceiroVendasDomain> listaFinanceiroCliente;
     private FinanceiroContasReceberAdapter adapter;
     private RecyclerView rvFinanceiro;
 
-    private Button btnAddF, btnPagamento;
-
+    //
     int id = 1;
-    private ClassAuxiliar classAuxiliar;
 
+    //
     TextInputLayout tilDocumento, tilVencimento;
+    Button btnAddFormaPagamento, btnPagamento;
 
+    //
+    //ArrayList<FinanceiroReceberClientes> listaContasReceberCliente;
+
+    private String ValorABaixar = "0";
+
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contas_receber_baixar_conta);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        //
-        classAuxiliar = new ClassAuxiliar();
+        //----------------------------------------V-----------------------------------------------
 
-        //
-        prefs = getSharedPreferences("preferencias", this.MODE_PRIVATE);
+        cAux = new ClassAuxiliar();
+        prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
 
         //
@@ -104,90 +119,27 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         //txtNomeClienteFinanceiro = (TextView) findViewById(R.id.txtNomeClienteFinanceiro);
         txtTotalFinanceiroReceber = findViewById(R.id.txtTotalFinanceiroReceber);
         //
-        txtValorFormaPagamento = (EditText) findViewById(R.id.txtValorFormaPagamento);
-        txtValorFormaPagamento.addTextChangedListener(new ContasReceberBaixarConta.MoneyTextWatcher(txtValorFormaPagamento));
+        txtValorFormaPagamento = findViewById(R.id.txtValorFormaPagamento);
+        txtValorFormaPagamento.addTextChangedListener(new MoneyTextWatcher(txtValorFormaPagamento));
 
-        txtDocumentoFormaPagamento = (EditText) findViewById(R.id.txtDocumentoFormaPagamento);
+        txtDocumentoFormaPagamento = findViewById(R.id.txtDocumentoFormaPagamento);
 
         //
-        txtVencimentoFormaPagamentoReceber = (EditText) findViewById(R.id.txtVencimentoFormaPagamento);
-        txtVencimentoFormaPagamentoReceber.setText(classAuxiliar.exibirDataAtual());
-        txtVencimentoFormaPagamentoReceber.addTextChangedListener(classAuxiliar.maskData("##/##/####", txtVencimentoFormaPagamentoReceber));
-        /*txtVencimentoFormaPagamentoReceber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                showDatePickerDialog(v);
-            }
-        });*/
+        txtVencimentoFormaPagamentoReceber = findViewById(R.id.txtVencimentoFormaPagamento);
+        txtVencimentoFormaPagamentoReceber.setText(cAux.exibirDataAtual());
+        txtVencimentoFormaPagamentoReceber.addTextChangedListener(cAux.maskData("##/##/####", txtVencimentoFormaPagamentoReceber));
 
+        //
         txtTotalItemFinanceiroReceber = findViewById(R.id.txtTotalItemFinanceiroReceber);
 
         //
-        btnAddF = findViewById(R.id.btnAddF);
-        btnAddF.setOnClickListener(v -> {
-
-            //SE O USUÁRIO NÃO ADICIONAR NENHUM VALOR
-            if (txtValorFormaPagamento.getText().toString().equals("") || txtValorFormaPagamento.getText().toString().equals("R$0,00")) {
-                //
-                Toast.makeText(getBaseContext(), "Adicione uma valor para esta forma de pagamento.", Toast.LENGTH_LONG).show();
-            } else {
-
-                //
-                String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
-
-                //SE A FORMA DE PAGAMENTO FOR IGUAL A PRAZO VERIFICA O NÚMERO DO DOCUMENTO E O TIPO DE BAIXA
-                if (fPag[1].equals("A PRAZO")) {
-
-                    //SE O NÚMERO DO DOCUMENTO ESTIVER VÁSIO MOSTRA A MENSAGEM
-                    if (txtDocumentoFormaPagamento.getText().toString().equals("")) {
-                        //
-                        Toast.makeText(getBaseContext(), "Número do documento é obrigatório.", Toast.LENGTH_LONG).show();
-                    }
-                    //SE A BAIXA FOR MANUAL VERIFICA O CAMPO VENCIMENTO
-                    else if (fPag[3].equals("1")) {
-
-                        //SE O CAMPO VENCIMENTO FOR IGUAL A 00/00/0000 PEDE QUE INFORME A DATA DO VENCIMENTO
-                        if (txtVencimentoFormaPagamentoReceber.getText().toString().equals("") || txtVencimentoFormaPagamentoReceber.getText().toString().equals("00/00/0000")) {
-
-                            //
-                            Toast.makeText(getBaseContext(), "Data do vencimento é obrigatório.", Toast.LENGTH_LONG).show();
-                        }
-                        //ADICIONA VALOR AO FINANCEIRO
-                        else {
-                            addFinanceiro();
-                        }
-                    }
-                    //ADICIONA VALOR AO FINANCEIRO
-                    else {
-                        addFinanceiro();
-                    }
-                }
-                //ADICIONA VALOR AO FINANCEIRO
-                else {
-                    addFinanceiro();
-                }
-            }
-        });
+        btnAddFormaPagamento = findViewById(R.id.btnAddF);
+        btnAddFormaPagamento.setOnClickListener(v -> _verificarValores());
         //
         btnPagamento = findViewById(R.id.btnPagamento);
-        btnPagamento.setOnClickListener(v -> {
+        btnPagamento.setOnClickListener(v -> _finalizarBaixaContaReceber());
 
-            if (txtTotalItemFinanceiroReceber.getText().equals("0,00")) {
-                //
-                Toast.makeText(getBaseContext(), "Adicione pelo menos uma forma de pagamento ao financeiro.", Toast.LENGTH_LONG).show();
-            } else if (!txtTotalItemFinanceiroReceber.getText().equals(txtTotalFinanceiroReceber.getText())) {
-                //
-                Toast.makeText(getBaseContext(), "O valor do financeiro está diferente da conta a receber.", Toast.LENGTH_LONG).show();
-            } else {
-                //
-                Toast.makeText(getBaseContext(), "Operação Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getBaseContext(), Principal2.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                sair();
-            }
-        });
+        Log.i("ContasReceber - IDS ", String.valueOf(IdsCR.size()));
 
 
         //
@@ -199,39 +151,207 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
             if (params != null) {
 
                 //
-                getSupportActionBar().setTitle("Baixa Financeiro");
+                Objects.requireNonNull(getSupportActionBar()).setTitle("Baixa Financeiro");
 
                 //
                 codigo_cliente = params.getString("codigo_cliente");
                 txtTotalFinanceiroReceber.setText(params.getString("valorVenda"));
                 txtValorFormaPagamento.setText(params.getString("valorVenda"));
 
+                //
+                ValorABaixar = params.getString("valorVenda");
+
                 String nomeCliente = params.getString("nome_cliente");
-                getSupportActionBar().setSubtitle(classAuxiliar.maiuscula1(nomeCliente.toLowerCase()));
+                getSupportActionBar().setSubtitle(cAux.maiuscula1(Objects.requireNonNull(nomeCliente).toLowerCase()));
             }
         }
 
         //
-        listaFinanceiroCliente = bd.getFinanceiroClienteRecebidos(prefs.getInt("id_baixa_app", 1));
+        listaFinanceiroCliente = bd.getFinanceiroClienteRecebidos(Integer.parseInt(codigo_cliente));
         adapter = new FinanceiroContasReceberAdapter(this, listaFinanceiroCliente);
         rvFinanceiro.setAdapter(adapter);
 
         //
-        listaFormasPagamentoCliente = bd.getFormasPagamentoCliente(codigo_cliente);
+        listaFormasPagamentoCliente = bd.getFormasPagamentoClienteBaixa(codigo_cliente);
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaFormasPagamentoCliente);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spFormasPagamentoCliente = (Spinner) findViewById(R.id.spFormasPagamentoCliente);
+        spFormasPagamentoCliente = findViewById(R.id.spFormasPagamentoCliente);
         spFormasPagamentoCliente.setAdapter(adapter);
 
         spFormasPagamentoCliente.setOnItemSelectedListener(ContasReceberBaixarConta.this);
     }
 
-    public void showDatePickerDialog(View v) {
-        DialogFragment newFragment = new DialogFragment();
-        newFragment.show(getSupportFragmentManager(), "dataPicker");
+    private void _finalizarBaixaContaReceber() {
+        int totalItemFin = Integer.parseInt(cAux.soNumeros(txtTotalItemFinanceiroReceber.getText().toString()));
+        int totalFin = Integer.parseInt(cAux.soNumeros(txtTotalFinanceiroReceber.getText().toString()));
+
+        //Log.i("ContasReceber", "" + totalItemFin);
+        //Log.i("ContasReceber", "" + totalFin);
+
+        if (totalItemFin == 0) {
+            //
+            Toast.makeText(getBaseContext(), "Adicione pelo menos uma forma de pagamento ao financeiro.", Toast.LENGTH_LONG).show();
+        } else if (totalItemFin > totalFin) {
+            //
+            Toast.makeText(getBaseContext(), "O valor ultrapassa o total.", Toast.LENGTH_LONG).show();
+        } else {
+            //
+            Toast.makeText(getBaseContext(), "Operação Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(getBaseContext(), Principal2.class);
+            //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            sair();
+        }
+    }
+
+    private void _verificarValores() {
+        int ValorFormaPagamento = Integer.parseInt(cAux.soNumeros(txtValorFormaPagamento.getText().toString()));
+        //Log.i("ContasReceber", txtValorFormaPagamento.getText().toString());
+        //Log.i("ContasReceber", String.valueOf(ValorFormaPagamento));
+
+        //SE O USUÁRIO NÃO ADICIONAR NENHUM VALOR
+        if (ValorFormaPagamento == 0) {
+            Toast.makeText(getBaseContext(), "Adicione uma valor para esta forma de pagamento.", Toast.LENGTH_LONG).show();
+        } else {
+            String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
+
+            //SE A FORMA DE PAGAMENTO FOR IGUAL A PRAZO VERIFICA O NÚMERO DO DOCUMENTO E O TIPO DE BAIXA
+            if (fPag[1].equals("A PRAZO")) {
+
+                //SE O NÚMERO DO DOCUMENTO ESTIVER VÁSIO MOSTRA A MENSAGEM
+                if (txtDocumentoFormaPagamento.getText().toString().equals("")) {
+                    //
+                    Toast.makeText(getBaseContext(), "Número do documento é obrigatório.", Toast.LENGTH_LONG).show();
+                }
+                //SE A BAIXA FOR MANUAL VERIFICA O CAMPO VENCIMENTO
+                else if (fPag[3].equals("1")) {
+
+                    //SE O CAMPO VENCIMENTO FOR IGUAL A 00/00/0000 PEDE QUE INFORME A DATA DO VENCIMENTO
+                    if (txtVencimentoFormaPagamentoReceber.getText().toString().equals("") || txtVencimentoFormaPagamentoReceber.getText().toString().equals("00/00/0000")) {
+
+                        //
+                        Toast.makeText(getBaseContext(), "Data do vencimento é obrigatório.", Toast.LENGTH_LONG).show();
+                    }
+                    //ADICIONA VALOR AO FINANCEIRO
+                    else {
+                        addFinanceiro();
+                    }
+                }
+                //ADICIONA VALOR AO FINANCEIRO
+                else {
+                    addFinanceiro();
+                }
+            }
+            //ADICIONA VALOR AO FINANCEIRO
+            else {
+                addFinanceiro();
+            }
+        }
     }
 
     private void addFinanceiro() {
+        try {
+            //
+            //listaContasReceberCliente = bd.getListFormContasReceberCliente(codigo_cliente);
+            Log.d("ContasReceber", " ValorABaixar: " + ValorABaixar);
+
+            for (int i = 0; i < IdsCR.size(); i++) {
+                Log.i("ContasReceber", IdsCR.get(i));
+                boolean a = false;
+
+                try {
+                    FinanceiroVendasDomain financeiroBaixaDomains = bd.getBaixaRecebida(IdsCR.get(i));
+                    Log.i("ContasReceber", financeiroBaixaDomains.getValor_financeiro());
+                    a = false;
+                } catch (Exception e) {
+                    Log.i("ContasReceber ERRO ", Objects.requireNonNull(e.getMessage()));
+                }
+
+
+                //
+                String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
+
+                if (!a) {
+                    // VERIFICA SE JÁ EXISTE UM REGISTRO PARA A FORMA DE PAGAMENTO ESCOLHIDA
+                    String[] codigoverFormaPagamentoRecebidos = bd.verFormaPagamentoRecebidos(fPag[0], String.valueOf(codigo_cliente));
+                    Log.i("ContasReceber", codigoverFormaPagamentoRecebidos[0]);
+                    Log.i("ContasReceber", codigoverFormaPagamentoRecebidos[1]);
+
+                    //
+                    if (!codigoverFormaPagamentoRecebidos[0].equalsIgnoreCase("0")) {
+                        //
+                        //bd.updateFinanceiroRecebidos(codigoverFormaPagamentoRecebidos[1], String.valueOf(cAux.converterValores(txtValorFormaPagamento.getText().toString())));
+                        String[] somaValUpd = {
+                                codigoverFormaPagamentoRecebidos[1],
+                                String.valueOf(cAux.converterValores(txtValorFormaPagamento.getText().toString()))
+                        };
+                        String valSoma = String.valueOf(cAux.somar(somaValUpd));
+                        Log.i("ContasReceber", String.valueOf(bd.updateFinanceiroRecebidos(codigoverFormaPagamentoRecebidos[0], valSoma)));
+                    }
+                    //
+                    else {
+
+                        //
+                        bd.addFinanceiroRecebidos(new FinanceiroVendasDomain(
+                                "" + IdsCR.get(i),
+                                "" + prefs.getString("unidade", "UNIDADE TESTE"),
+                                "" + cAux.inserirDataAtual(),
+                                "" + codigo_cliente,
+                                "" + fPag[0],//spFormasPagamentoCliente.getSelectedItem().toString(),
+                                "" + txtDocumentoFormaPagamento.getText().toString(),
+                                "" + cAux.inserirData(cAux.formatarData(cAux.soNumeros(txtVencimentoFormaPagamentoReceber.getText().toString()))),
+                                "" + cAux.converterValores(txtValorFormaPagamento.getText().toString()),
+                                "0",
+                                "0",
+                                "0",
+                                "0",
+                                "" + cAux.inserirDataAtual(),
+                                "",
+                                "" + prefs.getInt("id_vendedor", 1),
+                                "" + codigo_cliente
+                        ));
+                    }
+                }
+
+                a = false;
+            }
+
+            //
+            listaFinanceiroCliente = bd.getFinanceiroClienteRecebidos(Integer.parseInt(codigo_cliente));
+            adapter = new FinanceiroContasReceberAdapter(this, listaFinanceiroCliente);
+            rvFinanceiro.setAdapter(adapter);
+            //
+            String tif = cAux.maskMoney(new BigDecimal(bd.getValorTotalFinanceiroReceber(String.valueOf(codigo_cliente))));
+            txtTotalItemFinanceiroReceber.setText(tif);
+
+            //
+            String valorFinanceiroReceber = String.valueOf(cAux.converterValores(txtTotalFinanceiroReceber.getText().toString()));
+            String valorFinanceiroReceberAdd = String.valueOf(cAux.converterValores(txtTotalItemFinanceiroReceber.getText().toString()));
+
+            //SUBTRAIR O VALOR PELA QUANTIDADE
+            String[] subtracao = {valorFinanceiroReceber, valorFinanceiroReceberAdd};
+            String total = String.valueOf(cAux.subitrair(subtracao));
+
+            txtValorFormaPagamento.setText(total);
+
+            //
+            if (comparar()) {
+
+                bgTotalReceber.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.erro));
+                txtValorFormaPagamento.setText(R.string.zero_reais);
+            } else {
+                bgTotalReceber.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.transparente));
+            }
+
+            //
+            txtDocumentoFormaPagamento.setText("");
+            tilDocumento.setVisibility(View.GONE);
+            spFormasPagamentoCliente.setSelection(0);
+        }catch (Exception ignored){
+
+        }
+/*
 
         //
         id = id + 1;
@@ -239,22 +359,22 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
 
         //
         String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
-
+        Log.i("ContasReceber", txtVencimentoFormaPagamentoReceber.getText().toString());
         //INSERIR FINANCEIRO
         bd.addFinanceiroRecebidos(new FinanceiroVendasDomain(
                 String.valueOf(id),//CODIGO_FINANCEIRO
                 prefs.getString("unidade", "UNIDADE TESTE"),//UNIDADE_FINANCEIRO
-                classAuxiliar.inserirDataAtual(),//DATA_FINANCEIRO
+                cAux.inserirDataAtual(),//DATA_FINANCEIRO
                 codigo_cliente,//CODIGO_CLIENTE_FINANCEIRO
                 fPag[0],//spFormasPagamentoCliente.getSelectedItem().toString(),//FPAGAMENTO_FINANCEIRO
                 txtDocumentoFormaPagamento.getText().toString(),//DOCUMENTO_FINANCEIRO
-                String.valueOf(classAuxiliar.inserirData(txtVencimentoFormaPagamentoReceber.getText().toString())),//VENCIMENTO_FINANCEIRO
-                String.valueOf(classAuxiliar.converterValores(txtValorFormaPagamento.getText().toString())),//VALOR_FINANCEIRO
+                String.valueOf(cAux.inserirData(cAux.formatarData(cAux.soNumeros(txtVencimentoFormaPagamentoReceber.getText().toString())))),//VENCIMENTO_FINANCEIRO
+                String.valueOf(cAux.converterValores(txtValorFormaPagamento.getText().toString())),//VALOR_FINANCEIRO
                 "0",//STATUS_AUTORIZACAO
                 "0",//PAGO
                 "0",//VASILHAME_REF
                 "0",//USUARIO_ATUAL_FINANCEIRO
-                classAuxiliar.inserirDataAtual(),//DATA_INCLUSAO
+                "" + cAux.inserirDataAtual(),//DATA_INCLUSAO
                 "",//NOSSO_NUMERO_FINANCEIRO
                 "" + prefs.getInt("id_vendedor", 1),//ID_VENDEDOR_FINANCEIRO
                 "" + prefs.getInt("id_baixa_app", 1)
@@ -266,16 +386,16 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         rvFinanceiro.setAdapter(adapter);
 
         //
-        String tif = classAuxiliar.maskMoney(new BigDecimal(bd.getValorTotalFinanceiroReceber(String.valueOf(prefs.getInt("id_baixa_app", 1)))));
+        String tif = cAux.maskMoney(new BigDecimal(bd.getValorTotalFinanceiroReceber(String.valueOf(prefs.getInt("id_baixa_app", 1)))));
         txtTotalItemFinanceiroReceber.setText(tif);
 
         //
-        String valorFinanceiroReceber = String.valueOf(classAuxiliar.converterValores(txtTotalFinanceiroReceber.getText().toString()));
-        String valorFinanceiroReceberAdd = String.valueOf(classAuxiliar.converterValores(txtTotalItemFinanceiroReceber.getText().toString()));
+        String valorFinanceiroReceber = String.valueOf(cAux.converterValores(txtTotalFinanceiroReceber.getText().toString()));
+        String valorFinanceiroReceberAdd = String.valueOf(cAux.converterValores(txtTotalItemFinanceiroReceber.getText().toString()));
 
         //SUBTRAIR O VALOR PELA QUANTIDADE
         String[] subtracao = {valorFinanceiroReceber, valorFinanceiroReceberAdd};
-        String total = String.valueOf(classAuxiliar.subitrair(subtracao));
+        String total = String.valueOf(cAux.subitrair(subtracao));
 
         txtValorFormaPagamento.setText(total);
 
@@ -283,7 +403,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         if (comparar()) {
 
             bgTotalReceber.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.erro));
-            txtValorFormaPagamento.setText("0,00");
+            txtValorFormaPagamento.setText(R.string.zero_reais);
         } else {
             bgTotalReceber.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.transparente));
         }
@@ -292,12 +412,13 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         txtDocumentoFormaPagamento.setText("");
         tilDocumento.setVisibility(View.GONE);
         spFormasPagamentoCliente.setSelection(0);
+*/
 
         //ESCONDER O TECLADO
         // TODO Auto-generated method stub
         try {
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(), 0);
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -309,34 +430,23 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
         if (fPag[1].equals("A PRAZO")) {
 
-            runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    //tilDocumento.setVisibility(View.VISIBLE);
-                    tilVencimento.setVisibility(View.VISIBLE);
-                }
+            runOnUiThread(() -> {
+                //tilDocumento.setVisibility(View.VISIBLE);
+                tilVencimento.setVisibility(View.VISIBLE);
             });
 
             if (fPag[3].equals("1")) {
 
-                runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        tilDocumento.setVisibility(View.VISIBLE);
-                    }
-                });
+                runOnUiThread(() -> tilDocumento.setVisibility(View.VISIBLE));
             }
         } else {
-            runOnUiThread(new Runnable() {
+            runOnUiThread(() -> {
+                tilDocumento.setVisibility(View.GONE);
+                tilVencimento.setVisibility(View.GONE);
+                txtVencimentoFormaPagamentoReceber.setText(cAux.exibirDataAtual());
 
-                @Override
-                public void run() {
-                    tilDocumento.setVisibility(View.GONE);
-                    tilVencimento.setVisibility(View.GONE);
-                    txtVencimentoFormaPagamentoReceber.setText(classAuxiliar.exibirDataAtual());
-                }
+                Log.i("ContasReceber", cAux.exibirDataAtual());
+                Log.i("ContasReceber", txtVencimentoFormaPagamentoReceber.getText().toString());
             });
         }
 
@@ -348,11 +458,11 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
 
     }
 
-    public class MoneyTextWatcher implements TextWatcher {
+    public static class MoneyTextWatcher implements TextWatcher {
         private final WeakReference<EditText> editTextWeakReference;
 
         public MoneyTextWatcher(EditText editText) {
-            editTextWeakReference = new WeakReference<EditText>(editText);
+            editTextWeakReference = new WeakReference<>(editText);
         }
 
         @Override
@@ -369,7 +479,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
             if (editText == null) return;
             String s = editable.toString();
             editText.removeTextChangedListener(this);
-            String cleanString = s.toString().replaceAll("[^0-9]", "");
+            String cleanString = s.replaceAll("[^0-9]", "");
             BigDecimal parsed = new BigDecimal(cleanString).setScale(2, BigDecimal.ROUND_FLOOR).divide(new BigDecimal(100), BigDecimal.ROUND_FLOOR);
             String formatted = NumberFormat.getCurrencyInstance().format(parsed);
             editText.setText(formatted);
@@ -382,17 +492,12 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
     private boolean comparar() {
 
         //
-        BigDecimal valorFinanceiroReceber = new BigDecimal(String.valueOf(classAuxiliar.converterValores(txtTotalFinanceiroReceber.getText().toString())));
-        BigDecimal valorFinanceiroReceberAdd = new BigDecimal(String.valueOf(classAuxiliar.converterValores(txtTotalItemFinanceiroReceber.getText().toString())));
+        BigDecimal valorFinanceiroReceber = new BigDecimal(String.valueOf(cAux.converterValores(txtTotalFinanceiroReceber.getText().toString())));
+        BigDecimal valorFinanceiroReceberAdd = new BigDecimal(String.valueOf(cAux.converterValores(txtTotalItemFinanceiroReceber.getText().toString())));
 
-        if (valorFinanceiroReceberAdd.compareTo(valorFinanceiroReceber) == 1) {
+        if (valorFinanceiroReceberAdd.compareTo(valorFinanceiroReceber) > 0) {
             //
-            if (valorFinanceiroReceber.toString().equals(valorFinanceiroReceberAdd.toString())) {
-
-                return false;
-            } else {
-                return true;
-            }
+            return !valorFinanceiroReceber.toString().equals(valorFinanceiroReceberAdd.toString());
         } else {
             return false;
         }
@@ -402,10 +507,8 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                super.onBackPressed();
-                break;
+        if (id == android.R.id.home) {
+            super.onBackPressed();
         }
 
         return super.onOptionsItemSelected(item);
@@ -414,5 +517,12 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
     private void sair() {
         super.finish();
     }
+
+
+
+    /*public void showDatePickerDialog(View v) {
+        DialogFragment newFragment = new DialogFragment();
+        newFragment.show(getSupportFragmentManager(), "dataPicker");
+    }*/
 
 }

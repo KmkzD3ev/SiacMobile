@@ -57,6 +57,6 @@
         android:background="?android:attr/selectableItemBackground"
         android:padding="5dp"
         android:visibility="visible"
-        android:text="PAGAMENTO"
+        android:text="@string/pagamento"
         android:textColor="@color/colorPrimary" />
 </LinearLayout>

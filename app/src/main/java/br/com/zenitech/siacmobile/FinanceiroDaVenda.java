@@ -1,14 +1,19 @@
 package br.com.zenitech.siacmobile;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -19,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -34,7 +40,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
@@ -48,10 +64,16 @@ import java.util.Locale;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.FinanceiroVendasAdapter;
+import br.com.zenitech.siacmobile.domains.Conta;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import br.com.zenitech.siacmobile.interfaces.ILogin;
 import dmax.dialog.SpotsDialog;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    protected static final int REQUEST_CHECK_SETTINGS = 1;
     //
     private SharedPreferences prefs;
     private SharedPreferences.Editor ed;
@@ -91,6 +113,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     // DADOS DE CORDENADAS *********
     double coord_latitude = 0.0;
     double coord_longitude = 0.0;
+    String precisao = "";
     GPStracker coord;
     LatLng posicaoInicial;
     LatLng posicaiFinal;
@@ -101,6 +124,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     // DADOS DE CORDENADAS *********
 
     private SpotsDialog dialog;
+
+    private VerificarOnline verificarOnline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +144,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             coord.getLocation();
             //gps.getLatLon();
         }
+        verificarOnline = new VerificarOnline();
         dialog = (SpotsDialog) new SpotsDialog.Builder()
                 .setContext(context)
                 .setTheme(R.style.Custom)
@@ -162,12 +188,6 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //
         txtVencimentoFormaPagamento = findViewById(R.id.txtVencimentoFormaPagamento);
         txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
-        /*if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> showDatePickerDialog(v));
-        } else {
-            txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> showDatePickerDialog(v));
-        }*/
-        //txtVencimentoFormaPagamento.setOnFocusChangeListener((v, hasFocus) -> Mask.insert("##/##/####", txtVencimentoFormaPagamento));
         txtVencimentoFormaPagamento.addTextChangedListener(classAuxiliar.maskData("##/##/####", txtVencimentoFormaPagamento));
 
         txtTotalItemFinanceiro = findViewById(R.id.txtTotalItemFinanceiro);
@@ -230,7 +250,19 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
 
                 if (coordCliLat != 0.0) {
-                    verifCordenadas();
+                    // VERIFICA SE O GPS ESTÁ ATIVO
+                    if (!coord.isGPSEnabled()) {
+                        //Toast.makeText(FinanceiroDaVenda.this, "Ative o GPS para finalizar a venda!.", Toast.LENGTH_LONG).show();
+                        /*Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);*/
+
+                        createLocationRequest();
+
+                    }else{
+                        coord.getLocation();
+                        verifCordenadas();
+                    }
+
                 } else {
                     finalizarFinanceiroVenda();
                 }
@@ -283,22 +315,22 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             if (params != null) {
 
                 //
-                if (!params.getString("saldo").equalsIgnoreCase("")) {
-                    getSupportActionBar().setTitle("Saldo: " + classAuxiliar.maskMoney(classAuxiliar.converterValores(params.getString("saldo"))));
+                if (!Objects.requireNonNull(params.getString("saldo")).equalsIgnoreCase("")) {
+                    Objects.requireNonNull(getSupportActionBar()).setTitle("Saldo: " + classAuxiliar.maskMoney(classAuxiliar.converterValores(params.getString("saldo"))));
                 } else {
-                    getSupportActionBar().setTitle("Financeiro");
+                    Objects.requireNonNull(getSupportActionBar()).setTitle("Financeiro");
                 }
                 //getSupportActionBar().setSubtitle("R$ " + params.getString("valorVenda"));// + "  " + prefs.getInt("id_venda_app", 1)
 
                 //
-                Log.i("Financeiro", params.getString("latitude_cliente"));
+                Log.i("Financeiro", Objects.requireNonNull(params.getString("latitude_cliente")));
                 //nome_cliente
                 codigo_cliente = params.getString("codigo_cliente");
-                if (!params.getString("latitude_cliente").equalsIgnoreCase("") &&
-                        !params.getString("longitude_cliente").equalsIgnoreCase("")
+                if (!Objects.requireNonNull(params.getString("latitude_cliente")).equalsIgnoreCase("") &&
+                        !Objects.requireNonNull(params.getString("longitude_cliente")).equalsIgnoreCase("")
                 ) {
-                    coordCliLat = Double.parseDouble(params.getString("latitude_cliente"));
-                    coordCliLon = Double.parseDouble(params.getString("longitude_cliente"));
+                    coordCliLat = Double.parseDouble(Objects.requireNonNull(params.getString("latitude_cliente")));
+                    coordCliLon = Double.parseDouble(Objects.requireNonNull(params.getString("longitude_cliente")));
                 }
 
                 //txtNomeClienteFinanceiro.setText(params.getString("nome_cliente"));
@@ -313,7 +345,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
                 //
                 String nomeCliente = params.getString("nome_cliente");
-                getSupportActionBar().setSubtitle(classAuxiliar.maiuscula1(nomeCliente.toLowerCase()));
+                getSupportActionBar().setSubtitle(classAuxiliar.maiuscula1(Objects.requireNonNull(nomeCliente).toLowerCase()));
             }
         }
 
@@ -374,7 +406,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
             txtValorFormaPagamento.setText(total);
         } catch (Exception e) {
-            Log.i("Financeiro", e.getMessage());
+            Log.i("Financeiro", Objects.requireNonNull(e.getMessage()));
         }
     }
 
@@ -588,7 +620,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             if (editText == null) return;
             String s = editable.toString();
             editText.removeTextChangedListener(this);
-            String cleanString = s.toString().replaceAll("[^0-9]", "");
+            String cleanString = s.replaceAll("[^0-9]", "");
             BigDecimal parsed = new BigDecimal(cleanString).setScale(2, BigDecimal.ROUND_FLOOR).divide(new BigDecimal(100), BigDecimal.ROUND_FLOOR);
             String formatted = NumberFormat.getCurrencyInstance().format(parsed);
             editText.setText(formatted);
@@ -695,6 +727,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             posicaiFinal = new LatLng(0.0, 0.0);
         }
         distance = SphericalUtil.computeDistanceBetween(posicaoInicial, posicaiFinal);
+        double distanciaComparar = distance;
 
         //Log.e("LOG", "A Distancia é = " + (distance));
         Locale mL = new Locale("pt", "BR");
@@ -704,13 +737,25 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             distance /= 1000;
             unit = "km";
         }
-        //Log.e("Distancia", "A Distancia é = " + String.format(mL, "%4.3f%s", distance, unit));
-        //Log.e("Distancia", "A Distancia é = " + distance);
-
-        if (distance <= 0.1) {
+        Log.e("Distancia", "A Distancia é = " + String.format(mL, "%4.2f%s", distance, unit));
+        Log.e("Distancia", "A Distancia é = " + distanciaComparar);
+        //if (distance <= 0.1) {
+        if (distanciaComparar <= 150 && unit.equalsIgnoreCase("m")) {
             result = true;
         } else {
-            msg("Você parece estar a uns " + String.format(mL, "%4.3f%s", distance, unit) + " de onde o cliente está. Chegue mais perto para finalizar a venda!");
+            // Retirar depois da atualização
+            //result = true;
+
+            //
+            if (verificarOnline.isOnline(context)) {
+                String posCli = coordCliLat + ", " + coordCliLon;
+                String posVen = coord_latitude + ", " + coord_longitude;
+                String raio = String.format(mL, "%4.2f%s", distance, unit);
+                String prec = precisao + "m";
+                //
+                enviarLog(posCli, posVen, raio, prec);
+            }
+            msg("Você parece estar a uns " + String.format(mL, "%4.2f%s", distance, unit) + " de onde o cliente está. Chegue mais perto para finalizar a venda!");
         }
 
         return result;
@@ -737,6 +782,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             String[] c = coord.getLatLon().split(",");
             coord_latitude = Double.parseDouble(c[0]);
             coord_longitude = Double.parseDouble(c[1]);
+
+            precisao = coord.getPrecisao();
 
             //Log.i("POS", c[0] + ", " + c[1]);
             // VERIFICA SE AS CORDENADAS DO ENTREGADOR FORAM RECONHECIDAS
@@ -824,4 +871,116 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         super.finish();
     }
+
+    private void enviarLog(String posCli, String posVen, String raio, String precisao) {
+        //
+        final ILogin login = ILogin.retrofit.create(ILogin.class);
+
+        //
+        final Call<Conta> call = login.enviarLog(
+                posCli,
+                posVen,
+                raio,
+                precisao,
+                "Marca: " + Build.BRAND + ", Modelo: " + Build.MODEL + ", SDK: " + Build.VERSION.SDK_INT,
+                prefs.getString("serial", "")
+        );
+
+        call.enqueue(new Callback<Conta>() {
+            @Override
+            public void onResponse(Call<Conta> call, Response<Conta> response) {
+
+                //
+                final Conta sincronizacao = response.body();
+                if (sincronizacao != null) {
+
+                    //
+                    runOnUiThread(() -> {
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Conta> call, Throwable t) {
+            }
+        });
+    }
+
+    protected void createLocationRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(this, locationSettingsResponse -> {
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            // ...
+        });
+
+        task.addOnFailureListener(this, e -> {
+            if (e instanceof ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(FinanceiroDaVenda.this,
+                            REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    // Ignore the error.
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        // Todas as alterações necessárias foram feitas
+                        coord.getLocation();
+                        //verifCordenadas();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        // O usuário cancelou o dialog, não fazendo as alterações requeridas
+                        Toast.makeText(FinanceiroDaVenda.this, "Operação cancelada!", Toast.LENGTH_LONG).show();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /*@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final LocationSettingsStates states = LocationSettingsStates.fromIntent(intent);
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        // Todas as alterações necessárias foram feitas
+                     ...
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        // O usuário cancelou o dialog, não fazendo as alterações requeridas
+                     ...
+                        break;
+                    default:
+                        break;
+                }
+                break;
+        }
+    }*/
 }

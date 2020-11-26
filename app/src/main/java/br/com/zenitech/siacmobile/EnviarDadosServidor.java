@@ -51,6 +51,8 @@ public class EnviarDadosServidor extends AppCompatActivity {
         prefs = context.getSharedPreferences("preferencias", Context.MODE_PRIVATE);
         classAuxiliar = new ClassAuxiliar();
         bd = new DatabaseHelper(context);
+
+        //
         dados = bd.EnviarDados();
         Log.i(TAG + " Venda", dados[0]);
         Log.i(TAG + " Venda", dados[1]);
@@ -58,6 +60,7 @@ public class EnviarDadosServidor extends AppCompatActivity {
         Log.i(TAG + " Venda", dados[3]);
         Log.i(TAG + " Venda", dados[4]);
         Log.i(TAG + " Venda", dados[5]);
+        //
         dadosFin = bd.EnviarDadosFinanceiro();
         Log.i(TAG + " Financeiro", dadosFin[0]);
         Log.i(TAG + " Financeiro", dadosFin[1]);

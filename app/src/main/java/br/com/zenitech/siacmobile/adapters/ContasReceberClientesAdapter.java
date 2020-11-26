@@ -1,13 +1,14 @@
 package br.com.zenitech.siacmobile.adapters;
 
 import android.content.Context;
+
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
@@ -17,8 +18,10 @@ import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FinanceiroReceberClientes;
+import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 
-import static br.com.zenitech.siacmobile.ContasReceberCliente.id_baixa_app;
+import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
+//import static br.com.zenitech.siacmobile.ContasReceberCliente.id_baixa_app;
 import static br.com.zenitech.siacmobile.ContasReceberCliente.tvTotalPagarContasReceberCliente;
 
 public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasReceberClientesAdapter.ViewHolder> {
@@ -58,74 +61,115 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-
         //
         final FinanceiroReceberClientes financeiroVendasDomain = elementos.get(position);
+
+        //valFinanceiroReceber = financeiroVendasDomain.getValor_financeiro();
 
         TextView fpgItemContaReceberCliente = holder.fpgItemContaReceberCliente;
         fpgItemContaReceberCliente.setText(financeiroVendasDomain.getFpagamento_financeiro());
 
         TextView fpgItemContaReceberVencimento = holder.fpgItemContaReceberVencimento;
-        fpgItemContaReceberVencimento.setText("Venc. " + classAuxiliar.exibirData(financeiroVendasDomain.getVencimento_financeiro()));
+        fpgItemContaReceberVencimento.setText(String.format("Venc. %s", classAuxiliar.exibirData(financeiroVendasDomain.getVencimento_financeiro())));
 
         TextView vfpgItemContaReceberCliente = holder.vfpgItemContaReceberCliente;
-        vfpgItemContaReceberCliente.setText("R$ " + classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro())));
+        //
+        String valorPago = bd.getTotalRecebido(financeiroVendasDomain.getCodigo_financeiro());
+        Log.i("ContasReceber", " TOTAL PAGO " + valorPago);
+        if (!valorPago.equalsIgnoreCase("0")) {
+            String[] subtrValorPago = {
+                    String.valueOf(financeiroVendasDomain.getValor_financeiro()),
+                    valorPago
+            };
 
+            Log.i("ContasReceber", " VALOR FINANCEIRO " + classAuxiliar.subitrair(subtrValorPago));
+            vfpgItemContaReceberCliente.setText(String.format("R$ %s", classAuxiliar.maskMoney(classAuxiliar.subitrair(subtrValorPago))));
+        } else {
+            vfpgItemContaReceberCliente.setText(String.format("R$ %s", classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro()))));
+        }
+
+        Log.i("ContasReceber - IDS ", String.valueOf(IdsCR.size()));
+
+        //
         CheckBox cbItemContaReceberCliente = holder.cbItemContaReceberCliente;
-        //cbItemContaReceberCliente.setChecked(false);
-        cbItemContaReceberCliente.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        cbItemContaReceberCliente.setOnCheckedChangeListener((buttonView, isChecked) -> {
 
+            if (isChecked) {
+                Log.i("ContasReceber - IDS ", financeiroVendasDomain.getCodigo_financeiro());
+                IdsCR.add(financeiroVendasDomain.getCodigo_financeiro());
+                Log.i("ContasReceber - IDS ", String.valueOf(IdsCR.size()));
+                //
+                String[] sv = {
+                        String.valueOf(classAuxiliar.converterValores(tvTotalPagarContasReceberCliente.getText().toString())),
+                        String.valueOf(financeiroVendasDomain.getValor_financeiro())
+                };
 
-                if (isChecked) {
-                    //
-                    String[] sv = {
-                            String.valueOf(classAuxiliar.converterValores(tvTotalPagarContasReceberCliente.getText().toString())),
-                            String.valueOf(financeiroVendasDomain.getValor_financeiro())
+                if (!valorPago.equalsIgnoreCase("0")) {
+                    String[] subtrValorPago = {
+                            String.valueOf(financeiroVendasDomain.getValor_financeiro()),
+                            valorPago
                     };
-                    //
-                    tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.somar(sv)));
 
-                    bd.updateFinanceiroReceber(financeiroVendasDomain.getCodigo_financeiro(), "0", id_baixa_app);
+                    String[] sv2 = {
+                            String.valueOf(classAuxiliar.converterValores(tvTotalPagarContasReceberCliente.getText().toString())),
+                            String.valueOf(classAuxiliar.subitrair(subtrValorPago))
+                    };
 
-                    //ADICIONA O ID DO FINANCEIRO EM UM ARRAY PARA SALVAR A BAIXA NA TABELA CONTAS_RECEBER NA FINALIZAÇÃO
-                    //ids.add(Integer.parseInt(financeiroVendasDomain.getCodigo_financeiro()), financeiroVendasDomain.getCodigo_financeiro());
+                    tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.somar(sv2)));
                 } else {
-                    //
-                    String[] sv = {
-                            String.valueOf(classAuxiliar.converterValores(tvTotalPagarContasReceberCliente.getText().toString())),
-                            String.valueOf(financeiroVendasDomain.getValor_financeiro())
-                    };
-                    //
-                    tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.subitrair(sv)));
-
-                    bd.updateFinanceiroReceber(financeiroVendasDomain.getCodigo_financeiro(), "1", 0);
-
-                    //REMOVE O ID DO FINANCEIRO A RECEBER DO ARRAY
-                    //ids.remove(Integer.parseInt(financeiroVendasDomain.getCodigo_financeiro()));
+                    tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.somar(sv)));
                 }
+
+                //
+                bd.updateFinanceiroReceber(financeiroVendasDomain.getCodigo_financeiro(), "0", Integer.parseInt(financeiroVendasDomain.getCodigo_cliente()));
+
+            } else {
+                //
+                String[] sv = {
+                        String.valueOf(classAuxiliar.converterValores(tvTotalPagarContasReceberCliente.getText().toString())),
+                        String.valueOf(financeiroVendasDomain.getValor_financeiro())
+                };
+
+                for (int i = 0; i < IdsCR.size(); i++) {
+                    if (IdsCR.get(i).equalsIgnoreCase(financeiroVendasDomain.getCodigo_financeiro())) {
+                        try {
+                            Log.i("ContasReceber - IDS ", IdsCR.get(i));
+                            IdsCR.remove(i);
+                        } catch (Exception ignored) {
+
+                        }
+                    }
+                }
+
+                Log.i("ContasReceber - IDS ", String.valueOf(IdsCR.size()));
+
+                if (!valorPago.equalsIgnoreCase("0")) {
+                    String[] subtrValorPago = {
+                            String.valueOf(financeiroVendasDomain.getValor_financeiro()),
+                            valorPago
+                    };
+
+                    String[] sv2 = {
+                            String.valueOf(classAuxiliar.converterValores(tvTotalPagarContasReceberCliente.getText().toString())),
+                            String.valueOf(classAuxiliar.subitrair(subtrValorPago))
+                    };
+
+                    tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.subitrair(sv2)));
+                } else {
+                    tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.subitrair(sv)));
+                }
+
+                //
+                //tvTotalPagarContasReceberCliente.setText(classAuxiliar.maskMoney(classAuxiliar.subitrair(sv)));
+                bd.updateFinanceiroReceber(financeiroVendasDomain.getCodigo_financeiro(), "1", 0);
             }
         });
 
-        /*//
-        TextView codigo = holder.tvCodigo;
-        codigo.setText(clientes.getCodigo());
-
-        //
-        TextView nome = holder.tvNome;
-        nome.setText(clientes.getNome());
-
-        holder.LlList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent in = new Intent(context, ContasReceberCliente.class);
-                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                in.putExtra("codigo", clientes.getCodigo());
-                in.putExtra("nome", clientes.getNome());
-                context.startActivity(in);
-            }
-        });*/
+        /*if(valFinanceiroReceber.equalsIgnoreCase("0")){
+            elementos.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, elementos.size());
+        }*/
     }
 
     @Override
@@ -134,19 +178,15 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        /*LinearLayout LlList;
-        TextView tvCodigo;*/
         CheckBox cbItemContaReceberCliente;
         TextView fpgItemContaReceberCliente, vfpgItemContaReceberCliente, fpgItemContaReceberVencimento;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
-            cbItemContaReceberCliente = (CheckBox) itemView.findViewById(R.id.cbItemContaReceberCliente);
-            fpgItemContaReceberCliente = (TextView) itemView.findViewById(R.id.fpgItemContaReceberCliente);
-            vfpgItemContaReceberCliente = (TextView) itemView.findViewById(R.id.vfpgItemContaReceberCliente);
-            fpgItemContaReceberVencimento = (TextView) itemView.findViewById(R.id.fpgItemContaReceberVencimento);
+            cbItemContaReceberCliente = itemView.findViewById(R.id.cbItemContaReceberCliente);
+            fpgItemContaReceberCliente = itemView.findViewById(R.id.fpgItemContaReceberCliente);
+            vfpgItemContaReceberCliente = itemView.findViewById(R.id.vfpgItemContaReceberCliente);
+            fpgItemContaReceberVencimento = itemView.findViewById(R.id.fpgItemContaReceberVencimento);
         }
     }
 }

@@ -100,25 +100,25 @@ public class Vendas extends AppCompatActivity {
         listaProdutos = bd.getProdutos();
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaProdutos);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spProduto = (Spinner) findViewById(R.id.spProdutos);
+        spProduto = findViewById(R.id.spProdutos);
         spProduto.setAdapter(adapter);
         //spProduto.requestFocus();
 
 
         //
-        etQuantidade = (EditText) findViewById(R.id.etQuantidade);
+        etQuantidade = findViewById(R.id.etQuantidade);
         etQuantidade.setText("");
         //etQuantidade.requestFocus();
 
         //
-        etPreco = (EditText) findViewById(R.id.etPreco);
+        etPreco = findViewById(R.id.etPreco);
         etPreco.addTextChangedListener(new MoneyTextWatcher(etPreco));
 
         //
-        txtTotalVenda = (TextView) findViewById(R.id.textTotalVenda);
+        txtTotalVenda = findViewById(R.id.textTotalVenda);
         txtTotalVenda.setText(R.string.zeros);
 
-        textTotalItens = (TextView) findViewById(R.id.textTotalItens);
+        textTotalItens = findViewById(R.id.textTotalItens);
         textTotalItens.setText(R.string.zero);
 
         etPreco.setOnEditorActionListener((v, actionId, event) -> {
