@@ -93,7 +93,7 @@ public class Vendas extends AppCompatActivity {
 
 
         //
-        rvVendas = (RecyclerView) findViewById(R.id.rvVendas);
+        rvVendas = findViewById(R.id.rvVendas);
         rvVendas.setLayoutManager(new LinearLayoutManager(Vendas.this));
 
         //
@@ -268,21 +268,21 @@ public class Vendas extends AppCompatActivity {
 
             //INSERIR VENDA
             bd.addVenda(new VendasDomain(
-                    String.valueOf(id),//CODIGO_VENDA
-                    id_cliente,//CODIGO_CLIENTE_VENDA
-                    prefs.getString("unidade", ""),//UNIDADE_VENDA
-                    spProduto.getSelectedItem().toString(),//PRODUTO_VENDA
-                    prefs.getString("data_movimento", classAuxiliar.inserirDataAtual()),//DATA_MOVIMENTO
-                    etQuantidade.getText().toString(),//QUANTIDADE_VENDA
-                    valorUnit,//PRECO_UNITARIO
-                    total,//VALOR_TOTAL
-                    prefs.getString("nome_vendedor", "app"),//VENDEDOR_VENDA
+                    "" + String.valueOf(id),//CODIGO_VENDA
+                    "" + id_cliente,//CODIGO_CLIENTE_VENDA
+                    "" + prefs.getString("unidade", ""),//UNIDADE_VENDA
+                    "" + spProduto.getSelectedItem().toString(),//PRODUTO_VENDA
+                    "" + prefs.getString("data_movimento", classAuxiliar.inserirDataAtual()),//DATA_MOVIMENTO
+                    "" + etQuantidade.getText().toString(),//QUANTIDADE_VENDA
+                    "" + valorUnit,//PRECO_UNITARIO
+                    "" + total,//VALOR_TOTAL
+                    "" + prefs.getString("nome_vendedor", "app"),//VENDEDOR_VENDA
                     "0",//STATUS_AUTORIZACAO_VENDA
                     "0",//ENTREGA_FUTURA_VENDA
                     "0",//ENTREGA_FUTURA_REALIZADA
-                    prefs.getString("usuario_atual", "app"),//USUARIO_ATUAL
-                    classAuxiliar.inserirDataAtual(),//DATA_CADASTRO
-                    String.valueOf(prefs.getInt("id_venda_app", 1)),
+                    "" + prefs.getString("usuario_atual", "app"),//USUARIO_ATUAL
+                    "" + classAuxiliar.inserirDataAtual(),//DATA_CADASTRO
+                    "" + String.valueOf(prefs.getInt("id_venda_app", 1)),
                     "0",
                     ""
             ));

@@ -40,6 +40,8 @@ public class ClassAuxiliar {
     public String inserirDataAtual() {
         cal.setTime(data);
         Date data_atual = cal.getTime();
+
+        Log.i("Data", inserirDataFormat.format(data_atual));
         return inserirDataFormat.format(data_atual);
     }
 
