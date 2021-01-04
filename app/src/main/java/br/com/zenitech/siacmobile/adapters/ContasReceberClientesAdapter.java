@@ -74,7 +74,7 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
 
         TextView vfpgItemContaReceberCliente = holder.vfpgItemContaReceberCliente;
         //
-        String valorPago = bd.getTotalRecebido(financeiroVendasDomain.getCodigo_financeiro());
+        String valorPago = bd.getTotalRecebidoList(financeiroVendasDomain.getCodigo_financeiro());
         Log.i("ContasReceber", " TOTAL PAGO " + valorPago);
         if (!valorPago.equalsIgnoreCase("0")) {
             String[] subtrValorPago = {

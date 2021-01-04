@@ -841,22 +841,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         FinanceiroVendasDomain listaVendas = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         String query = "SELECT " +
-                "codigo_financeiro, " +
-                "unidade_financeiro, " +
-                "data_financeiro, " +
-                "codigo_cliente_financeiro, " +
-                "fpagamento_financeiro, " +
-                "documento_financeiro, " +
-                "vencimento_financeiro, " +
-                "SUM(valor_financeiro) valor_financeiro, " +
-                "status_autorizacao, " +
-                "pago, " +
-                "vasilhame_ref, " +
-                "usuario_atual, " +
-                "data_inclusao, " +
-                "nosso_numero_financeiro, " +
-                "id_vendedor_financeiro, " +
-                "id_financeiro_app " +
+                "codigo_financeiro, unidade_financeiro, data_financeiro, " +
+                "codigo_cliente_financeiro, fpagamento_financeiro, " +
+                "documento_financeiro, vencimento_financeiro, " +
+                "SUM(valor_financeiro) valor_financeiro, status_autorizacao, " +
+                "pago, vasilhame_ref, usuario_atual, data_inclusao, " +
+                "nosso_numero_financeiro, id_vendedor_financeiro, id_financeiro_app " +
                 "FROM recebidos " +
                 "WHERE codigo_financeiro = " + codigo_finan + " " +
                 "GROUP BY fpagamento_financeiro";
@@ -879,7 +869,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.beginTransaction();
 
         //
-        String selectQuery = "SELECT valor_financeiro FROM recebidos WHERE codigo_financeiro = " + codigo_finan + " LIMIT 1";
+        String selectQuery = "SELECT pago " +
+                "FROM recebidos " +
+                "WHERE codigo_financeiro = " + codigo_finan + " " +
+                "LIMIT 1";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    valor_financeiro = cursor.getString(0);
+                }
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("ContasReceber", e.getMessage());
+        }
+
+        db.endTransaction();
+        db.close();
+        return valor_financeiro;
+    }
+
+    public String getTotalRecebidoList(String codigo_finan) {
+        String valor_financeiro = "0";
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.beginTransaction();
+
+        //
+        String selectQuery = "SELECT valor_financeiro " +
+                "FROM recebidos " +
+                "WHERE codigo_financeiro = " + codigo_finan + " " +
+                "LIMIT 1";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    valor_financeiro = cursor.getString(cursor.getColumnIndex("valor_financeiro"));
+                }
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        db.endTransaction();
+        db.close();
+        return valor_financeiro;
+    }
+
+    public String getValorFinReceberCli(String codigo_finan) {
+        String valor_financeiro = "0";
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.beginTransaction();
+
+        //
+        String selectQuery = "SELECT fir.valor_financeiro FROM financeiro_receber fir WHERE fir.codigo_financeiro = '" + codigo_finan + "' LIMIT 1";
         Cursor cursor = db.rawQuery(selectQuery, null);
         try {
             if (cursor.getCount() > 0) {
@@ -1282,6 +1327,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //
+    private FormasPagamentoReceberTemp cursorToFormasPagamentoReceberTemp(Cursor cursor) {
+        FormasPagamentoReceberTemp formasPagamentoReceberTemp = new FormasPagamentoReceberTemp(null, null, null, null);
+
+        formasPagamentoReceberTemp.setId(cursor.getString(0));
+        formasPagamentoReceberTemp.setId_cliente(cursor.getString(1));
+        formasPagamentoReceberTemp.setId_forma_pagamento(cursor.getString(2));
+        formasPagamentoReceberTemp.setValor(cursor.getString(3));
+
+        return formasPagamentoReceberTemp;
+    }
+
+    //
     public void addFinanceiro(FinanceiroVendasDomain financeiroVendasDomain) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -1330,6 +1387,60 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         myDataBase.insert("recebidos", null, values);
     }
 
+    //
+    public void addValorFinReceber(String id_cliente, String id_forma_pagamento, String valor) {
+        myDataBase = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("id_cliente", id_cliente);
+        values.put("id_forma_pagamento", id_forma_pagamento);
+        values.put("valor", valor);
+        myDataBase.insert("formas_pagamento_receber", null, values);
+    }
+
+    // VERIFICA SE A FORMA DE PAGAMENTO ESCOLHIDA JÁ EXISTE EM RECEBIDOS
+    public String[] verForPagRecTemp(String fpagamento_financeiro, String codigo_financeiro_app) {
+
+        myDataBase = this.getReadableDatabase();
+        //db.beginTransaction();
+
+        String query = "SELECT id, valor " +
+                "FROM formas_pagamento_receber " +
+                "WHERE id_forma_pagamento = '" + fpagamento_financeiro + "'";
+        Log.e("SQL", "verForPagRecTemp - " + query);
+
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        String[] codigo_financeiro = new String[]{"0", ""};
+        try {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                codigo_financeiro = new String[]{cursor.getString(0), cursor.getString(1)};
+            }
+            //myDataBase.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return codigo_financeiro;
+    }
+
+    // ATUALIZA OS VALORES DAS BAIXAS RECEBIDAS
+    public int updateFinRecTemp(String id, String valor) {
+        myDataBase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("valor", valor);
+
+        int i = myDataBase.update(
+                "formas_pagamento_receber",
+                values,
+                "id" + " = ?",
+                new String[]{id}
+        );
+
+        return i;
+    }
+
 
     // ATUALIZA OS VALORES DAS BAIXAS RECEBIDAS
     public int updateFinanceiroRecebidos(String codigo_financeiro, String valor) {
@@ -1369,8 +1480,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    //LISTAR TODOS OS ITENS DO FINANCEIRO
-    public ArrayList<FinanceiroVendasDomain> getFinanceiroClienteRecebidos(int id_financeiro_app) {
+    //LISTAR AS VALORES INSERIDOS AO FINANCEIRO A RECEBER DO CLIENTE
+    public ArrayList<FormasPagamentoReceberTemp> getFinanceiroClienteRecebidos(int id_cliente) {
+        //SQLiteDatabase
+        myDataBase = this.getReadableDatabase();
+        ArrayList<FormasPagamentoReceberTemp> listaFormasPagamentoReceber = new ArrayList<>();
+
+        String query = "SELECT * " +
+                "FROM formas_pagamento_receber " +
+                "WHERE id_cliente = '" + id_cliente + "' ";
+
+        Log.e("SQL", "getFinanceiroClienteRecebidos - " + query);
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                FormasPagamentoReceberTemp temp = cursorToFormasPagamentoReceberTemp(cursor);
+                listaFormasPagamentoReceber.add(temp);
+
+                Log.e("SQL", "getFinanceiroClienteRecebidos - " + temp.getId_forma_pagamento());
+            } while (cursor.moveToNext());
+        }
+
+        //db.close();
+        return listaFormasPagamentoReceber;
+    }
+    /*public ArrayList<FinanceiroVendasDomain> getFinanceiroClienteRecebidos(int id_financeiro_app) {
         //SQLiteDatabase
         myDataBase = this.getReadableDatabase();
         ArrayList<FinanceiroVendasDomain> listaFinanceiroVendas = new ArrayList<>();
@@ -1409,16 +1544,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //db.close();
         return listaFinanceiroVendas;
     }
+*/
 
     //LISTAR TODOS OS ITENS DO FINANCEIRO
     public ArrayList<FinanceiroReceberClientes> getContasReceberCliente(String id_cliente) {
         ArrayList<FinanceiroReceberClientes> listaFinanceiroVendas = new ArrayList<>();
 
-        String query = "SELECT * " +
+        /*String query = "SELECT * " +
                 "FROM financeiro_receber " +
                 "WHERE codigo_cliente = '" + id_cliente + "' AND status_app = '1'" +
-                " AND baixa_finalizada_app = '0'";
+                " AND baixa_finalizada_app = '0'";*/
         //String query = "SELECT * FROM financeiro_receber WHERE codigo_cliente = '" + id_cliente + "' AND valor_financeiro != total_pago";
+
+        String query = "SELECT *" +
+                "  FROM financeiro_receber AS fir" +
+                " WHERE fir.codigo_cliente = '" + id_cliente + "' AND " +
+                "       fir.valor_financeiro > (" +
+                "                                  SELECT (CASE WHEN Sum(rec.pago) IS NOT NULL THEN Sum(rec.pago) ELSE 0 END) AS pago" +
+                "                                    FROM recebidos rec" +
+                "                                   WHERE rec.codigo_financeiro = fir.codigo_financeiro" +
+                "                              )";
+
         Log.e("SQL", "getContasReceberCliente - " + query);
 
         myDataBase = this.getReadableDatabase();
@@ -1516,10 +1662,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "WHERE status_app = '0' " +
                 "GROUP BY clientes.codigo_cliente ORDER BY clientes.nome_cliente";*/
 
-        String query = "SELECT * " +
+        /*String query = "SELECT * " +
                 "FROM financeiro_receber " +
                 "INNER JOIN clientes ON clientes.codigo_cliente = financeiro_receber.codigo_cliente " +
-                "GROUP BY clientes.codigo_cliente ORDER BY clientes.nome_cliente";
+                "GROUP BY clientes.codigo_cliente ORDER BY clientes.nome_cliente";*/
+        String query = "SELECT *" +
+                "  FROM financeiro_receber fir" +
+                "       INNER JOIN" +
+                "       clientes cli ON cli.codigo_cliente = fir.codigo_cliente" +
+                " WHERE fir.valor_financeiro > (" +
+                "                                  SELECT (CASE WHEN Sum(rec.pago) IS NOT NULL THEN Sum(rec.pago) ELSE 0 END) AS pago" +
+                "                                    FROM recebidos rec" +
+                "                                   WHERE rec.codigo_financeiro = fir.codigo_financeiro" +
+                "                              )" +
+                " GROUP BY cli.codigo_cliente" +
+                " ORDER BY cli.nome_cliente";
 
         Log.e("SQL", "getAllClientesContasReceber - " + query);
 
@@ -1595,6 +1752,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.endTransaction();
             db.close();
         }
+
+        return total;
+    }
+
+    //SOMAR O VALOR DO FINANCEIRO A RECEBER
+    public String SomaValTotFinReceber(String id_cliente) {
+
+        myDataBase = this.getReadableDatabase();
+        //db.beginTransaction();
+
+        String selectQuery = "SELECT SUM(valor) FROM " + "formas_pagamento_receber" + " WHERE id_cliente = '" + id_cliente + "'";
+
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+
+        String total = "0.0";
+        try {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                total = cursor.getString(0);
+            }
+            //db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }/* finally {
+            db.endTransaction();
+            db.close();
+        }*/
 
         return total;
     }
@@ -1705,6 +1889,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 TABELA_FINANCEIRO,
                 CODIGO_FINANCEIRO + " = ?",
                 new String[]{String.valueOf(financeiroVendasDomain.getCodigo_financeiro())}
+        );
+        db.close();
+        return i;
+    }
+
+    //
+    public int deleteItemFinanceiroReceberTemp(FormasPagamentoReceberTemp temp) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int i = db.delete(
+                "formas_pagamento_receber",
+                "id = ?",
+                new String[]{String.valueOf(temp.getId())}
+        );
+        db.close();
+        return i;
+    }
+
+    //
+    public int deleteFinanceiroReceberTemp() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int i = db.delete(
+                "formas_pagamento_receber",
+                null,
+                null
         );
         db.close();
         return i;

@@ -482,7 +482,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
 
         String sql = "";
-        sql += String.valueOf(id) + "\n";//CODIGO_FINANCEIRO
+        sql += id + "\n";//CODIGO_FINANCEIRO
         sql += prefs.getString("unidade", "UNIDADE TESTE") + "\n";//UNIDADE_FINANCEIRO
         sql += classAuxiliar.inserirDataAtual() + "\n";//DATA_FINANCEIRO
         sql += codigo_cliente + "\n";//CODIGO_CLIENTE_FINANCEIRO

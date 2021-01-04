@@ -87,10 +87,8 @@ public class Vendas extends AppCompatActivity {
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
 
-
         //
         bd = new DatabaseHelper(this);
-
 
         //
         rvVendas = findViewById(R.id.rvVendas);
@@ -103,7 +101,6 @@ public class Vendas extends AppCompatActivity {
         spProduto = findViewById(R.id.spProdutos);
         spProduto.setAdapter(adapter);
         //spProduto.requestFocus();
-
 
         //
         etQuantidade = findViewById(R.id.etQuantidade);
@@ -146,7 +143,6 @@ public class Vendas extends AppCompatActivity {
                 addVenda();
             }
         });
-
 
         //
         Intent intent = getIntent();
