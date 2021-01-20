@@ -36,7 +36,7 @@ public class EnviarDadosServidor extends AppCompatActivity {
     private static final String TAG = "GerenciarCF";
     private Context context = null;
     private ProgressDialog pd;
-    String[] dados, dadosFin;
+    String[] dados, dadosFin, dadosContasReceber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +68,31 @@ public class EnviarDadosServidor extends AppCompatActivity {
         Log.i(TAG + " Financeiro", dadosFin[3]);
         Log.i(TAG + " Financeiro", dadosFin[4]);
 
-        findViewById(R.id.cv_enviar_dados).setOnClickListener(v -> enviarDados());
+        //
+        dadosContasReceber = bd.EnviarDadosContasReceber();
+        Log.i(TAG, "dadosContasReceber " + dadosContasReceber[0]);
+        Log.i(TAG, "dadosContasReceber " + dadosContasReceber[1]);
+        Log.i(TAG, "dadosContasReceber " + dadosContasReceber[2]);
+        Log.i(TAG, "dadosContasReceber " + dadosContasReceber[3]);
+        Log.i(TAG, "dadosContasReceber " + dadosContasReceber[4]);
+        Log.i(TAG, "dadosContasReceber " + dadosContasReceber[5]);
+
+        findViewById(R.id.cv_enviar_dados).setOnClickListener(v -> {
+            //MOSTRA A MENSAGEM DE SINCRONIZAÇÃO
+            pd = ProgressDialog.show(context, "Enviando dados...", "Aguarde...",
+                    true, false);
+
+            enviarDados();
+            enviarDadosContasReceber();
+        });
     }
 
     void enviarDados() {
         findViewById(R.id.cv_btn_enviar_dados).setVisibility(View.GONE);
 
-        //MOSTRA A MENSAGEM DE SINCRONIZAÇÃO
+        /*//MOSTRA A MENSAGEM DE SINCRONIZAÇÃO
         pd = ProgressDialog.show(context, "Enviando dados...", "Aguarde...",
-                true, false);
+                true, false);*/
 
         //
         final IEnviarDados iEnviarDados = IEnviarDados.retrofit.create(IEnviarDados.class);
@@ -116,6 +132,85 @@ public class EnviarDadosServidor extends AppCompatActivity {
                     //
                     ArrayList<VendasDomain> v = bd.vendasNaoSinc();
                     Log.i(TAG, String.valueOf(v.size()));
+                    prefs.edit().putBoolean("sincronizado", false).apply();
+                    prefs.edit().putString("unidade_vendedor", "").apply();
+                    prefs.edit().putString("unidade_usuario", "").apply();
+                    prefs.edit().putString("codigo_usuario", "").apply();
+                    prefs.edit().putString("login_usuario", "").apply();
+                    prefs.edit().putString("senha_usuario", "").apply();
+                    prefs.edit().putString("usuario_atual", "").apply();
+                    prefs.edit().putString("nome_vendedor", "").apply();
+                    prefs.edit().putString("data_movimento", "").apply();
+                    prefs.edit().putString("biometria", "").apply();
+
+                    //CANCELA A MENSAGEM DE SINCRONIZAÇÃO
+                    if (pd != null && pd.isShowing()) {
+                        pd.dismiss();
+                    }
+
+                    Toast.makeText(EnviarDadosServidor.this, "Dados enviado com sucesso!", Toast.LENGTH_SHORT).show();
+
+
+                    //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+                    context.deleteDatabase("siacmobileDB");
+                    Intent i = new Intent(context, SincronizarBancoDados.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(i);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<EnviarDados>> call, Throwable t) {
+
+                //CANCELA A MENSAGEM DE SINCRONIZAÇÃO
+                if (pd != null && pd.isShowing()) {
+                    pd.dismiss();
+                }
+            }
+        });
+    }
+
+    void enviarDadosContasReceber() {
+
+        //
+        final IEnviarDados iEnviarDados = IEnviarDados.retrofit.create(IEnviarDados.class);
+
+        final Call<ArrayList<EnviarDados>> call = iEnviarDados.enviarDadosContasReceber(
+                "851",
+                prefs.getString("serial", ""),
+                "" + dadosContasReceber[0],
+                "" + dadosContasReceber[1],
+                "" + dadosContasReceber[2],
+                "" + dadosContasReceber[3],
+                "" + dadosContasReceber[4],
+                "" + dadosContasReceber[5],
+                "" + dadosContasReceber[6],
+                "" + dadosContasReceber[7],
+                "" + dadosContasReceber[8],
+                "" + dadosContasReceber[9],
+                "" + dadosContasReceber[10],
+                "" + dadosContasReceber[11],
+                "" + dadosContasReceber[12],
+                "" + dadosContasReceber[13]
+        );
+
+        call.enqueue(new Callback<ArrayList<EnviarDados>>() {
+            @Override
+            public void onResponse(Call<ArrayList<EnviarDados>> call, Response<ArrayList<EnviarDados>> response) {
+
+                //
+                final ArrayList<EnviarDados> sincronizacao = response.body();
+                if (sincronizacao != null) {
+
+                    /*Log.i(TAG, sincronizacao.get(0).getnVenda());
+                    Log.i(TAG, sincronizacao.get(0).getnVendaSiac());
+
+                    for (EnviarDados enviarDados : sincronizacao) {
+                        bd.updateVendaApp(enviarDados.getnVenda(), enviarDados.getnVendaSiac());
+                    }*/
+
+
                     prefs.edit().putBoolean("sincronizado", false).apply();
                     prefs.edit().putString("unidade_vendedor", "").apply();
                     prefs.edit().putString("unidade_usuario", "").apply();

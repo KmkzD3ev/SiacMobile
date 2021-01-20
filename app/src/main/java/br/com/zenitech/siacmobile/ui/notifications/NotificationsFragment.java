@@ -64,7 +64,7 @@ public class NotificationsFragment extends Fragment {
         cv_btn_resetar_app.setOnClickListener(v -> mostrarMsg());
 
         //
-        if (bd.getAllVendas().size() > 0) {
+        if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0) {
             cv_enviar_dados.setVisibility(View.VISIBLE);
             cv_btn_resetar_app.setVisibility(View.GONE);
         } else {

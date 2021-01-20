@@ -60,7 +60,7 @@ public class RelatorioContasReceberAdapter extends RecyclerView.Adapter<Relatori
 
         //
         TextView total = holder.txtFinanceiro;
-        total.setText(classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro())));
+        total.setText(classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getPago())));
     }
 
     private void deleteItem(int position) {

@@ -248,23 +248,27 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 Toast.makeText(FinanceiroDaVenda.this, "O valor do financeiro está diferente da venda.", Toast.LENGTH_LONG).show();
             } else {
 
-
-                if (coordCliLat != 0.0) {
-                    // VERIFICA SE O GPS ESTÁ ATIVO
-                    if (!coord.isGPSEnabled()) {
-                        //Toast.makeText(FinanceiroDaVenda.this, "Ative o GPS para finalizar a venda!.", Toast.LENGTH_LONG).show();
+                // SE O VENDEDOR PODE VENDER SEM COMPARAR A POSIÇÃO DO CLIENTE, PASSA DIRETO PARA A INSERÇÃO DO FINANCEIRO
+                if (prefs.getString("verificar_posicao_cliente", "1").equalsIgnoreCase("0")) {
+                    finalizarFinanceiroVenda();
+                } else {
+                    if (coordCliLat != 0.0) {
+                        // VERIFICA SE O GPS ESTÁ ATIVO
+                        if (!coord.isGPSEnabled()) {
+                            //Toast.makeText(FinanceiroDaVenda.this, "Ative o GPS para finalizar a venda!.", Toast.LENGTH_LONG).show();
                         /*Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(intent);*/
 
-                        createLocationRequest();
+                            createLocationRequest();
 
-                    }else{
-                        coord.getLocation();
-                        verifCordenadas();
+                        } else {
+                            coord.getLocation();
+                            verifCordenadas();
+                        }
+
+                    } else {
+                        finalizarFinanceiroVenda();
                     }
-
-                } else {
-                    finalizarFinanceiroVenda();
                 }
 
                 /*bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));

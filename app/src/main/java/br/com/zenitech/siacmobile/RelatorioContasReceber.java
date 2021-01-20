@@ -60,23 +60,20 @@ public class RelatorioContasReceber extends AppCompatActivity {
         //
         classAuxiliar = new ClassAuxiliar();
 
-        rvRelatorioContasReceber = (RecyclerView) findViewById(R.id.rvRelatorioContasReceber);
+        rvRelatorioContasReceber = findViewById(R.id.rvRelatorioContasReceber);
         rvRelatorioContasReceber.setLayoutManager(new LinearLayoutManager(context));
         financeiroVendasDomains = bd.getRelatorioContasReceber();
         adapter = new RelatorioContasReceberAdapter(this, financeiroVendasDomains);
         rvRelatorioContasReceber.setAdapter(adapter);
         //
         if (financeiroVendasDomains.size() == 0) {
-            erroRelatorio = (LinearLayout) findViewById(R.id.erroRelatorio);
+            erroRelatorio = findViewById(R.id.erroRelatorio);
             erroRelatorio.setVisibility(View.VISIBLE);
 
-            venderProdutos = (Button) findViewById(R.id.venderProdutos);
-            venderProdutos.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(context, ContasReceberConsultarCliente.class));
-                    finish();
-                }
+            venderProdutos = findViewById(R.id.venderProdutos);
+            venderProdutos.setOnClickListener(v -> {
+                startActivity(new Intent(context, ContasReceberConsultarCliente.class));
+                finish();
             });
         }
     }

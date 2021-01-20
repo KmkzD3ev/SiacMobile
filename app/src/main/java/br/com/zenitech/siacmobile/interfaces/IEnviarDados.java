@@ -47,6 +47,27 @@ public interface IEnviarDados {
             @Field("DOCUMENTOS") String DOCUMENTOS
     );
 
+    @FormUrlEncoded
+    @POST("index_app_siac.php")
+    Call<ArrayList<EnviarDados>> enviarDadosContasReceber(
+            @Field("TELA") String TELA,
+            @Field("SERIAL") String SERIAL,
+            @Field("codigo_financeiro") String codigo_financeiro,
+            @Field("unidade_financeiro") String unidade_financeiro,
+            @Field("data_financeiro") String data_financeiro,
+            @Field("codigo_cliente_financeiro") String codigo_cliente_financeiro,
+            @Field("fpagamento_financeiro") String fpagamento_financeiro,
+            @Field("documento_financeiro") String documento_financeiro,
+            @Field("vencimento_financeiro") String vencimento_financeiro,
+            @Field("valor_financeiro") String valor_financeiro,
+            @Field("status_autorizacao") String status_autorizacao,
+            @Field("pago") String pago,
+            @Field("usuario_atual") String usuario_atual,
+            @Field("data_inclusao") String data_inclusao,
+            @Field("nosso_numero_financeiro") String nosso_numero_financeiro,
+            @Field("id_vendedor_financeiro") String id_vendedor_financeiro
+    );
+
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://emissorweb.com.br/POSSIACN/")
             .addConverterFactory(GsonConverterFactory.create())

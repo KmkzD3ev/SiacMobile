@@ -448,6 +448,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return listaVendas;
     }
 
+    //LISTAR TODOS OS CLIENTES
+    public ArrayList<FinanceiroReceberClientes> getAllRecebidos() {
+        ArrayList<FinanceiroReceberClientes> listaVendas = new ArrayList<>();
+
+        String query = "SELECT * FROM recebidos";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                FinanceiroReceberClientes vendas = cursorToContasReceberCliente(cursor);
+                listaVendas.add(vendas);
+            } while (cursor.moveToNext());
+        }
+
+        return listaVendas;
+    }
+
     //LISTAR TODOS OS ITENS DA VENDA
     public ArrayList<VendasDomain> getVendasCliente(int codigo_venda_app) {
         ArrayList<VendasDomain> listaVendas = new ArrayList<>();
@@ -808,9 +827,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "fpagamento_financeiro, " +
                 "documento_financeiro, " +
                 "vencimento_financeiro, " +
-                "SUM(valor_financeiro) valor_financeiro, " +
+                "valor_financeiro valor_financeiro, " +
                 "status_autorizacao, " +
-                "pago, " +
+                "SUM(pago), " +
                 "vasilhame_ref, " +
                 "usuario_atual, " +
                 "data_inclusao, " +
@@ -2044,7 +2063,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    // ** Enviar dados
+    // ** Enviar dados VENDAS
     public String[] EnviarDados() {
 
         // **
@@ -2117,7 +2136,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ret;
     }
 
-    // ** Enviar dados
+    // ** Enviar dados VENDAS
     public String[] EnviarDadosFinanceiro() {
 
         // **
@@ -2211,6 +2230,108 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 VALORESFIN.toString(),
                 FPAGAMENTOS.toString(),
                 DOCUMENTOS.toString()
+        };
+
+        return ret;
+    }
+
+    // ** Enviar dados CONTAS A RECEBER
+    public String[] EnviarDadosContasReceber() {
+        // **
+        StringBuilder codigo_financeiro = new StringBuilder();
+        StringBuilder unidade_financeiro = new StringBuilder();
+        StringBuilder data_financeiro = new StringBuilder();
+        StringBuilder codigo_cliente_financeiro = new StringBuilder();
+        StringBuilder fpagamento_financeiro = new StringBuilder();
+        StringBuilder documento_financeiro = new StringBuilder();
+        StringBuilder vencimento_financeiro = new StringBuilder();
+        StringBuilder valor_financeiro = new StringBuilder();
+        StringBuilder status_autorizacao = new StringBuilder();
+        StringBuilder pago = new StringBuilder();
+        StringBuilder vasilhame_ref = new StringBuilder();
+        StringBuilder usuario_atual = new StringBuilder();
+        StringBuilder data_inclusao = new StringBuilder();
+        StringBuilder nosso_numero_financeiro = new StringBuilder();
+        StringBuilder id_vendedor_financeiro = new StringBuilder();
+
+        String query = "SELECT *, (pago * 100) as valPago  FROM recebidos";
+
+        //Log.e("SQL = ", query);
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                // **
+                codigo_financeiro.append(",");
+                codigo_financeiro.append(cursor.getString(cursor.getColumnIndex("codigo_financeiro")));
+                // **
+                unidade_financeiro.append(",");
+                unidade_financeiro.append(cursor.getString(cursor.getColumnIndex("unidade_financeiro")));
+                // **
+                data_financeiro.append(",");
+                data_financeiro.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("data_financeiro"))));
+                // **
+                codigo_cliente_financeiro.append(",");
+                codigo_cliente_financeiro.append(cursor.getString(cursor.getColumnIndex("codigo_cliente_financeiro")));
+                // **
+                fpagamento_financeiro.append(",");
+                fpagamento_financeiro.append(cursor.getString(cursor.getColumnIndex("fpagamento_financeiro")));
+                // **
+                documento_financeiro.append(",");
+                documento_financeiro.append(cursor.getString(cursor.getColumnIndex("documento_financeiro")));
+                // **
+                vencimento_financeiro.append(",");
+                vencimento_financeiro.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("vencimento_financeiro"))));
+                // **
+                valor_financeiro.append(",");
+                valor_financeiro.append(cursor.getString(cursor.getColumnIndex("valor_financeiro")));
+                // **
+                status_autorizacao.append(",");
+                status_autorizacao.append(cursor.getString(cursor.getColumnIndex("status_autorizacao")));
+                // **
+                pago.append(",");
+                pago.append(cursor.getString(cursor.getColumnIndex("valPago")));
+                // **
+                vasilhame_ref.append(",");
+                vasilhame_ref.append(cursor.getString(cursor.getColumnIndex("vasilhame_ref")));
+                // **
+                usuario_atual.append(",");
+                usuario_atual.append(cursor.getString(cursor.getColumnIndex("usuario_atual")));
+                // **
+                data_inclusao.append(",");
+                data_inclusao.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("data_inclusao"))));
+                // **
+                nosso_numero_financeiro.append(",");
+                nosso_numero_financeiro.append(cursor.getString(cursor.getColumnIndex("nosso_numero_financeiro")));
+                // **
+                id_vendedor_financeiro.append(",");
+                id_vendedor_financeiro.append(cursor.getString(cursor.getColumnIndex("id_vendedor_financeiro")));
+
+
+                //Log.i(TAG + " Peço unit.", cursor.getString(cursor.getColumnIndex("valPreVen")));
+            } while (cursor.moveToNext());
+        }
+
+        myDataBase.close();
+
+        String[] ret = {
+                codigo_financeiro.toString(),
+                unidade_financeiro.toString(),
+                data_financeiro.toString(),
+                codigo_cliente_financeiro.toString(),
+                fpagamento_financeiro.toString(),
+                documento_financeiro.toString(),
+                vencimento_financeiro.toString(),
+                valor_financeiro.toString(),
+                status_autorizacao.toString(),
+                pago.toString(),
+                vasilhame_ref.toString(),
+                usuario_atual.toString(),
+                data_inclusao.toString(),
+                nosso_numero_financeiro.toString(),
+                id_vendedor_financeiro.toString()
         };
 
         return ret;
