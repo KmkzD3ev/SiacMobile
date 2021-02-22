@@ -60,6 +60,7 @@ import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -126,6 +127,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private SpotsDialog dialog;
 
     private VerificarOnline verificarOnline;
+
+    private String vencimentoTemp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -357,7 +360,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         listaFormasPagamentoCliente = bd.getFormasPagamentoCliente(codigo_cliente);
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaFormasPagamentoCliente);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spFormasPagamentoCliente = (Spinner) findViewById(R.id.spFormasPagamentoCliente);
+        spFormasPagamentoCliente = findViewById(R.id.spFormasPagamentoCliente);
         spFormasPagamentoCliente.setAdapter(adapter);
 
         spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
@@ -572,6 +575,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         }
     }
 
+    public void atualizarDataVencimento(String data){
+        txtVencimentoFormaPagamento.setText(data);
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
@@ -581,16 +588,22 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             runOnUiThread(() -> {
                 tilDocumento.setVisibility(View.VISIBLE);
                 tilVencimento.setVisibility(View.VISIBLE);
+
+                //atualizarDataVencimento(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
+                txtVencimentoFormaPagamento.setText(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
             });
 
             if (fPag[3].equals("1")) {
 
                 runOnUiThread(() -> tilVencimento.setVisibility(View.VISIBLE));
             }
+
+
         } else {
             runOnUiThread(() -> {
                 tilDocumento.setVisibility(View.GONE);
                 tilVencimento.setVisibility(View.GONE);
+                //
                 txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
 
                 Log.i("Fin", classAuxiliar.formatarData(classAuxiliar.soNumeros(txtVencimentoFormaPagamento.getText().toString())));

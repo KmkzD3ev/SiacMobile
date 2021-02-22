@@ -13,19 +13,30 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 public class ClassAuxiliar {
 
     //FORMATAR DATA - INSERIR E EXIBIR
-    private SimpleDateFormat inserirDataFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private SimpleDateFormat exibirDataFormat = new SimpleDateFormat("dd/MM/yyyy");
-    private SimpleDateFormat exibirDataFormat_dataHora = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
+    private final SimpleDateFormat inserirDataFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat exibirDataFormat = new SimpleDateFormat("dd/MM/yyyy");
+    private final SimpleDateFormat exibirDataFormat_dataHora = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
     //FORMATAR HORA
-    private SimpleDateFormat dateFormat_hora = new SimpleDateFormat("HH:mm:ss");
-    private Date data = new Date();
-    private Calendar cal = Calendar.getInstance();
+    private final SimpleDateFormat dateFormat_hora = new SimpleDateFormat("HH:mm:ss");
+    private final Date data = new Date();
+    private final Calendar cal = Calendar.getInstance();
 
+    //
+    public String dataFutura(int dias) {
+
+        cal.setTime(data);
+        cal.add(Calendar.DAY_OF_MONTH, dias);
+        Date dataFutura = cal.getTime();
+        String dataReturn = exibirDataFormat.format(dataFutura);
+        Log.i("DataFutura", exibirDataFormat.format(cal.getTime()));
+        return dataReturn;// exibirDataFormat.format(cal.getTime());
+    }
 
     //EXIBIR DATA ATUAL DO SISTEMA - pt-BR
     public String exibirDataAtual() {
@@ -236,7 +247,7 @@ public class ClassAuxiliar {
     ////////////////////////////
     public TextWatcher maskData(final String mask, final EditText et) {
         return new TextWatcher() {
-            boolean isUpdating;
+            boolean isUpdating = true;
             String oldTxt = "";
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -265,8 +276,8 @@ public class ClassAuxiliar {
                 et.setSelection(maskCurrent.length());*/
             }
 
-            public void beforeTextChanged(
-                    CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
 
             public void afterTextChanged(Editable s) {
@@ -291,7 +302,20 @@ public class ClassAuxiliar {
                     i++;
                 }
                 isUpdating = true;
-                et.setText(maskCurrent);
+                Log.i("Mask 1000", maskCurrent);
+
+                // VERIFICA SE A VARIAVEL SO CONTEM NUMERO
+                boolean soNumeros = maskCurrent.matches("^\\d+$");
+
+                // CASO SO TENHA NUMERO FORMATA A DATA PELO formatarData()
+                if (soNumeros && maskCurrent.length() == 8) {
+                    et.setText(formatarData(maskCurrent));
+                }
+                // CASO CONTRARIO USA O maskCurrent
+                else {
+                    et.setText(maskCurrent);
+                }
+                //
                 et.setSelection(maskCurrent.length());
             }
         };

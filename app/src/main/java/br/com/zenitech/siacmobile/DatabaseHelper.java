@@ -2337,6 +2337,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ret;
     }
 
+    // ** Enviar dados
+    public int DiasPrazoCliente(String fpg, String cod) {
+        int result = 0;
+
+        String query = "SELECT fpc.pagamento_prazo_cliente FROM formas_pagamento_cliente fpc WHERE fpc.pagamento_cliente = '" + fpg + "' AND fpc.cliente_pagamento = '" + cod + "'";
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            do {
+                result = Integer.parseInt(cursor.getString(cursor.getColumnIndex("pagamento_prazo_cliente")));
+            } while (cursor.moveToNext());
+        }
+
+        myDataBase.close();
+        return result;
+    }
+
     public void FecharConexao() {
         myDataBase.close();
         SQLiteDatabase db = this.getReadableDatabase();
