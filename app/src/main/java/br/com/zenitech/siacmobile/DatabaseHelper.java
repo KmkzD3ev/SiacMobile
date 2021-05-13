@@ -211,7 +211,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<Clientes> getAllClientes() {
         ArrayList<Clientes> listaClientes = new ArrayList<>();
         //String query = "SELECT * FROM " + TABELA_CLIENTES + " ORDER BY " + NOME_CLIENTE;
-        String query = "SELECT * FROM " + TABELA_CLIENTES + " ORDER BY " + CODIGO_CLIENTE + ", " + NOME_CLIENTE;
+        //String query = "SELECT * FROM " + TABELA_CLIENTES + " ORDER BY " + CODIGO_CLIENTE + ", " + NOME_CLIENTE;
+        String query = "SELECT * FROM clientes ORDER BY codigo_cliente, nome_cliente";
         //Log.i("SQL_APP", query);
 
         myDataBase = this.getReadableDatabase();

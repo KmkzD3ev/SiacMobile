@@ -69,17 +69,12 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
         TextView total = holder.txtFinanceiro;
         total.setText(classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro())));
 
-        holder.btnExcluirFinanceiro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                excluirItem(
-                        financeiroVendasDomain.getCodigo_financeiro(),
-                        financeiroVendasDomain.getId_financeiro_app(),
-                        financeiroVendasDomain.getValor_financeiro(),
-                        position
-                );
-            }
-        });
+        holder.btnExcluirFinanceiro.setOnClickListener(v -> excluirItem(
+                financeiroVendasDomain.getCodigo_financeiro(),
+                financeiroVendasDomain.getId_financeiro_app(),
+                financeiroVendasDomain.getValor_financeiro(),
+                position
+        ));
     }
 
     private void deleteItem(int position) {

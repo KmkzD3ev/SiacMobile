@@ -211,9 +211,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 if (fPag[1].equals("A PRAZO")) {
 
                     //SE O NÚMERO DO DOCUMENTO ESTIVER VÁSIO MOSTRA A MENSAGEM
-                    if (txtDocumentoFormaPagamento.getText().toString().equals("")) {
+                    if (txtDocumentoFormaPagamento.getText().toString().equals("") && fPag[2].equals("1")) {
                         //
-                        Toast.makeText(FinanceiroDaVenda.this, "Número do documento é obrigatório.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(FinanceiroDaVenda.this, "Para essa forma de pagamento o úmero do documento é obrigatório.", Toast.LENGTH_LONG).show();
                     }
                     //SE A BAIXA FOR MANUAL VERIFICA O CAMPO VENCIMENTO
                     else if (fPag[3].equals("1")) {
@@ -562,7 +562,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         //
         txtDocumentoFormaPagamento.setText("");
-        tilDocumento.setVisibility(View.GONE);
+        tilDocumento.setVisibility(View.VISIBLE);
         spFormasPagamentoCliente.setSelection(0);
 
         //ESCONDER O TECLADO
@@ -598,10 +598,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 runOnUiThread(() -> tilVencimento.setVisibility(View.VISIBLE));
             }
 
-
         } else {
             runOnUiThread(() -> {
-                tilDocumento.setVisibility(View.GONE);
+                tilDocumento.setVisibility(View.VISIBLE);
                 tilVencimento.setVisibility(View.GONE);
                 //
                 txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
