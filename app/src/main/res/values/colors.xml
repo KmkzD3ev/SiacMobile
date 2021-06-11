@@ -7,6 +7,7 @@
     <color name="icons">#747474</color>
     <color name="transparente">#00ffffff</color>
     <color name="erro">#ffd2d2</color>
+    <color name="colorErro">#E57373</color>
 
     <!-- Buttom -->
     <color name="btnBorda">#dedede</color>

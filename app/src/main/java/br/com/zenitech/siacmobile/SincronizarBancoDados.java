@@ -4,21 +4,17 @@ import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -36,13 +32,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.getkeepsafe.taptargetview.TapTargetView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.library.BuildConfig;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.domains.Sincronizador;
@@ -107,7 +99,19 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         //
         findViewById(R.id.btn_sincronizar).setOnClickListener(view -> _iniciarVerificacoes());
+//
+        Intent intent = getIntent();
 
+        if (intent != null) {
+            Bundle params = intent.getExtras();
+
+            if (params != null) {
+
+                if (params.getString("atualizarbd").equalsIgnoreCase("sim")) {
+                    _iniciarVerificacoes();
+                }
+            }
+        }
         //
         //fabWhatsapp.setOnClickListener(view -> enviarWhatsApp(msgErro + "\n\n" + (msgErroTec != null ? "Info.: " + msgErroTec : "")));
 
@@ -127,6 +131,17 @@ public class SincronizarBancoDados extends AppCompatActivity {
         /*if (prefs.getBoolean("mostrar_alerta_versao", true)) {
             _verificarVersaoAtual();
         }*/
+
+        findViewById(R.id.btnReset).setOnClickListener(view -> {
+            prefs.edit().putBoolean("reset", true).apply();
+
+            //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+            //getContext().deleteDatabase("siacmobileDB");
+            Intent i = new Intent(context, SplashScreen.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
     }
 
     @Override
@@ -304,7 +319,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                             _resetarSincronismo(10000, true);
                         } else {
                             prefs.edit().putString("serial", serial).apply();
-                            startDownload(serial);
+                            _aguardarTempoParaDowload(60000, serial);
                         }
                     });
                 } else {
@@ -372,6 +387,13 @@ public class SincronizarBancoDados extends AppCompatActivity {
                     introducao();
                 }
             }*/
+        }, time);
+    }
+
+    // MOSTRAR OS CAMPOS PARA SINCRONIZAR NOVAMENTE
+    void _aguardarTempoParaDowload(long time, String serial) {
+        new Handler().postDelayed(() -> {
+            startDownload(serial);
         }, time);
     }
 

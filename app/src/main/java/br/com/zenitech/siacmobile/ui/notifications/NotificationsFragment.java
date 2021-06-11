@@ -31,6 +31,7 @@ import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.EnviarDadosServidor;
 import br.com.zenitech.siacmobile.FinanceiroDaVenda;
+import br.com.zenitech.siacmobile.Impressora;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.Sincronizar;
 import br.com.zenitech.siacmobile.SplashScreen;
@@ -41,12 +42,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class NotificationsFragment extends Fragment {
     private Context context = null;
     private CardView cv_btn_resetar_app;
     private LinearLayout cv_enviar_dados;
     private DatabaseHelper bd;
     private AlertDialog alerta;
+    SharedPreferences prefs;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -57,20 +61,31 @@ public class NotificationsFragment extends Fragment {
         context = this.getContext();
         bd = new DatabaseHelper(context);
 
+        prefs = context.getSharedPreferences("preferencias", MODE_PRIVATE);
+
         cv_enviar_dados = view.findViewById(R.id.cv_enviar_dados);
         cv_enviar_dados.setOnClickListener(v -> enviarDados());
         //
         cv_btn_resetar_app = view.findViewById(R.id.cv_btn_resetar_app);
         cv_btn_resetar_app.setOnClickListener(v -> mostrarMsg());
 
+        view.findViewById(R.id.cv_btn_print).setOnClickListener(v -> {
+            Intent i = new Intent(getContext(), Impressora.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
         //
-        if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0) {
+        /*if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0) {
             cv_enviar_dados.setVisibility(View.VISIBLE);
             cv_btn_resetar_app.setVisibility(View.GONE);
         } else {
             cv_enviar_dados.setVisibility(View.GONE);
             cv_btn_resetar_app.setVisibility(View.VISIBLE);
-        }
+        }*/
+
+        cv_enviar_dados.setVisibility(View.VISIBLE);
+        cv_btn_resetar_app.setVisibility(View.VISIBLE);
 
         return view;
     }
@@ -80,11 +95,13 @@ public class NotificationsFragment extends Fragment {
     }
 
     private void resetarApp() {
-        Toast.makeText(getContext(), "App resetado com sucesso!",
-                Toast.LENGTH_LONG).show();
+        /*Toast.makeText(getContext(), "App resetado com sucesso!",
+                Toast.LENGTH_LONG).show();*/
+
+        prefs.edit().putBoolean("reset", true).apply();
 
         //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
-        getContext().deleteDatabase("siacmobileDB");
+        //getContext().deleteDatabase("siacmobileDB");
         Intent i = new Intent(getContext(), SplashScreen.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);

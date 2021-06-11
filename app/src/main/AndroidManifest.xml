@@ -44,6 +44,12 @@
         tools:replace="allowBackup"
         tools:targetApi="q">
         <activity
+            android:name=".ResetApp"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_reset_app"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".SincronizarBancoDados"
             android:label="@string/title_activity_sincronizar_banco_dados"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -147,6 +153,21 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_relatorio_contas_receber"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Impressora"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_impressora"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ImpressoraPOS"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_impressora"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".DeviceListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label=""
+            android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />
     </application>
 
 </manifest>

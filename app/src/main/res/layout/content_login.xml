@@ -50,8 +50,8 @@
                         android:layout_height="32dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginRight="16dp"
-                        android:tint="@color/colorPrimary"
-                        app:srcCompat="@drawable/ic_store" />
+                        app:srcCompat="@drawable/ic_store"
+                        app:tint="@color/colorPrimary" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
@@ -83,8 +83,8 @@
                         android:layout_height="32dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginRight="16dp"
-                        android:tint="@color/colorPrimary"
-                        app:srcCompat="@drawable/ic_user" />
+                        app:srcCompat="@drawable/ic_user"
+                        app:tint="@color/colorPrimary" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
@@ -116,8 +116,8 @@
                         android:layout_height="32dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginRight="16dp"
-                        android:tint="@color/colorPrimary"
-                        app:srcCompat="@drawable/ic_lock_black" />
+                        app:srcCompat="@drawable/ic_lock_black"
+                        app:tint="@color/colorPrimary" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
@@ -184,8 +184,8 @@
                             android:layout_height="32dp"
                             android:layout_marginEnd="16dp"
                             android:layout_marginRight="16dp"
-                            android:tint="@color/colorPrimary"
-                            app:srcCompat="@drawable/ic_user" />
+                            app:srcCompat="@drawable/ic_user"
+                            app:tint="@color/colorPrimary" />
 
                         <TextView
                             android:id="@+id/txtNomeUsuarioLogin"
@@ -208,8 +208,8 @@
                             android:layout_height="32dp"
                             android:layout_marginEnd="16dp"
                             android:layout_marginRight="16dp"
-                            android:tint="@color/colorPrimary"
-                            app:srcCompat="@drawable/ic_lock_black" />
+                            app:srcCompat="@drawable/ic_lock_black"
+                            app:tint="@color/colorPrimary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="0dp"
@@ -242,6 +242,15 @@
                     android:text="@string/action_sign_in"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnReset"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_btn_red"
+                    android:text="Reset App"
+                    android:textColor="@android:color/white" />
             </LinearLayout>
 
         </LinearLayout>

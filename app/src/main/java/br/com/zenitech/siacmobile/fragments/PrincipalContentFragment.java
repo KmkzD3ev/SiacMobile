@@ -1,6 +1,7 @@
 package br.com.zenitech.siacmobile.fragments;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,19 +10,18 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
-import java.util.Objects;
-
 import br.com.zenitech.siacmobile.ContasReceberConsultarCliente;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
 
+import static android.content.Context.MODE_PRIVATE;
+
 
 public class PrincipalContentFragment extends Fragment {
-
-
     private DatabaseHelper bd;
+    private SharedPreferences prefs;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,6 +33,7 @@ public class PrincipalContentFragment extends Fragment {
 
         //
         bd = new DatabaseHelper(getContext());
+        prefs = getContext().getSharedPreferences("preferencias", MODE_PRIVATE);
 
         try {
             String[] dados_venda = bd.getUltimaVendasCliente();
@@ -48,6 +49,7 @@ public class PrincipalContentFragment extends Fragment {
         //
         view.findViewById(R.id.ll_editar_ultima_venda).setOnClickListener(v -> {
             try {
+                prefs.edit().putBoolean("EditarVenda", true).apply();
                 //CONSULTAR DADOS DA VENDA
                 String[] dados_venda = bd.getUltimaVendasCliente();
 
@@ -57,6 +59,7 @@ public class PrincipalContentFragment extends Fragment {
                 in.putExtra("id_venda_app", dados_venda[1]);
                 in.putExtra("codigo", dados_venda[2]);
                 in.putExtra("nome", dados_venda[3]);
+                //in.putExtra("editar", "sim");
                 requireContext().startActivity(in);
             } catch (Exception ignored) {
 
@@ -67,26 +70,18 @@ public class PrincipalContentFragment extends Fragment {
         view.findViewById(R.id.cv_venda).setOnClickListener(view1 -> startActivity(new Intent(getContext(), VendasConsultarClientes.class)));
 
         //CONSULTAR CLIENTE CONTAS RECEBER
-        view.findViewById(R.id.cv_contas_receber).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class));
-            }
-        });
+        view.findViewById(R.id.cv_contas_receber).setOnClickListener(view13 -> startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class)));
 
         //CONSULTAR CLIENTE CONTAS RECEBER
-        view.findViewById(R.id.cv_emissor_notas).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PackageManager packageManager = getActivity().getPackageManager();
-                String packageName = "com.lvrenyang.sample1";
-                Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-                intent.putExtra("teste", "Olha, kkk");
-                intent.putExtra("teste1", "O negocio");
-                intent.putExtra("teste2", "vai dá certo");
-                if (null != intent) {
-                    startActivity(intent);
-                }
+        view.findViewById(R.id.cv_emissor_notas).setOnClickListener(view12 -> {
+            PackageManager packageManager = getActivity().getPackageManager();
+            String packageName = "com.lvrenyang.sample1";
+            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
+            intent.putExtra("teste", "Olha, kkk");
+            intent.putExtra("teste1", "O negocio");
+            intent.putExtra("teste2", "vai dá certo");
+            if (null != intent) {
+                startActivity(intent);
             }
         });
 

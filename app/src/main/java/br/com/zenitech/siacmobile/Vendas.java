@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,12 +66,15 @@ public class Vendas extends AppCompatActivity {
     int id_venda_app = 1;
     private String total_venda = "0.0";
     String saldo = "";
+    String cpfcnpj = "";
+    String endereco = "";
     private ClassAuxiliar classAuxiliar;
 
     //DADOS PARA PASSAR AO EMISSOR WEB
     private String produto_emissor;
     private String quantidade_emissor;
     private String valor_unit_emissor;
+    private String editandoVenda = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,9 +141,26 @@ public class Vendas extends AppCompatActivity {
         btnAddProdutoLista = findViewById(R.id.btnAddProdutoLista);
         btnAddProdutoLista.setOnClickListener(view -> {
             Log.i("Vendas ", etPreco.getText().toString());
-            if (etQuantidade.getText().toString().equals("") || etQuantidade.getText().toString().equals("0") || etPreco.getText().toString().equals("") || etPreco.getText().toString().equals("R$ 0,00")) {
+            String valEtPreco = "";
+            if (!etPreco.getText().toString().equals("")) {
+                valEtPreco = String.valueOf(classAuxiliar.converterValores(etPreco.getText().toString()));
+            }
+
+            /*if (etQuantidade.getText().toString().equals("") || etQuantidade.getText().toString().equals("0") || etPreco.getText().toString().equals("") || etPreco.getText().toString().equals("R$ 0,00")) {
                 Toast.makeText(Vendas.this, "Quantidade e Preço não podem ser vazios.", Toast.LENGTH_LONG).show();
-            } else {
+            }*/
+
+            //
+            if (spProduto.getSelectedItem().toString().equals("PRODUTO")) {
+                ShowMsgToast("Selecione um produto.");
+            } else if (etQuantidade.getText().toString().equals("") || etQuantidade.getText().toString().equals("0")) {
+                ShowMsgToast("Informe a quantidade.");
+            } else if (etPreco.getText().toString().equals("")
+                    || valEtPreco.equals("R$ 0,00")
+                    || valEtPreco.equals("0.0")
+                    || valEtPreco.equals("0.00")) {
+                ShowMsgToast("Informe o valor unitário.");
+            }else {
                 addVenda();
             }
         });
@@ -165,6 +186,9 @@ public class Vendas extends AppCompatActivity {
                     latitude_cliente = params.getString("latitude_cliente");
                     longitude_cliente = params.getString("longitude_cliente");
                     saldo = params.getString("saldo");
+                    cpfcnpj = params.getString("cpfcnpj");
+                    endereco = params.getString("endereco");
+                    editandoVenda = "";
                 }
                 //SE FOR EDITAR A ÚLTIMA VENDA REALIZADA
                 else {
@@ -178,6 +202,9 @@ public class Vendas extends AppCompatActivity {
                     latitude_cliente = params.getString("latitude_cliente");
                     longitude_cliente = params.getString("longitude_cliente");
                     saldo = params.getString("saldo");
+                    cpfcnpj = params.getString("cpfcnpj");
+                    endereco = params.getString("endereco");
+                    editandoVenda = params.getString("editar");
                 }
 
                 //
@@ -207,6 +234,10 @@ public class Vendas extends AppCompatActivity {
                 intent1.putExtra("quantidade", quantidade_emissor);
                 intent1.putExtra("valor_unit", valor_unit_emissor);
                 intent1.putExtra("saldo", saldo);
+
+                //
+                intent1.putExtra("cpfcnpj", cpfcnpj);
+                intent1.putExtra("endereco", endereco);
 
                 startActivity(intent1);
 
@@ -246,6 +277,12 @@ public class Vendas extends AppCompatActivity {
         classAuxiliar.multiplicar(multiplicar);
         classAuxiliar.dividir(dividir);
         classAuxiliar.comparar(comparar);*/
+    }
+
+    private void ShowMsgToast(String msg) {
+        Toast toast = Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 
     //ADICIONAR VENDAS
@@ -384,33 +421,38 @@ public class Vendas extends AppCompatActivity {
     }
 
     private void cancelarVenda() {
+        //  SE ESTIVER EDITANDO NÃO CANCELAR A VENDA
+        if (editandoVenda.equalsIgnoreCase("sim")) {
+            finish();
+        } else {
 
-        //Cria o gerador do AlertDialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.logosiac);
-        //define o titulo
-        builder.setTitle("Atenção");
-        //define a mensagem
-        builder.setMessage("Você Deseja Realmente Cancelar Esta Venda?");
-        //define um botão como positivo
-        builder.setPositiveButton("Sim", (arg0, arg1) -> {
-            //Toast.makeText(InformacoesVagas.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
-            int i = bd.deleteVenda(prefs.getInt("id_venda_app", 0));
-            if (i != 0) {
-                Toast.makeText(Vendas.this, "Esta Venda foi Cancelada!", Toast.LENGTH_LONG).show();
-                finish();
-            } else if (textTotalItens.getText().toString().equals("0")) {
-                finish();
-            }
-        });
-        //define um botão como negativo.
-        builder.setNegativeButton("Não", (arg0, arg1) -> {
-            //Toast.makeText(InformacoesVagas.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
-        });
-        //cria o AlertDialog
-        alerta = builder.create();
-        //Exibe alerta
-        alerta.show();
+            //Cria o gerador do AlertDialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setIcon(R.drawable.logosiac);
+            //define o titulo
+            builder.setTitle("Atenção");
+            //define a mensagem
+            builder.setMessage("Você Deseja Realmente Cancelar Esta Venda?");
+            //define um botão como positivo
+            builder.setPositiveButton("Sim", (arg0, arg1) -> {
+                //Toast.makeText(InformacoesVagas.this, "positivo=" + arg1, Toast.LENGTH_SHORT).show();
+                int i = bd.deleteVenda(prefs.getInt("id_venda_app", 0));
+                if (i != 0) {
+                    Toast.makeText(Vendas.this, "Esta Venda foi Cancelada!", Toast.LENGTH_LONG).show();
+                    finish();
+                } else if (textTotalItens.getText().toString().equals("0")) {
+                    finish();
+                }
+            });
+            //define um botão como negativo.
+            builder.setNegativeButton("Não", (arg0, arg1) -> {
+                //Toast.makeText(InformacoesVagas.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+            });
+            //cria o AlertDialog
+            alerta = builder.create();
+            //Exibe alerta
+            alerta.show();
+        }
     }
 
     @Override

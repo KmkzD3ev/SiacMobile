@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialiconsround/phone_android/round_phone_android_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/refresh/baseline_refresh_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_phone_android" />
+                            <entry key="outputName" value="ic_reload" />
                             <entry key="sourceFile" value="C:\Users\kma_s\Documents\PROJETOS ANDROID\ZENITECH\SIAC_MOBILE - LOGGAS\SiacMobile" />
                           </map>
                         </option>

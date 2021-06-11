@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +17,22 @@ import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
+import br.com.zenitech.siacmobile.Impressora;
+import br.com.zenitech.siacmobile.ImpressoraPOS;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 
 import static br.com.zenitech.siacmobile.FinanceiroDaVenda.bgTotal;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.cpfcnpjCliente;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.enderecoCliente;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtDocumentoFormaPagamento;
 import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtTotalFinanceiro;
 import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtTotalItemFinanceiro;
 import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtValorFormaPagamento;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.codigo_cliente;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.nomeCliente;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtVencimentoFormaPagamento;
 
 public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVendasAdapter.ViewHolder> {
 
@@ -75,6 +85,28 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
                 financeiroVendasDomain.getValor_financeiro(),
                 position
         ));
+
+        String val = classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro()));
+
+        if(financeiroVendasDomain.getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")){
+            Intent i = new Intent(getContext(), Impressora.class);
+            //Intent i = new Intent(getContext(), ImpressoraPOS.class);
+
+            //
+            i.putExtra("razao_social", nomeCliente);
+            i.putExtra("tel_contato", "");
+            i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+            i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
+            i.putExtra("valor", val);
+            //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
+            i.putExtra("id_cliente", codigo_cliente);
+            i.putExtra("cpfcnpj", cpfcnpjCliente);
+            i.putExtra("endereco", enderecoCliente);
+            i.putExtra("imprimir", "Promissoria");
+
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(i);
+        }
     }
 
     private void deleteItem(int position) {

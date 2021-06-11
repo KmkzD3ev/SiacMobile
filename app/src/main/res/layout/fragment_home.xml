@@ -43,8 +43,8 @@
                             android:layout_height="50dp"
                             android:layout_gravity="center"
                             android:contentDescription="@string/app_name"
-                            android:tint="@color/icons"
-                            app:srcCompat="@drawable/ic_edit" />
+                            app:srcCompat="@drawable/ic_edit"
+                            app:tint="@color/icons" />
 
                     </FrameLayout>
 
@@ -65,7 +65,61 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Edite a última venda realizada"
+                            android:text="Edite última venda realizada"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_excluir_ultima_venda"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:id="@+id/ll_excluir_ultima_venda"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="65dp"
+                        android:layout_height="65dp">
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/app_name"
+                            app:srcCompat="@drawable/ic_delete_forever"
+                            app:tint="@color/icons" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="EXCLUIR VENDA"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Excluir última venda realizada"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -96,8 +150,8 @@
                             android:layout_width="50dp"
                             android:layout_height="50dp"
                             android:layout_gravity="center"
-                            android:tint="@color/icons"
-                            app:srcCompat="@drawable/ic_baseline_local_shipping_24" />
+                            app:srcCompat="@drawable/ic_baseline_local_shipping_24"
+                            app:tint="@color/icons" />
 
                     </FrameLayout>
 
@@ -147,8 +201,8 @@
                             android:layout_width="50dp"
                             android:layout_height="50dp"
                             android:layout_gravity="center"
-                            android:tint="@color/icons"
-                            app:srcCompat="@drawable/ic_user" />
+                            app:srcCompat="@drawable/ic_user"
+                            app:tint="@color/icons" />
 
                         <ImageView
                             android:layout_width="30dp"
@@ -157,8 +211,8 @@
                             android:layout_marginEnd="6dp"
                             android:layout_marginRight="6dp"
                             android:layout_marginBottom="6dp"
-                            android:tint="@color/colorPrimary"
-                            app:srcCompat="@drawable/ic_money" />
+                            app:srcCompat="@drawable/ic_money"
+                            app:tint="@color/colorPrimary" />
 
                     </FrameLayout>
 
@@ -210,8 +264,8 @@
                             android:layout_width="50dp"
                             android:layout_height="50dp"
                             android:layout_gravity="center"
-                            android:tint="@color/icons"
-                            app:srcCompat="@drawable/ic_user" />
+                            app:srcCompat="@drawable/ic_user"
+                            app:tint="@color/icons" />
 
                         <ImageView
                             android:layout_width="30dp"
@@ -220,8 +274,8 @@
                             android:layout_marginEnd="6dp"
                             android:layout_marginRight="6dp"
                             android:layout_marginBottom="6dp"
-                            android:tint="@color/colorPrimary"
-                            app:srcCompat="@drawable/ic_money" />
+                            app:srcCompat="@drawable/ic_money"
+                            app:tint="@color/colorPrimary" />
 
                     </FrameLayout>
 

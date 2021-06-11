@@ -115,6 +115,16 @@ public class Login extends AppCompatActivity {
 
         });
 
+        findViewById(R.id.btnReset).setOnClickListener(view -> {
+            prefs.edit().putBoolean("reset", true).apply();
+
+            //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+            //getContext().deleteDatabase("siacmobileDB");
+            Intent i = new Intent(context, SplashScreen.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
 
         findViewById(R.id.btn_entrar).setOnClickListener(v -> {
 

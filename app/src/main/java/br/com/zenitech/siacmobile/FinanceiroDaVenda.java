@@ -67,6 +67,7 @@ import java.util.Objects;
 import br.com.zenitech.siacmobile.adapters.FinanceiroVendasAdapter;
 import br.com.zenitech.siacmobile.domains.Conta;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.interfaces.ILogin;
 import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
@@ -85,8 +86,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private ArrayList<String> listaFormasPagamentoCliente;
     private DatabaseHelper bd;
     private Spinner spFormasPagamentoCliente;
-    private String codigo_cliente = "";
-    private EditText txtDocumentoFormaPagamento;
+    public static String codigo_cliente = "";
+    public static String nomeCliente = "";
+    public static String cpfcnpjCliente = "";
+    public static String enderecoCliente = "";
+    public static EditText txtDocumentoFormaPagamento;
     public static EditText txtVencimentoFormaPagamento, txtValorFormaPagamento;
     public static LinearLayout bgTotal;
 
@@ -129,6 +133,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private VerificarOnline verificarOnline;
 
     private String vencimentoTemp;
+
+    //UnidadesDomain unidades;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -312,6 +318,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             }
         });
 
+        //unidades = bd.getUnidade();
+
 
         //
         Intent intent = getIntent();
@@ -351,7 +359,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 valor_unit_emissor = params.getString("valor_unit");
 
                 //
-                String nomeCliente = params.getString("nome_cliente");
+                nomeCliente = params.getString("nome_cliente");
+                cpfcnpjCliente = params.getString("cpfcnpj");
+                enderecoCliente = params.getString("endereco");
+
                 getSupportActionBar().setSubtitle(classAuxiliar.maiuscula1(Objects.requireNonNull(nomeCliente).toLowerCase()));
             }
         }
@@ -561,7 +572,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         }
 
         //
-        txtDocumentoFormaPagamento.setText("");
+        //txtDocumentoFormaPagamento.setText("");
         tilDocumento.setVisibility(View.VISIBLE);
         spFormasPagamentoCliente.setSelection(0);
 
@@ -575,7 +586,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         }
     }
 
-    public void atualizarDataVencimento(String data){
+    public void atualizarDataVencimento(String data) {
         txtVencimentoFormaPagamento.setText(data);
     }
 

@@ -21,9 +21,6 @@ import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.domains.*;
 
-import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
-
-
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private String TAG = "DatabaseHelper";
@@ -197,13 +194,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private Clientes cursorToCliente(Cursor cursor) {
-        Clientes clientes = new Clientes(null, null, null, null, null);
+        Clientes clientes = new Clientes(null, null, null, null, null, null, null);
         //clientes.setCodigo(Integer.parseInt(cursor.getString(0)));
         clientes.setCodigo(cursor.getString(0));
         clientes.setNome(cursor.getString(1));
         clientes.setLatitude_cliente(cursor.getString(2));
         clientes.setLongitude_cliente(cursor.getString(3));
         clientes.setSaldo(cursor.getString(4));
+        clientes.setCpfcnpj(cursor.getString(5));
+        clientes.setEndereco(cursor.getString(6));
         return clientes;
     }
 
@@ -262,6 +261,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     ///////
 
+    //
+    private UnidadesDomain cursorToUnidades(Cursor cursor) {
+        UnidadesDomain unidades = new UnidadesDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        unidades.setId_unidade(cursor.getString(0));
+        unidades.setDescricao_unidade(cursor.getString(1));
+        unidades.setRazao_social(cursor.getString(2));
+        unidades.setCnpj(cursor.getString(3));
+        unidades.setEndereco(cursor.getString(4));
+        unidades.setNumero(cursor.getString(5));
+        unidades.setBairro(cursor.getString(6));
+        unidades.setCep(cursor.getString(7));
+        unidades.setTelefone(cursor.getString(8));
+        unidades.setIe(cursor.getString(9));
+        unidades.setCidade(cursor.getString(10));
+        unidades.setUf(cursor.getString(11));
+        unidades.setCodigo_ibge(cursor.getString(12));
+        unidades.setUrl_consulta(cursor.getString(13));
+        return unidades;
+    }
+
 
     //SOMAR O VALOR DO FINANCEIRO
     public String getIdUnidade(String unidade) {
@@ -288,6 +307,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return id;
+    }//SOMAR O VALOR DO FINANCEIRO
+
+    public UnidadesDomain getUnidade() {
+
+        UnidadesDomain unidades = new UnidadesDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.beginTransaction();
+
+        String query = "SELECT * FROM unidades LIMIT 1";
+        Cursor cursor = db.rawQuery(query, null);
+        try {
+            if (cursor.getCount() > 0) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        unidades = cursorToUnidades(cursor);
+                    } while (cursor.moveToNext());
+                }
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //db.endTransaction();
+            //db.close();
+        }
+        db.endTransaction();
+        db.close();
+        return unidades;
     }
 
 

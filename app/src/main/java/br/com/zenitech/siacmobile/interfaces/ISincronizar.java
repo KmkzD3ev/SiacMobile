@@ -34,6 +34,11 @@ public interface ISincronizar {
     @POST("ativar_desativa_pos_app.php")
     Call<Sincronizador> verificarVersaoApp(@Field("opcao") String opcao);
 
+    //RESETAR APP
+    @FormUrlEncoded
+    @POST("ativar_desativa_pos_app.php")
+    Call<Sincronizador> resetApp(@Field("opcao") String opcao, @Field("serial") String serial, @Field("codigo") String codigo);
+
     OkHttpClient okHttpClient = new OkHttpClient.Builder ()
             .connectTimeout (2, TimeUnit.MINUTES)
             .readTimeout (2, TimeUnit.MINUTES)

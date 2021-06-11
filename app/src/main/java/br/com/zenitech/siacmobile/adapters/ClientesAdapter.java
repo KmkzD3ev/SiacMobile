@@ -81,6 +81,8 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
             in.putExtra("latitude_cliente", clientes.getLatitude_cliente());
             in.putExtra("longitude_cliente", clientes.getLongitude_cliente());
             in.putExtra("saldo", clientes.getSaldo());
+            in.putExtra("cpfcnpj", clientes.getCpfcnpj());
+            in.putExtra("endereco", clientes.getEndereco());
             context.startActivity(in);
 
             ((VendasConsultarClientes) context).finish();

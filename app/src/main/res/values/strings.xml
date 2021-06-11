@@ -4,6 +4,18 @@
     <string name="zenitech">© Zenitech</string>
     <string name="searchable">Procurar por</string>
 
+
+    <string name="testprinterbt2">Test Printer BT 2.0</string>
+    <string name="testprinterbt4">Test Printer BT 4.0</string>
+    <string name="testprinterusb">Test Printer USB</string>
+    <string name="testprinternet">Test Printer NET</string>
+    <string name="tickettype">Ticket Type</string>
+    <string name="tickettype58mm">58MM Ticket</string>
+    <string name="tickettype80mm">80MM Ticket</string>
+    <string name="printcount">Print Count</string>
+    <string name="printsuccess">Impressão Concluída</string>
+    <string name="printfailed">Impressão Falhou</string>
+
     <!--Principal-->
     <string name="title_activity_main">Siac Mobile</string>
     <string name="txt_btn_vendas">VENDAS</string>
@@ -46,11 +58,36 @@
     <string name="title_activity_relatorio_contas_receber">Relatório Contas Receber</string>
     <string name="title_activity_principal2">MainActivity</string>
     <string name="title_activity_teste">Enviar Dados</string>
+    <string name="title_activity_impressora">Impressora</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+
+    <!-- TEXTOS DA IMPRESSÂO Selecione a impressora para conectar-->
+    <string name="title_select_device">Selecione o dispositivo</string>
+    <string name="title_scanning">Procurando dispositivos&#8230;</string>
+    <string name="title_bluetooth_disabled">Bluetooth desabilitado</string>
+    <string name="title_read_information">Read information</string>
+    <string name="title_print_self_test">Print self test</string>
+    <string name="title_print_text">Print text</string>
+    <string name="title_print_image">Print image</string>
+    <string name="title_print_page">Print page</string>
+    <string name="title_print_barcode">Print barcode</string>
+    <string name="title_read_card">Read card</string>
+    <string name="title_read_barcode">Read barcode</string>
+    <string name="title_scan">Escanear</string>
+    <string name="title_please_wait">Por favor, espere</string>
+    <string name="title_warning">Warning</string>
+    <string name="title_address">Endereço</string>
+    <string name="title_connect">Conectar</string>
+    <string name="title_identity">Identidade</string>
+    <string name="title_enrol">Enrol</string>
+    <string name="title_check">Check</string>
+    <string name="title_get">Get</string>
+    <string name="title_fingerprint">Fingerprint</string>
+    <string name="title_delete_all">Delete all</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
@@ -82,5 +119,39 @@
     <string name="finalizar_app">FINALIZAR APP</string>
     <string name="pagamento">PAGAMENTO</string>
     <string name="zero_reais">0,00</string>
+
+    <!--    -->
+    <string name="title_activity_reset_app">Reset App</string>
+    <string name="mensagem_reset">Insira o código que você recebeu</string>
+    <string name="_0">0</string>
+
+    <string name="printer_info">Printer information</string>
+    <string name="card_info">Card information</string>
+    <string name="tag_info">Tag information</string>
+    <string name="barcode">Barcode</string>
+    <string name="card_no">Card#</string>
+    <string name="holder">Holder</string>
+    <string name="exp_date">Exp date</string>
+    <string name="no_card_read">No card information read</string>
+
+    <string name="msg_printing_self_test">Printing self test&#8230;</string>
+    <string name="msg_printing_text">Printing text&#8230;</string>
+    <string name="msg_printing_image">Printing image&#8230;</string>
+    <string name="msg_printing_page">Printing page&#8230;</string>
+    <string name="msg_printing_barcode">Printing barcode&#8230;</string>
+    <string name="msg_printing_relatorio">Imprimindo Ralatório&#8230;</string>
+    <string name="msg_reading_magstripe">Reading magnetic card&#8230;</string>
+    <string name="msg_reading_barcode">Reading barcode&#8230;</string>
+    <string name="msg_connecting">Conectando ao dispositivo&#8230;</string>
+    <string name="msg_unsupport_page_mode">Printer does not supports page mode</string>
+    <string name="msg_please_touch_finger">Please touch with finger</string>
+    <string name="msg_enrol_identity">Enrol new identity.Please tab and hold finger&#8230;</string>
+    <string name="msg_delete_all_identities">Delete all identities&#8230;</string>
+    <string name="msg_check_identity">Check identity.Please tab and hold finger&#8230;</string>
+    <string name="msg_get_identity">Get identity.Please tab and hold finger&#8230;</string>
+    <string name="msg_invalid_identity">Invalid identity</string>
+    <string name="msg_downloading_image">Downloading image&#8230;</string>
+    <string name="msg_printing_nfce">Imprimindo NFC-e&#8230;</string>
+    <string name="msg_printing_comp_pag_cartao_nfce">Imprimindo Comprovante Pagamento&#8230;</string>
 
 </resources>
