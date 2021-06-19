@@ -1,4 +1,4 @@
-package br.com.zenitech.siacmobile.ui.dashboard;
+package br.com.zenitech.siacmobile.ui_tela_principal.dashboard;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.RelatorioContasReceber;
 import br.com.zenitech.siacmobile.RelatorioVendas;
+import br.com.zenitech.siacmobile.RelatorioVendasPedido;
 
 public class DashboardFragment extends Fragment {
 
@@ -24,7 +25,8 @@ public class DashboardFragment extends Fragment {
         //INICIAR RELATÓRIO DE VENDAS
         view.findViewById(R.id.cv_relatorio_venda).setOnClickListener(view12 -> {
             //
-            startActivity(new Intent(getContext(), RelatorioVendas.class));
+            //startActivity(new Intent(getContext(), RelatorioVendas.class));
+            startActivity(new Intent(getContext(), RelatorioVendasPedido.class));
         });
 
         //INICIAR RELATÓRIO DE VENDAS

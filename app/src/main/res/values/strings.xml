@@ -153,5 +153,9 @@
     <string name="msg_downloading_image">Downloading image&#8230;</string>
     <string name="msg_printing_nfce">Imprimindo NFC-e&#8230;</string>
     <string name="msg_printing_comp_pag_cartao_nfce">Imprimindo Comprovante Pagamento&#8230;</string>
+    <string name="title_activity_relatorios_vendas">MainActivity</string>
+    <string name="title_activity_relatorios_das_vendas">MainActivity</string>
+    <string name="title_activity_relatorio_das_vendas">MainActivity</string>
+    <string name="title_activity_relatorio_de_vendas_geral">MainActivity</string>
 
 </resources>

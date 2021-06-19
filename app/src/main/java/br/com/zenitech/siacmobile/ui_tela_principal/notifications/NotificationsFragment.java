@@ -1,46 +1,24 @@
-package br.com.zenitech.siacmobile.ui.notifications;
+package br.com.zenitech.siacmobile.ui_tela_principal.notifications;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Objects;
-
-import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.EnviarDadosServidor;
-import br.com.zenitech.siacmobile.FinanceiroDaVenda;
 import br.com.zenitech.siacmobile.Impressora;
 import br.com.zenitech.siacmobile.R;
-import br.com.zenitech.siacmobile.Sincronizar;
 import br.com.zenitech.siacmobile.SplashScreen;
-import br.com.zenitech.siacmobile.domains.EnviarDados;
-import br.com.zenitech.siacmobile.ftps.MyFTPClientFunctions;
-import br.com.zenitech.siacmobile.interfaces.IEnviarDados;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static android.content.Context.MODE_PRIVATE;
 

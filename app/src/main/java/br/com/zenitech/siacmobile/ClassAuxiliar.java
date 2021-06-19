@@ -106,7 +106,7 @@ public class ClassAuxiliar {
         for (String v : args) {
             valor = new BigDecimal(String.valueOf(valor)).add(new BigDecimal(v));
             //
-            Log.e("TOTAL", "SOMAR" + String.valueOf(valor));
+            Log.e("TOTAL", "SOMAR" + valor);
         }
         return valor;
     }
@@ -195,10 +195,12 @@ public class ClassAuxiliar {
         DecimalFormatSymbols decimalFormatSymbols = ((DecimalFormat) nf).getDecimalFormatSymbols();
         decimalFormatSymbols.setCurrencySymbol("");
         ((DecimalFormat) nf).setDecimalFormatSymbols(decimalFormatSymbols);
-        ((DecimalFormat) nf).setMinimumFractionDigits(2);
+        nf.setMinimumFractionDigits(2);
         //System.out.println(nf.format(12345.124).trim());
 
-        return nf.format(valor);
+        String valForm = nf.format(valor).trim().replaceAll(" ", "");
+        Log.i("Decimal", valForm);
+        return valForm;
     }
 
     /*public static void main(String[] args) {

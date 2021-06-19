@@ -12,6 +12,10 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -61,18 +65,25 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.FinanceiroVendasAdapter;
 import br.com.zenitech.siacmobile.domains.Conta;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import br.com.zenitech.siacmobile.domains.PosApp;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.interfaces.ILogin;
 import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import stone.application.StoneStart;
+import stone.user.UserModel;
+import stone.utils.Stone;
+
+import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     protected static final int REQUEST_CHECK_SETTINGS = 1;
@@ -135,6 +146,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private String vencimentoTemp;
 
     //UnidadesDomain unidades;
+    Configuracoes configuracoes;
+
+    PosApp posApp;
+    String nDoc = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +184,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         //
         bd = new DatabaseHelper(this);
+        posApp = bd.getPos();
 
         //
         bgTotal = findViewById(R.id.bgTotal);
@@ -249,73 +265,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //
         btnPagamento = findViewById(R.id.btnPagamento);
         btnPagamento.setOnClickListener(v -> {
-            if (txtTotalItemFinanceiro.getText().equals("0,00")) {
-                //
-                Toast.makeText(FinanceiroDaVenda.this, "Adicione pelo menos uma forma de pagamento ao financeiro.", Toast.LENGTH_LONG).show();
-            } else if (!txtTotalItemFinanceiro.getText().equals(txtTotalFinanceiro.getText())) {
-                //
-                Toast.makeText(FinanceiroDaVenda.this, "O valor do financeiro está diferente da venda.", Toast.LENGTH_LONG).show();
-            } else {
-
-                // SE O VENDEDOR PODE VENDER SEM COMPARAR A POSIÇÃO DO CLIENTE, PASSA DIRETO PARA A INSERÇÃO DO FINANCEIRO
-                if (prefs.getString("verificar_posicao_cliente", "1").equalsIgnoreCase("0")) {
-                    finalizarFinanceiroVenda();
-                } else {
-                    if (coordCliLat != 0.0) {
-                        // VERIFICA SE O GPS ESTÁ ATIVO
-                        if (!coord.isGPSEnabled()) {
-                            //Toast.makeText(FinanceiroDaVenda.this, "Ative o GPS para finalizar a venda!.", Toast.LENGTH_LONG).show();
-                        /*Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(intent);*/
-
-                            createLocationRequest();
-
-                        } else {
-                            coord.getLocation();
-                            verifCordenadas();
-                        }
-
-                    } else {
-                        finalizarFinanceiroVenda();
-                    }
-                }
-
-                /*bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
-
-                Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(FinanceiroDaVenda.this, Principal2.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-
-                super.finish();*/
-                //mostrarMsg();
-                //
-                /*Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(FinanceiroDaVenda.this, Principal.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                sair();*/
-
-                /*//
-                try {
-
-                    bd.updateFinalizarVenda(prefs.getString("id_venda_app", ""));
-
-                    //
-                    Toast.makeText(FinanceiroDaVenda.this, "Venda Finalizada Com Sucesso.", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(FinanceiroDaVenda.this, Principal.class);
-                    //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    sair();
-
-                } catch (Exception e) {
-                    //
-                    Toast.makeText(FinanceiroDaVenda.this, "Não foi possível finalizar a venda, verifique todos os dados.", Toast.LENGTH_LONG).show();
-                }*/
-            }
+            //
+            _salvarFinanceiro();
         });
 
         //unidades = bd.getUnidade();
@@ -380,6 +331,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         // Verificar se o GPS foi aceito pelo entregador
         isGPSEnabled();
+        configuracoes = new Configuracoes();
+        if (configuracoes.GetDevice()) {
+            iniciarStone();
+        }
     }
 
     @Override
@@ -398,6 +353,119 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     protected void onPause() {
         super.onPause();
         VerificarActivityAtiva.activityPaused();
+    }
+
+    // Iniciar o Stone
+    void iniciarStone() {
+        // O primeiro passo é inicializar o SDK.
+        StoneStart.init(context);
+        /*Em seguida, é necessário chamar o método setAppName da classe Stone,
+        que recebe como parâmetro uma String referente ao nome da sua aplicação.*/
+        Stone.setAppName(getApplicationName(context));
+        //Ambiente de Sandbox "Teste"
+        Stone.setEnvironment(new Configuracoes().Ambiente());
+        //Ambiente de Produção
+        //Stone.setEnvironment((Environment.PRODUCTION));
+
+        // Esse método deve ser executado para inicializar o SDK
+        List<UserModel> userList = StoneStart.init(context);
+
+        // Quando é retornado null, o SDK ainda não foi ativado
+        /*if (userList != null) {
+            // O SDK já foi ativado.
+            _pinpadAtivado();
+
+        } else {
+            // Inicia a ativação do SDK
+            ativarStoneCode();
+        }*/
+    }
+
+    private void _verificarFPgVenda() {
+        int v = 0;
+        for (int a = 0; a < listaFinanceiroCliente.size(); a++) {
+            //Log.e("FINANCEIRO", listaFinanceiroCliente.get(a).getFpagamento_financeiro());
+
+            if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")) {
+                v++;
+                String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
+                Intent i;
+                if (configuracoes.GetDevice()) {
+                    i = new Intent(context, ImpressoraPOS.class);
+                } else {
+                    i = new Intent(context, Impressora.class);
+                }
+
+                //
+                i.putExtra("razao_social", nomeCliente);
+                i.putExtra("tel_contato", "");
+                //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+                i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+                i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
+                i.putExtra("valor", val);
+                //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
+                i.putExtra("id_cliente", codigo_cliente);
+                i.putExtra("cpfcnpj", cpfcnpjCliente);
+                i.putExtra("endereco", enderecoCliente);
+                i.putExtra("imprimir", "Promissoria");
+
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
+                //Intent intent = new Intent(this, SomeActivity.class);
+                //launchSomeActivity.launch(i);
+            }
+        }
+
+        if (v == 0) finish();
+    }
+    // Create lanucher variable inside onAttach or onCreate or global
+    /*ActivityResultLauncher<Intent> launchSomeActivity = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    // your operation....
+                }
+            });*/
+
+    /*public void openYourActivity() {
+        Intent intent = new Intent(this, SomeActivity.class);
+        launchSomeActivity.launch(intent);
+    }*/
+
+    //
+    private void _salvarFinanceiro() {
+        if (txtTotalItemFinanceiro.getText().equals("0,00")) {
+            //
+            Toast.makeText(FinanceiroDaVenda.this, "Adicione pelo menos uma forma de pagamento ao financeiro.", Toast.LENGTH_LONG).show();
+        } else if (!txtTotalItemFinanceiro.getText().equals(txtTotalFinanceiro.getText())) {
+            //
+            Toast.makeText(FinanceiroDaVenda.this, "O valor do financeiro está diferente da venda.", Toast.LENGTH_LONG).show();
+        } else {
+
+            // SE O VENDEDOR PODE VENDER SEM COMPARAR A POSIÇÃO DO CLIENTE, PASSA DIRETO PARA A INSERÇÃO DO FINANCEIRO
+            if (prefs.getString("verificar_posicao_cliente", "1").equalsIgnoreCase("0")) {
+                finalizarFinanceiroVenda();
+            } else {
+                if (coordCliLat != 0.0) {
+                    // VERIFICA SE O GPS ESTÁ ATIVO
+                    if (!coord.isGPSEnabled()) {
+                        //Toast.makeText(FinanceiroDaVenda.this, "Ative o GPS para finalizar a venda!.", Toast.LENGTH_LONG).show();
+                        /*Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);*/
+
+                        createLocationRequest();
+
+                    } else {
+                        coord.getLocation();
+                        verifCordenadas();
+                    }
+
+                } else {
+                    finalizarFinanceiroVenda();
+                }
+            }
+        }
     }
 
     private void atualizarValFin() {
@@ -572,7 +640,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         }
 
         //
-        //txtDocumentoFormaPagamento.setText("");
+        txtDocumentoFormaPagamento.setText("");
         tilDocumento.setVisibility(View.VISIBLE);
         spFormasPagamentoCliente.setSelection(0);
 
@@ -599,6 +667,19 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             runOnUiThread(() -> {
                 tilDocumento.setVisibility(View.VISIBLE);
                 tilVencimento.setVisibility(View.VISIBLE);
+
+                if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
+                    if (posApp.getUltpromissoria().equalsIgnoreCase("0")) {
+                        nDoc = posApp.getSerie() + "00000001";
+                    } else {
+                        String[] soma = {posApp.getUltpromissoria(), "1"};
+                        String[] totSoma = String.valueOf(classAuxiliar.somar(soma)).split("[.]");
+                        nDoc = classAuxiliar.soNumeros(totSoma[0]);
+                    }
+
+                    txtDocumentoFormaPagamento.setText(nDoc);
+                    txtDocumentoFormaPagamento.setEnabled(false);
+                }
 
                 //atualizarDataVencimento(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
                 txtVencimentoFormaPagamento.setText(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
@@ -888,15 +969,20 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
     private void finalizarFinanceiroVenda() {
         bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
+        if (!nDoc.equalsIgnoreCase("")) {
+            bd.updatePosApp(nDoc);
+        }
 
         msg("Venda Finalizada Com Sucesso.");
 
-        Intent intent = new Intent(FinanceiroDaVenda.this, Principal2.class);
+        /*Intent intent = new Intent(FinanceiroDaVenda.this, Principal2.class);
         //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
-        super.finish();
+        super.finish();*/
+
+        _verificarFPgVenda();
     }
 
     private void enviarLog(String posCli, String posVen, String raio, String precisao) {

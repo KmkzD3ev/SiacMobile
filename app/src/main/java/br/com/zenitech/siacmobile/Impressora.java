@@ -55,6 +55,7 @@ import br.com.zenitech.siacmobile.domains.ItensPedidos;
 import br.com.zenitech.siacmobile.domains.Pedidos;
 import br.com.zenitech.siacmobile.domains.PedidosNFE;*/
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
+import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import br.com.zenitech.siacmobile.network.PrinterServer;
 import br.com.zenitech.siacmobile.util.HexUtil;
 
@@ -104,17 +105,17 @@ public class Impressora extends AppCompatActivity {
 
     public static String[] linhaProduto;
 
-    //ArrayList<Unidades> elementosUnidade;
+    ArrayList<Unidades> elementosUnidade;
     UnidadesDomain unidade;
 
     //ArrayList<PosApp> elementosPos;
     //PosApp posApp;
 
-    // NFC-e
-    /*ArrayList<Pedidos> elementosPedidos;
-    Pedidos pedidos;
+    //
+    ArrayList<VendasPedidosDomain> elementosPedidos;
+    VendasPedidosDomain pedidos;
 
-    ArrayList<ItensPedidos> elementosItens;
+    /*ArrayList<ItensPedidos> elementosItens;
     ItensPedidos itensPedidos;
 
     // NF-e
@@ -188,10 +189,6 @@ public class Impressora extends AppCompatActivity {
             }
         }
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> {
-            ativarBluetooth();
-        });
         ativarBluetooth();
 
         if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
@@ -220,64 +217,6 @@ public class Impressora extends AppCompatActivity {
 
             //
             if (liberaImpressao) {
-                /*if (tipoImpressao.equals("relatorio")) {
-                    //Log.i(LOG_TAG, "Relatório");
-
-                    //Imprimir relatório de notas fiscais eletronica
-
-                    if (prefs.getString("tamPapelImpressora", "").equalsIgnoreCase("58mm")) {
-                        printRelatorioNFCE58mm();
-                    } else {
-                        printRelatorioNFCE();
-                    }
-                    //printPage();
-                } else if (tipoImpressao.equals("nfe")) {
-
-                    //Imprimir nota fiscal eletronica
-
-                    if (prefs.getString("tamPapelImpressora", "").equalsIgnoreCase("58mm")) {
-                        printNFE58mm(linhaProduto);
-                    } else {
-                        printNFE(linhaProduto);
-                    }
-
-                    //printImage();
-                    //printBarcode();
-
-                } else if (tipoImpressao.equals("reimpressao_comprovante")) {
-
-                    //Imprimir comprovante do pagamento cartão
-                    tempoImprCompViaEsta(1000, true);
-
-                } else if (tipoImpressao.equals("comprovante_cancelamento")) {
-
-                    //Imprimir comprovante do pagamento cartão
-                    imprimirComprovanteCancelCartaoCliente();
-                    tempoImprCompCancelEsta(5000);
-                } else {
-
-                    //Imprimir nota fiscal eletronica
-                    if (prefs.getString("tamPapelImpressora", "").equalsIgnoreCase("58mm")) {
-                        printNFCE58mm(linhaProduto);
-                        *//*if (form_pagamento.equalsIgnoreCase("CARTAO DE CREDITO") || form_pagamento.equalsIgnoreCase("CARTAO DE DEBITO")) {
-                            tempoImprCompViaCli(linhaProduto);
-                        }*//*
-                        tempoImprCompViaCli();
-
-                    } else {
-                        printNFCE(linhaProduto);
-                        *//*if (form_pagamento.equalsIgnoreCase("CARTAO DE CREDITO") || form_pagamento.equalsIgnoreCase("CARTAO DE DEBITO")) {
-                            tempoImprCompViaCli(linhaProduto);
-                        }*//*
-
-                        tempoImprCompViaCli();
-                    }
-
-                    //printImage();
-                    //printBarcode();
-
-                }
-                */
 
                 if (tipoImpressao.equals("Promissoria")) {
                     //Log.i(LOG_TAG, "Relatório");
@@ -290,6 +229,8 @@ public class Impressora extends AppCompatActivity {
                         printPromissoria();
                     }
                     //printPage();
+                } else if (tipoImpressao.equals("relatorio")) {
+                    printRelatorioNFCE58mm();
                 }
 
                 liberaImpressao = false;
@@ -1151,7 +1092,7 @@ public class Impressora extends AppCompatActivity {
             textBuffer.append(tamFont).append("   ***  NOTA PROMISSORIA  ***").append("{br}");
             textBuffer.append("{br}");
             textBuffer.append("{br}");
-            textBuffer.append(tamFont).append("      ***  VIA ESTABELECIMENTO ***").append("{br}");
+            textBuffer.append(tamFont).append(" ***  VIA ESTABELECIMENTO ***").append("{br}");
             textBuffer.append("{br}");
             textBuffer.append("{br}");
 
@@ -1201,169 +1142,111 @@ public class Impressora extends AppCompatActivity {
             printer.flush();
 
             //
-            desativarBluetooth();
+            //desativarBluetooth();
 
-            finish();
+            finalizarImpressao();
 
         }, R.string.msg_printing_relatorio);
     }
 
-    // ** RELATÓRIO 80mm
-    private void _printPromissoria() {
+    // ** RELATÓRIO 58mm
+
+    private void printRelatorioNFCE58mm() {
 
         runTask((dialog, printer) -> {
             Log.d(LOG_TAG, "Print Relatório NFC-e");
             printer.reset();
 
-            //
-            String txtTel = "TEL. CONTATO: " + unidade.getTelefone();
-            String txtNumVen = "N: " + numero + " / VENCIMENTO: " + vencimento;
-            String txtValor = "VALOR: R$ " + valor;
+            elementosPedidos = bd.getRelatorioVendasPedidos();
+            /*String serie = bd.getSeriePOS();*/
+            //elementosUnidade = bd.getUnidade();
+            //unidade = elementosUnidade.get(0);
 
-            //
-            String txtCorpo = "Ao(s) " + getDataPorExtenso(vencimento) +
-                    "pagarei por esta unica via de NOTA PROMISSORIA a " + unidade.getRazao_social() +
-                    " ou a sua ordem, " +
-                    "a quantidade de: " + getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))) + " em moeda corrente deste pais.";
+            unidade = bd.getUnidade();
 
-            //
-            String txtPagavel = "Pagavel em " + unidade.getCidade() + "/" + unidade.getUf();
-
-            // EMITENTE
-            String txtEmitente = "Emitente: " + cliente;
-            String txtCnpjCpf = "CNPJ/CPF: " + cpfcnpj;
-            String txtEndereco = "Endereco: " + endereco;
-
-            // ASSINATURA
-            String txtLinAss = "-------------------------------";
-            String txtAss = "        Ass. Emitente";
-
-            //
-            String txtNum = "N: " + numero;
-            String txtCli = "CLIENTE: " + id_cliente + " - " + cliente;
-            String txtVal = "VALOR: R$ " + valor;
-
-            //
-            String txtLinAss1 = "-------------------------------";
-            String txtAss1 = unidade.getRazao_social();
-
-            // IMPRESSÃO PROMISSÓRIA CLIENTE ********
+            String quantItens = "0";
+            String valTotalPed = "0";
 
             StringBuilder textBuffer = new StringBuilder();
 
-            // PARTE 1
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append("   ***  NOTA PROMISSORIA  ***").append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append("      ***  VIA CLIENTE ***").append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
+            int posicaoNota;
 
-            // PARTE 2
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtTel).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtNumVen).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtValor).append("{br}");
-            textBuffer.append("{reset}{br}");
+            //IMPRIMIR CABEÇALHO
+            textBuffer.append(" {br}");
+            textBuffer.append(tamFont).append("  ***  RELATORIO PEDIDOS  ***").append("{br}");
+            textBuffer.append(tamFont).append("{br}");
+            textBuffer.append(tamFont).append("Unidade: ").append(unidade.getDescricao_unidade()).append("{br}");
+            textBuffer.append(tamFont).append("Serial: ").append(prefs.getString("serial", "")).append("{br}");
 
-            // PARTE 3
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtCorpo).append("{br}");
-            textBuffer.append("{reset}{br}");
+            textBuffer.append(tamFont).append("{br}");
+            textBuffer.append(tamFont).append("{br}").append("         *** ITENS ***").append("{br}");
+            textBuffer.append(tamFont).append("-------------------------------{br}");
 
-            // PARTE 4
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtPagavel).append("{br}");
-            textBuffer.append("{reset}{br}");
+            // TOTAL DE PRODUTOS
+            int totalProdutos = 0;
+            int totalProdutosNFE = 0;
 
-            // PARTE 5
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtEmitente).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtCnpjCpf).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtEndereco).append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
+            //DADOS DAS NOTAS NFC-e
+            if (elementosPedidos.size() > 0) {
+                for (int n = 0; n < elementosPedidos.size(); n++) {
 
-            // PARTE 6
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtAss).append("{br}");
-            textBuffer.append("{reset}{br}");
+                    //DADOS DOS PEDIDO
+                    pedidos = elementosPedidos.get(n);
 
-            // PARTE 7
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss).append("{br}");
-            textBuffer.append("{reset}{br}");
+                    // SOMA A QUANTIDADE DE ITENS
+                    String[] somarItens = {quantItens, pedidos.getQuantidade_venda()};
+                    quantItens = String.valueOf(cAux.somar(somarItens));
 
-            // PARTE 8
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtNum).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtCli).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtVal).append("{br}");
-            textBuffer.append("{reset}{br}");
+                    // SOMA O VALOR TOTAL DOS PEDIDOS
+                    String[] somarValTot = {valTotalPed, pedidos.getValor_total()};
+                    valTotalPed = String.valueOf(cAux.somar(somarValTot));
 
-            // PARTE 9
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss1).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtAss1).append("{br}");
+                    //IMPRIMIR TEXTO
+                    //textBuffer.append(tamFont).append("PRODUTO | QTDE. | VL.UNIT | VL.TOTAL{br}");
+                    textBuffer.append(tamFont).append("PRODUTO: ").append(pedidos.getProduto_venda()).append("{br}");
+                    textBuffer.append(tamFont).append("QTDE.: ").append(" | VL.UNIT: ").append(" | VL.TOTAL: ").append("{br}");
+                    textBuffer.append(tamFont).append(pedidos.getQuantidade_venda()).append("       | ").append(cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario()))).append("    | ").append(cAux.maskMoney(new BigDecimal(pedidos.getValor_total()))).append("{br}");
+                    textBuffer.append(tamFont).append("CLIENTE: ").append(pedidos.getCodigo_cliente()).append("{br}");
+                    textBuffer.append(tamFont).append("-------------------------------").append("{br}");
 
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss).append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
+                    /*try {
+                        String[] sum = {String.valueOf(n), "1"};
+                        imprimindo.setText(String.valueOf(cAux.somar(sum)));
+                    } catch (Exception ignored) {
 
-            // VIA ESTABELECIMENTO ********
+                    }*/
+                    //totalProdutos += Integer.parseInt(itensPedidos.getQuantidade());
+                }
+            }
 
-            // PARTE 1
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append("   ***  NOTA PROMISSORIA  ***").append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append("      ***  VIA ESTABELECIMENTO ***").append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
+            textBuffer.append(tamFont).append("{br}").append("         *** TOTAIS ***").append("{br}{br}");
 
-            // PARTE 2
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtTel).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtNumVen).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtValor).append("{br}");
-            textBuffer.append("{reset}{br}");
+            /*textBuffer.append(tamFont).append("Quant. P13: ").append(totalProdutos).append(" Total: R$ ").append(totalProdutos).append("{br}");
+            textBuffer.append(tamFont).append("Quant. P20: ").append(totalProdutosNFE).append(" Total: R$ ").append("{br}");*/
+            String[] somar = {String.valueOf(totalProdutos), String.valueOf(totalProdutosNFE)};
+            //textBuffer.append(tamFont).append("-------------------------------").append("{br}");
+            Double s = Double.parseDouble(quantItens);
+            textBuffer.append(tamFont).append("TOTAL DE VENDAS: ").append(elementosPedidos.size()).append("{br}");
+            textBuffer.append(tamFont).append("TOTAL DE ITENS: ").append(s.intValue()).append("{br}");
+            textBuffer.append(tamFont).append("VALOR TOTAL: R$ ").append(cAux.maskMoney(new BigDecimal(valTotalPed))).append("{br}");
 
-            // PARTE 3
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtCorpo).append("{br}");
-            textBuffer.append("{reset}{br}");
-
-            // PARTE 4
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtPagavel).append("{br}");
-            textBuffer.append("{reset}{br}");
-
-            // PARTE 5
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtEmitente).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtCnpjCpf).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtEndereco).append("{br}");
-            textBuffer.append("{reset}{br}");
-            textBuffer.append("{reset}{br}");
-
-            // PARTE 6
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtAss).append("{br}");
-            textBuffer.append("{reset}{br}");
-
-            // PARTE 7
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss).append("{br}");
-            textBuffer.append("{reset}{br}");
-
-            // PARTE 8
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtNum).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtCli).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtVal).append("{br}");
-            textBuffer.append("{reset}{br}");
-
-            // PARTE 9
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtLinAss1).append("{br}");
-            textBuffer.append("{reset}{center}").append(tamFont).append(txtAss1).append("{br}");
+            textBuffer.append("{br}{br}");
 
             printer.reset();
+            printer.selectPageMode();
+            printer.setPageXY(0, 0);
+            printer.setAlign(0);
             printer.printTaggedText(textBuffer.toString());
             printer.feedPaper(100);
             printer.flush();
 
-            //
-            desativarBluetooth();
+            //desativarBluetooth();
+
+            /*Intent i = new Intent(Impressora.this, Principal2.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.putExtra("nomeImpressoraBlt", enderecoBlt);
+            i.putExtra("enderecoBlt", enderecoBlt);
+            startActivity(i);*/
             finish();
 
         }, R.string.msg_printing_relatorio);
@@ -1389,7 +1272,7 @@ public class Impressora extends AppCompatActivity {
     }
 
     private void finalizarImpressao() {
-        Intent i = new Intent(Impressora.this, Principal.class);
+        Intent i = new Intent(Impressora.this, Principal2.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         i.putExtra("nomeImpressoraBlt", enderecoBlt);
         i.putExtra("enderecoBlt", enderecoBlt);

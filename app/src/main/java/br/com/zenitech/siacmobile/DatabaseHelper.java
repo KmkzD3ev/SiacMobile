@@ -478,6 +478,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return vendas;
     }
 
+    //
+    private VendasPedidosDomain cursorToVendasPedidos(Cursor cursor) {
+        VendasPedidosDomain vendas = new VendasPedidosDomain(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null, null, null, null, null);
+        vendas.setCodigo_venda(cursor.getString(0));
+        vendas.setCodigo_cliente(cursor.getString(1));
+        vendas.setUnidade_venda(cursor.getString(2));
+        vendas.setProduto_venda(cursor.getString(3));
+        vendas.setData_movimento(cursor.getString(4));
+        vendas.setQuantidade_venda(cursor.getString(5));
+        vendas.setPreco_unitario(cursor.getString(6));
+        vendas.setValor_total(cursor.getString(7));
+        vendas.setVendedor_venda(cursor.getString(8));
+        vendas.setStatus_autorizacao_venda(cursor.getString(9));
+        vendas.setEntrega_futura_venda(cursor.getString(10));
+        vendas.setEntrega_futura_realizada(cursor.getString(11));
+        vendas.setUsuario_atual(cursor.getString(12));
+        vendas.setData_cadastro(cursor.getString(13));
+        vendas.setCodigo_venda_app(cursor.getString(14));
+        vendas.setVenda_finalizada_app(cursor.getString(15));
+        return vendas;
+    }
+
     //LISTAR TODOS OS CLIENTES
     public ArrayList<VendasDomain> getAllVendas() {
         ArrayList<VendasDomain> listaVendas = new ArrayList<>();
@@ -562,6 +597,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(CODIGO_VENDA_APP)),
                     cursor.getString(cursor.getColumnIndex(CODIGO_CLIENTE)),
                     cursor.getString(cursor.getColumnIndex(NOME_CLIENTE))
+            };
+        } catch (Exception e) {
+
+        }
+        return id;
+    }
+
+    //LISTAR TODOS OS ITENS DA VENDA
+    public String[] getClienteUltimaVendas(String id_cliente) {
+
+        String query = "SELECT * FROM clientes WHERE codigo_cliente = " + id_cliente;
+
+        Log.i("SQL", "getClienteUltimaVendas - " + query);
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+        cursor.moveToFirst();
+        String[] id = {};
+        try {
+            id = new String[]{
+                    cursor.getString(cursor.getColumnIndex("saldo")),
+                    cursor.getString(cursor.getColumnIndex("cpfcnpj")),
+                    cursor.getString(cursor.getColumnIndex("endereco"))
             };
         } catch (Exception e) {
 
@@ -788,6 +846,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 VendasDomain vendas = cursorToVendas(cursor);
+                listaVendas.add(vendas);
+            } while (cursor.moveToNext());
+        }
+
+        myDataBase.close();
+        return listaVendas;
+    }
+
+    public ArrayList<VendasPedidosDomain> getRelatorioVendasPedidos() {
+        ArrayList<VendasPedidosDomain> listaVendas = new ArrayList<>();
+
+        //"SUM(quantidade_venda) quantidade_venda, " +
+        //"SUM(valor_total) valor_total, " +
+        String query = "SELECT  codigo_venda, nome_cliente AS codigo_cliente,  unidade_venda,  produto_venda,  data_movimento, " +
+                "quantidade_venda,  preco_unitario,  (preco_unitario * quantidade_venda) valor_total, " +
+                "vendedor_venda,  status_autorizacao_venda,  entrega_futura_venda, " +
+                "entrega_futura_realizada,  usuario_atual,  data_cadastro,  codigo_venda_app, " +
+                "venda_finalizada_app  chave_importacao " +
+                "FROM " + TABELA_VENDAS + " " +
+                "INNER JOIN clientes ON clientes.codigo_cliente = vendas_app.codigo_cliente " +
+                "WHERE venda_finalizada_app = '1' ORDER BY produto_venda";// GROUP BY " + PRODUTO_VENDA
+
+        Log.e("SQL = ", query);
+
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                VendasPedidosDomain vendas = cursorToVendasPedidos(cursor);
                 listaVendas.add(vendas);
             } while (cursor.moveToNext());
         }
@@ -1796,6 +1885,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return i;
     }
+    //ALTERAR CLIENTE
+    public int updatePosApp(String val) {
+        myDataBase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("ultpromissoria", val);
+
+        int i = myDataBase.update(
+                "pos",
+                values,
+                null,
+                null
+        );
+        myDataBase.close();
+        return i;
+    }
 
     //SOMAR O VALOR DO FINANCEIRO
     public String getValorTotalFinanceiro(String codigo_financeiro_app) {
@@ -2401,6 +2505,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         myDataBase.close();
         return result;
+    }
+
+    //CURSOR POS
+    private PosApp cursorToPos(Cursor cursor) {
+        PosApp posApp = new PosApp(null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+        //
+        posApp.setCodigo(cursor.getString(0));
+        posApp.setSerial(cursor.getString(1));
+        posApp.setUnidade(cursor.getString(2));
+        posApp.setSerie(cursor.getString(3));
+        posApp.setUltnfce(cursor.getString(4));
+        posApp.setUltboleto(cursor.getString(5));
+        posApp.setNota_remessa(cursor.getString(6));
+        posApp.setSerie_remessa(cursor.getString(7));
+        posApp.setLimite_credito(cursor.getString(8));
+        posApp.setUltpromissoria(cursor.getString(9));
+        posApp.setAutovencimento(cursor.getString(10));
+        posApp.setModulo_pedidos(cursor.getString(11));
+        posApp.setBaixa_a_prazo(cursor.getString(12));
+        return posApp;
+    }
+
+    //LISTAR TODAS AS UNIDADES
+    public PosApp getPos() {
+        PosApp posApp = new PosApp(null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+        String query = "SELECT * FROM pos LIMIT 1";
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                posApp = cursorToPos(cursor);
+            } while (cursor.moveToNext());
+        }
+
+        myDataBase.close();
+        return posApp;
     }
 
     public void FecharConexao() {

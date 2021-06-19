@@ -86,7 +86,7 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
                 position
         ));
 
-        String val = classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro()));
+        /*String val = classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro()));
 
         if(financeiroVendasDomain.getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")){
             Intent i = new Intent(getContext(), Impressora.class);
@@ -106,7 +106,7 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
 
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             context.startActivity(i);
-        }
+        }*/
     }
 
     private void deleteItem(int position) {

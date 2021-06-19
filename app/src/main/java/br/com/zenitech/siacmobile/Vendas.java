@@ -151,9 +151,7 @@ public class Vendas extends AppCompatActivity {
             }*/
 
             //
-            if (spProduto.getSelectedItem().toString().equals("PRODUTO")) {
-                ShowMsgToast("Selecione um produto.");
-            } else if (etQuantidade.getText().toString().equals("") || etQuantidade.getText().toString().equals("0")) {
+            if (etQuantidade.getText().toString().equals("") || etQuantidade.getText().toString().equals("0")) {
                 ShowMsgToast("Informe a quantidade.");
             } else if (etPreco.getText().toString().equals("")
                     || valEtPreco.equals("R$ 0,00")

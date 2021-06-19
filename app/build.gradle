@@ -13,6 +13,7 @@ android {
     }
     compileSdkVersion 30
     buildToolsVersion '29.0.3'
+
     defaultConfig {
         applicationId "br.com.zenitech.siacmobile"
         minSdkVersion 21
@@ -62,8 +63,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'androidx.navigation:navigation-fragment:2.3.5'
-    implementation 'androidx.navigation:navigation-ui:2.3.5'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.3.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -98,31 +99,23 @@ dependencies {
     //
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
 
-    // QRcode
-    implementation 'com.google.zxing:core:3.4.1'
-    implementation 'com.journeyapps:zxing-android-embedded:4.2.0@aar'
-
     //Impressora DPP-350 BT
     implementation files('libs/com.datecs.api.jar')
 
     // QRcode
-    implementation 'com.google.zxing:core:3.4.1'
-    implementation 'com.journeyapps:zxing-android-embedded:4.2.0@aar'
+    //implementation 'com.google.zxing:core:3.4.1'
+    //implementation 'com.journeyapps:zxing-android-embedded:4.2.0@aar'
 
-    // Stone **
-    implementation 'br.com.stone:stone-sdk:3.4.3.2'
-    implementation 'br.com.stone:stone-sdk-posandroid:3.4.3.2'
+    // Stone ** 3.4.3.2
+    implementation 'br.com.stone:stone-sdk:3.11.8'
+    implementation 'br.com.stone:stone-sdk-posandroid:3.11.8'
 
     //implementation 'br.com.stone:stone-sdk:3.10.0'
     //implementation 'br.com.stone:stone-sdk-posandroid:3.10.0'
 
-    // Terminais Gertec:
-    implementation 'br.com.stone:stone-sdk-posandroid-ingenico:3.10.0'
-    implementation 'br.com.stone:stone-sdk-posandroid-gertec:3.10.0'
-/*
-    implementation 'br.com.stone:stone-sdk:3.10.0'
-    implementation 'br.com.stone:stone-sdk-posandroid:3.10.0' */
-    //
+    // Terminais Gertec:3.10.0
+    implementation 'br.com.stone:stone-sdk-posandroid-ingenico:3.11.8'
+    implementation 'br.com.stone:stone-sdk-posandroid-gertec:3.11.8'
 
     // Multidex **
     implementation 'androidx.multidex:multidex:2.0.1'

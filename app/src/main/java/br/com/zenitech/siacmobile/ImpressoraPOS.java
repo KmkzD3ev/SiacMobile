@@ -18,11 +18,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.datecs.api.BuildInfo;
-import com.google.zxing.BarcodeFormat;
+/*import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.journeyapps.barcodescanner.BarcodeEncoder;*/
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -39,6 +39,7 @@ import br.com.zenitech.siacmobile.domains.ItensPedidos;
 import br.com.zenitech.siacmobile.domains.Pedidos;
 import br.com.zenitech.siacmobile.domains.PedidosNFE;*/
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
+import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import stone.application.enums.Action;
 import stone.application.interfaces.StoneActionCallback;
 import stone.application.interfaces.StoneCallbackInterface;
@@ -62,6 +63,9 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
     public TextView imprimindo;
 
     public static String[] linhaProduto;
+
+    ArrayList<VendasPedidosDomain> elementosPedidos;
+    VendasPedidosDomain pedidos;
 
     UnidadesDomain unidade;
 
@@ -98,6 +102,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         cAux = new ClassAuxiliar();
         context = this;
 
+        unidade = bd.getUnidade();
+
         imprimindo = findViewById(R.id.imprimindo);
         total = findViewById(R.id.total);
         qrcode = findViewById(R.id.qrcode);
@@ -131,9 +137,14 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         }
 
         printViewHelper = new PrintViewHelper();
-        ppp = new PosPrintProvider(context);
+//        ppp = new PosPrintProvider(context);
 
-        printPromissoria();
+        if (tipoImpressao.equals("relatorio")) {
+            printRelatorioNFCE58mm();
+        } else if (tipoImpressao.equals("Promissoria")) {
+            printPromissoria();
+        }
+
 
         /*try {
             if (tipoImpressao.equals("promissoria")) {
@@ -154,7 +165,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
     private void printPromissoria() {
 
-        PosPrintProvider ppp = new PosPrintProvider(context);
+        PosPrintProvider pppPromissoria = new PosPrintProvider(this);
 
         //
         String txtTel = "TEL. CONTATO: " + unidade.getTelefone();
@@ -176,8 +187,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         String txtEndereco = "Endereco: " + endereco;
 
         // ASSINATURA
-        String txtLinAss = "-------------------------------";
-        String txtAss = "        Ass. Emitente";
+        String txtLinAss = "-----------------------------------------------";
+        String txtAss = "Ass. Emitente";
 
         //
         String txtNum = "N: " + numero;
@@ -185,118 +196,224 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         String txtVal = "VALOR: R$ " + valor;
 
         //
-        String txtLinAss1 = "-------------------------------";
+        String txtLinAss1 = "-----------------------------------------------";
         String txtAss1 = unidade.getRazao_social();
 
         // IMPRESSÃO PROMISSÓRIA CLIENTE ********
 
-        StringBuilder textBuffer = new StringBuilder();
-
         // PARTE 1
-        textBuffer.append("{br}");
-        textBuffer.append(tamFont).append("   ***  NOTA PROMISSORIA  ***").append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append(tamFont).append("      ***  VIA CLIENTE ***").append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText("***  NOTA PROMISSORIA  ***"));
+        pppPromissoria.addLine("");
+        pppPromissoria.addLine(new CentralizedBigText("***  VIA CLIENTE ***"));
+        pppPromissoria.addLine("");
 
         // PARTE 2
-        textBuffer.append(tamFont).append(txtTel).append("{br}");
-        textBuffer.append(tamFont).append(txtNumVen).append("{br}");
-        textBuffer.append(tamFont).append(txtValor).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtTel));
+        pppPromissoria.addLine(new CentralizedBigText(txtNumVen));
+        pppPromissoria.addLine(new CentralizedBigText(txtValor));
+        pppPromissoria.addLine("");
 
         // PARTE 3
-        textBuffer.append(tamFont).append(txtCorpo).append("{br}");
-        textBuffer.append("{br}");
+        /*String txtCorpo = "Ao(s) " + getDataPorExtenso(vencimento) +
+                "pagarei por esta unica via de NOTA PROMISSORIA a " + unidade.getRazao_social() +
+                " ou a sua ordem, " +
+                "a quantidade de: " + getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))) + " em moeda corrente deste pais.";
+*/
+        pppPromissoria.addLine(new CentralizedBigText("Ao(s) " + getDataPorExtenso(vencimento)));
+        pppPromissoria.addLine(new CentralizedBigText("pagarei por esta unica via de NOTA PROMISSORIA a "));
+        pppPromissoria.addLine(new CentralizedBigText(unidade.getRazao_social()));
+        pppPromissoria.addLine(new CentralizedBigText("ou a sua ordem, a quantidade de: "));
+        pppPromissoria.addLine(new CentralizedBigText(getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor)))))));
+        pppPromissoria.addLine(new CentralizedBigText("em moeda corrente deste pais."));
+        pppPromissoria.addLine("");
 
         // PARTE 4
-        textBuffer.append(tamFont).append(txtPagavel).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtPagavel));
+        pppPromissoria.addLine("");
 
         // PARTE 5
-        textBuffer.append(tamFont).append(txtEmitente).append("{br}");
-        textBuffer.append(tamFont).append(txtCnpjCpf).append("{br}");
-        textBuffer.append(tamFont).append(txtEndereco).append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText("Emitente:"));
+        pppPromissoria.addLine(new CentralizedBigText(cliente));
+        pppPromissoria.addLine(new CentralizedBigText("CNPJ/CPF: " + cpfcnpj));
+        pppPromissoria.addLine(new CentralizedBigText("Endereco:"));
+        pppPromissoria.addLine(new CentralizedBigText(endereco));
+        pppPromissoria.addLine("");
 
         // PARTE 6
-        textBuffer.append(tamFont).append(txtLinAss).append("{br}");
-        textBuffer.append(tamFont).append(txtAss).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
+        pppPromissoria.addLine(new CentralizedBigText(txtAss));
+        pppPromissoria.addLine("");
 
         // PARTE 7
-        textBuffer.append(tamFont).append(txtLinAss).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
 
         // PARTE 8
-        textBuffer.append(tamFont).append(txtNum).append("{br}");
-        textBuffer.append(tamFont).append(txtCli).append("{br}");
-        textBuffer.append(tamFont).append(txtVal).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtNum));
+        pppPromissoria.addLine(new CentralizedBigText("CLIENTE: " + id_cliente));
+        pppPromissoria.addLine(new CentralizedBigText(cliente));
+        pppPromissoria.addLine(new CentralizedBigText(txtVal));
 
         // PARTE 9
-        textBuffer.append(tamFont).append(txtLinAss1).append("{br}");
-        textBuffer.append(tamFont).append(txtAss1).append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss1));
+        pppPromissoria.addLine(new CentralizedBigText(txtAss1));
 
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append(tamFont).append(txtLinAss).append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine("");
+        pppPromissoria.addLine("");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
+        pppPromissoria.addLine("");
+        pppPromissoria.addLine("");
 
-        // VIA ESTABELECIMENTO ********
+        // VIA ESTABELECIMENTO ********VIA ESTABELECIMENTO
+
 
         // PARTE 1
-        textBuffer.append("{br}");
-        textBuffer.append(tamFont).append("   ***  NOTA PROMISSORIA  ***").append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append(tamFont).append("      ***  VIA ESTABELECIMENTO ***").append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText("***  NOTA PROMISSORIA  ***"));
+        pppPromissoria.addLine("");
+        pppPromissoria.addLine(new CentralizedBigText("***  VIA ESTABELECIMENTO ***"));
+        pppPromissoria.addLine("");
 
         // PARTE 2
-        textBuffer.append(tamFont).append(txtTel).append("{br}");
-        textBuffer.append(tamFont).append(txtNumVen).append("{br}");
-        textBuffer.append(tamFont).append(txtValor).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtTel));
+        pppPromissoria.addLine(new CentralizedBigText(txtNumVen));
+        pppPromissoria.addLine(new CentralizedBigText(txtValor));
+        pppPromissoria.addLine("");
 
         // PARTE 3
-        textBuffer.append(tamFont).append(txtCorpo).append("{br}");
-        textBuffer.append("{br}");
+        /*String txtCorpo = "Ao(s) " + getDataPorExtenso(vencimento) +
+                "pagarei por esta unica via de NOTA PROMISSORIA a " + unidade.getRazao_social() +
+                " ou a sua ordem, " +
+                "a quantidade de: " + getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))) + " em moeda corrente deste pais.";
+*/
+        pppPromissoria.addLine(new CentralizedBigText("Ao(s) " + getDataPorExtenso(vencimento)));
+        pppPromissoria.addLine(new CentralizedBigText("pagarei por esta unica via de NOTA PROMISSORIA a "));
+        pppPromissoria.addLine(new CentralizedBigText(unidade.getRazao_social()));
+        pppPromissoria.addLine(new CentralizedBigText("ou a sua ordem, a quantidade de: "));
+        pppPromissoria.addLine(new CentralizedBigText(getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor)))))));
+        pppPromissoria.addLine(new CentralizedBigText("em moeda corrente deste pais."));
+        pppPromissoria.addLine("");
 
         // PARTE 4
-        textBuffer.append(tamFont).append(txtPagavel).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtPagavel));
+        pppPromissoria.addLine("");
 
         // PARTE 5
-        textBuffer.append(tamFont).append(txtEmitente).append("{br}");
-        textBuffer.append(tamFont).append(txtCnpjCpf).append("{br}");
-        textBuffer.append(tamFont).append(txtEndereco).append("{br}");
-        textBuffer.append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText("Emitente:"));
+        pppPromissoria.addLine(new CentralizedBigText(cliente));
+        pppPromissoria.addLine(new CentralizedBigText("CNPJ/CPF: " + cpfcnpj));
+        pppPromissoria.addLine(new CentralizedBigText("Endereco:"));
+        pppPromissoria.addLine(new CentralizedBigText(endereco));
+        pppPromissoria.addLine("");
 
         // PARTE 6
-        textBuffer.append(tamFont).append(txtLinAss).append("{br}");
-        textBuffer.append(tamFont).append(txtAss).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
+        pppPromissoria.addLine(new CentralizedBigText(txtAss));
+        pppPromissoria.addLine("");
 
         // PARTE 7
-        textBuffer.append(tamFont).append(txtLinAss).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
 
         // PARTE 8
-        textBuffer.append(tamFont).append(txtNum).append("{br}");
-        textBuffer.append(tamFont).append(txtCli).append("{br}");
-        textBuffer.append(tamFont).append(txtVal).append("{br}");
-        textBuffer.append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtNum));
+        pppPromissoria.addLine(new CentralizedBigText("CLIENTE: " + id_cliente));
+        pppPromissoria.addLine(new CentralizedBigText(cliente));
+        pppPromissoria.addLine(new CentralizedBigText(txtVal));
 
         // PARTE 9
-        textBuffer.append(tamFont).append(txtLinAss1).append("{br}");
-        textBuffer.append(tamFont).append(txtAss1).append("{br}");
+        pppPromissoria.addLine(new CentralizedBigText(txtLinAss1));
+        pppPromissoria.addLine(new CentralizedBigText(txtAss1));
+        pppPromissoria.addLine("");
+
+        pppPromissoria.setConnectionCallback(new StoneCallbackInterface() {
+            @Override
+            public void onSuccess() {
+                liberarImpressora();
+            }
+
+            @Override
+            public void onError() {
+                liberarImpressora();
+                Toast.makeText(context, "Erro ao imprimir: " + pppPromissoria.getListOfErrors(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        pppPromissoria.execute();
+    }
+
+    // ** RELATÓRIO 58mm
+
+    private void printRelatorioNFCE58mm() {
+        PosPrintProvider ppp = new PosPrintProvider(this);
+
+        elementosPedidos = bd.getRelatorioVendasPedidos();
+        /*String serie = bd.getSeriePOS();*/
+        //elementosUnidade = bd.getUnidade();
+        //unidade = elementosUnidade.get(0);
+
+        unidade = bd.getUnidade();
+
+        String quantItens = "0";
+        String valTotalPed = "0";
+
+        int posicaoNota;
+
+        //IMPRIMIR CABEÇALHO
+        ppp.addLine(new CentralizedBigText("***  RELATORIO PEDIDOS  ***"));
+        ppp.addLine("");
+
+        ppp.addLine(new CentralizedBigText("Unidade: " + unidade.getDescricao_unidade()));
+        ppp.addLine(new CentralizedBigText("Serial: " + prefs.getString("serial", "")));
+
+        ppp.addLine("");
+        ppp.addLine(new CentralizedBigText("*** ITENS ***"));
+        ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+
+        // TOTAL DE PRODUTOS
+        int totalProdutos = 0;
+        int totalProdutosNFE = 0;
+
+        //DADOS DAS NOTAS NFC-e
+        if (elementosPedidos.size() > 0) {
+            for (int n = 0; n < elementosPedidos.size(); n++) {
+
+                //DADOS DOS PEDIDO
+                pedidos = elementosPedidos.get(n);
+
+                // SOMA A QUANTIDADE DE ITENS
+                String[] somarItens = {quantItens, pedidos.getQuantidade_venda()};
+                quantItens = String.valueOf(cAux.somar(somarItens));
+
+                // SOMA O VALOR TOTAL DOS PEDIDOS
+                String[] somarValTot = {valTotalPed, pedidos.getValor_total()};
+                valTotalPed = String.valueOf(cAux.somar(somarValTot));
+
+                //IMPRIMIR TEXTO
+                ppp.addLine(new CentralizedBigText("PRODUTO: " + pedidos.getProduto_venda()));
+                ppp.addLine(new CentralizedBigText("QTDE.:  | VL.UNIT:  | VL.TOTAL: "));
+                ppp.addLine(new CentralizedBigText(pedidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(pedidos.getValor_total()))));
+                ppp.addLine(new CentralizedBigText("CLIENTE: " + pedidos.getCodigo_cliente()));
+                ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+
+                try {
+                    String[] sum = {String.valueOf(n), "1"};
+                    imprimindo.setText(String.valueOf(cAux.somar(sum)));
+                } catch (Exception ignored) {
+
+                }
+                //totalProdutos += Integer.parseInt(itensPedidos.getQuantidade());
+            }
+        }
+
+        ppp.addLine(new CentralizedBigText("*** TOTAIS ***"));
+        ppp.addLine("");
+
+        Double s = Double.parseDouble(quantItens);
+
+        ppp.addLine(new CentralizedBigText("TOTAL DE VENDAS: " + elementosPedidos.size()));
+        ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: "+s.intValue()));
+        ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ "+cAux.maskMoney(new BigDecimal(valTotalPed))));
+
+        ppp.addLine("");
+        ppp.addLine("");
 
         ppp.setConnectionCallback(new StoneCallbackInterface() {
             @Override
@@ -311,7 +428,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             }
         });
 
-        ppp.addLine(textBuffer.toString());
+        //ppp.addLine(textBuffer.toString());
         ppp.execute();
     }
 
@@ -357,7 +474,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         if (!impressao1 || !impressao2 || !impressao3 || !impressao4) return;
 
         //
-        Intent i = new Intent(ImpressoraPOS.this, Principal.class);
+        Intent i = new Intent(ImpressoraPOS.this, Principal2.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         i.putExtra("nomeImpressoraBlt", enderecoBlt);
         i.putExtra("enderecoBlt", enderecoBlt);

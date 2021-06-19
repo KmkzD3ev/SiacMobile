@@ -1,4 +1,4 @@
-package br.com.zenitech.siacmobile.ui.home;
+package br.com.zenitech.siacmobile.ui_tela_principal.home;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,16 +8,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Objects;
 
@@ -25,15 +19,12 @@ import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.ContasReceberConsultarCliente;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.EnviarDadosServidor;
-import br.com.zenitech.siacmobile.FinanceiroDaVenda;
-import br.com.zenitech.siacmobile.Principal2;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.SincronizarBancoDados;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
 
 import static android.content.Context.MODE_PRIVATE;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.cpfcnpjCliente;
 
 public class HomeFragment extends Fragment {
 
@@ -61,7 +52,7 @@ public class HomeFragment extends Fragment {
             String[] dados_venda = bd.getUltimaVendasCliente();
             if (dados_venda.length != 0) {
                 view.findViewById(R.id.cv_editar_ultima_venda).setVisibility(View.VISIBLE);
-                view.findViewById(R.id.cv_excluir_ultima_venda).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.cv_excluir_ultima_venda).setVisibility(View.GONE);
             } else {
                 view.findViewById(R.id.cv_editar_ultima_venda).setVisibility(View.GONE);
                 view.findViewById(R.id.cv_excluir_ultima_venda).setVisibility(View.GONE);
@@ -72,26 +63,33 @@ public class HomeFragment extends Fragment {
 
         //
         view.findViewById(R.id.ll_editar_ultima_venda).setOnClickListener(v -> {
-            try {
-                //CONSULTAR DADOS DA VENDA
-                String[] dados_venda = bd.getUltimaVendasCliente();
+            if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
+                try {
+                    //CONSULTAR DADOS DA VENDA
+                    String[] dados_venda = bd.getUltimaVendasCliente();
+                    //CONSULTAR DADOS DA VENDA
+                    String[] dados_cli_venda = bd.getClienteUltimaVendas(dados_venda[2]);
 
-                Intent in = new Intent(getContext(), Vendas.class);
-                in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                in.putExtra("id_venda", dados_venda[0]);
-                in.putExtra("id_venda_app", dados_venda[1]);
-                in.putExtra("codigo", dados_venda[2]);
-                in.putExtra("nome", dados_venda[3]);
-                in.putExtra("latitude_cliente", prefs.getString("latitude_cliente", ""));
-                in.putExtra("longitude_cliente", prefs.getString("longitude_cliente", ""));
-                /*in.putExtra("saldo", clientes.getSaldo());
-                in.putExtra("cpfcnpj", clientes.getCpfcnpj());
-                in.putExtra("endereco", clientes.getEndereco());*/
-                in.putExtra("editar", "sim");
-                requireContext().startActivity(in);
-            } catch (Exception ignored) {
+                    Intent in = new Intent(getContext(), Vendas.class);
+                    in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    in.putExtra("id_venda", dados_venda[0]);
+                    in.putExtra("id_venda_app", dados_venda[1]);
+                    in.putExtra("codigo", dados_venda[2]);
+                    in.putExtra("nome", dados_venda[3]);
+                    in.putExtra("latitude_cliente", prefs.getString("latitude_cliente", ""));
+                    in.putExtra("longitude_cliente", prefs.getString("longitude_cliente", ""));
+                    in.putExtra("saldo", dados_cli_venda[0]);
+                    in.putExtra("cpfcnpj", dados_cli_venda[1]);
+                    in.putExtra("endereco", dados_cli_venda[2]);
+                    in.putExtra("editar", "sim");
+                    requireContext().startActivity(in);
+                } catch (Exception ignored) {
 
+                }
+            } else {
+                alerta();
             }
+
         });
 
         //
@@ -120,13 +118,13 @@ public class HomeFragment extends Fragment {
         //INICIAR VENDAS
         view.findViewById(R.id.cv_venda).setOnClickListener(view1 -> {
 
-            startActivity(new Intent(getContext(), VendasConsultarClientes.class));
+            //startActivity(new Intent(getContext(), VendasConsultarClientes.class));
 
-            /*if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
+            if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
                 startActivity(new Intent(getContext(), VendasConsultarClientes.class));
             } else {
                 alerta();
-            }*/
+            }
         });
 
         //CONSULTAR CLIENTE CONTAS RECEBER
@@ -144,7 +142,7 @@ public class HomeFragment extends Fragment {
         });
 
         if (!Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
-            if (bd.getAllVendas().size() <= 0 || bd.getAllRecebidos().size() <= 0) {
+            if (bd.getAllVendas().size() == 0 && bd.getAllRecebidos().size() == 0) {
                 alertaBanco();
             }
         }
@@ -161,7 +159,7 @@ public class HomeFragment extends Fragment {
         //define o titulo
         builder.setTitle("Atenção");
         //define a mensagem
-        builder.setMessage("Não foi possível iniciar uma nova venda, sincronismo pendente!");
+        builder.setMessage("Não foi possível editar ou iniciar uma nova venda, sincronismo pendente!");
         //define um botão como positivo
         builder.setPositiveButton("Gerenciar", (arg0, arg1) -> startActivity(new Intent(context, EnviarDadosServidor.class)));
         //define um botão como negativo.
