@@ -14,7 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +50,8 @@ public class RelatorioVendasPedido extends AppCompatActivity {
     private LinearLayout erroRelatorio;
     private Button venderProdutos;
     Configuracoes configuracoes;
+    VendasPedidosDomain pedidos;
+    TextView txtProdutoRelatorioVendas, txtQuantidadeRelatorioVendas, txtTotalRelatorioVendas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +79,9 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         adapter = new RelatorioVendasPedidosAdapter(this, vendasDomains);
         rvRelatorioVendas.setAdapter(adapter);
 
+        txtProdutoRelatorioVendas = findViewById(R.id.txtProdutoRelatorioVendas);
+        txtQuantidadeRelatorioVendas = findViewById(R.id.txtQuantidadeRelatorioVendas);
+        txtTotalRelatorioVendas = findViewById(R.id.txtTotalRelatorioVendas);
 
         //
         if (vendasDomains.size() == 0) {
@@ -86,6 +93,30 @@ public class RelatorioVendasPedido extends AppCompatActivity {
                 startActivity(new Intent(context, VendasConsultarClientes.class));
                 finish();
             });
+        } else {
+            String quantItens = "0";
+            String valTotalPed = "0";
+
+
+            for (int n = 0; n < vendasDomains.size(); n++) {
+
+                //DADOS DOS PEDIDO
+                pedidos = vendasDomains.get(n);
+
+                // SOMA A QUANTIDADE DE ITENS
+                String[] somarItens = {quantItens, pedidos.getQuantidade_venda()};
+                quantItens = String.valueOf(classAuxiliar.somar(somarItens));
+
+                // SOMA O VALOR TOTAL DOS PEDIDOS
+                String[] somarValTot = {valTotalPed, pedidos.getValor_total()};
+                valTotalPed = String.valueOf(classAuxiliar.somar(somarValTot));
+            }
+
+            txtProdutoRelatorioVendas.setText(String.valueOf(vendasDomains.size()));
+            Double s = Double.parseDouble(quantItens);
+            txtQuantidadeRelatorioVendas.setText(String.valueOf(s.intValue()));
+            txtTotalRelatorioVendas.setText(String.valueOf(classAuxiliar.maskMoney(new BigDecimal(valTotalPed))));
+
         }
         configuracoes = new Configuracoes();
         findViewById(R.id.btnPrintRelPed).setOnClickListener(v -> {

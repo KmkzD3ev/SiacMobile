@@ -54,15 +54,15 @@ public class NotificationsFragment extends Fragment {
         });
 
         //
-        /*if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0) {
+        if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0) {
             cv_enviar_dados.setVisibility(View.VISIBLE);
-            cv_btn_resetar_app.setVisibility(View.GONE);
+            //cv_btn_resetar_app.setVisibility(View.GONE);
         } else {
             cv_enviar_dados.setVisibility(View.GONE);
-            cv_btn_resetar_app.setVisibility(View.VISIBLE);
-        }*/
+            //cv_btn_resetar_app.setVisibility(View.VISIBLE);
+        }
 
-        cv_enviar_dados.setVisibility(View.VISIBLE);
+        //cv_enviar_dados.setVisibility(View.VISIBLE);
         cv_btn_resetar_app.setVisibility(View.VISIBLE);
 
         return view;

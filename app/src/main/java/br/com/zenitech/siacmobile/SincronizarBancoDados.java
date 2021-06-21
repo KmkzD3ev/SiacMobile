@@ -269,6 +269,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                 if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")) {
                     // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
                     prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
+                    prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
                     // INICIA A GERAÇÃO DO BANCO ONLINE
                     gerarBancoOnline(serial.getText().toString());
 

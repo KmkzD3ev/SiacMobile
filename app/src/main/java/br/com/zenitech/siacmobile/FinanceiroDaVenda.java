@@ -382,6 +382,12 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     }
 
     private void _verificarFPgVenda() {
+        // VERIFICA SE É PARA IMPRIMIR A PROMISSORIA, CASO SEJA 0, NÃO AVANÇA.
+        if (prefs.getString("print_promissoria", "0").equalsIgnoreCase("0")) {
+            finish();
+            return;
+        }
+
         int v = 0;
         for (int a = 0; a < listaFinanceiroCliente.size(); a++) {
             //Log.e("FINANCEIRO", listaFinanceiroCliente.get(a).getFpagamento_financeiro());
