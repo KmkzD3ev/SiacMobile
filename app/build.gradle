@@ -12,14 +12,14 @@ android {
         }
     }
     compileSdkVersion 30
-    buildToolsVersion '29.0.3'
+    buildToolsVersion '30.0.2'
 
     defaultConfig {
         applicationId "br.com.zenitech.siacmobile"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 27
-        versionName '1.8.3'
+        versionCode 28
+        versionName '1.8.4'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config

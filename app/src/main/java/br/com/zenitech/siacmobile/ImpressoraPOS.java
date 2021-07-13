@@ -143,6 +143,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             printRelatorioNFCE58mm();
         } else if (tipoImpressao.equals("Promissoria")) {
             printPromissoria();
+        }else{
+            printBoleto();
         }
 
 
@@ -430,6 +432,41 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         //ppp.addLine(textBuffer.toString());
         ppp.execute();
+    }
+
+    private void printBoleto() {
+
+        PosPrintProvider pppPromissoria = new PosPrintProvider(this);
+
+
+        // PARTE 1
+        /*pppPromissoria.addLine(new CentralizedBigText("***  BOLETO  ***"));
+        pppPromissoria.addLine("");
+        pppPromissoria.addLine(new CentralizedBigText("***  TESTE ***"));*/
+        //pppPromissoria.addLine("");
+
+        LinearLayout impressora1 = findViewById(R.id.printBoletoCanhoto); // 520 x 260
+        Bitmap bitmap1 = printViewHelper.createBitmapFromView90(impressora1, 452, 220);
+        LinearLayout impressora2 = findViewById(R.id.printBoleto); // 520 x 260
+        Bitmap bitmap2 = printViewHelper.createBitmapFromView90(impressora2, 590, 220);
+
+        pppPromissoria.setConnectionCallback(new StoneCallbackInterface() {
+            @Override
+            public void onSuccess() {
+                liberarImpressora();
+            }
+
+            @Override
+            public void onError() {
+                liberarImpressora();
+                Toast.makeText(context, "Erro ao imprimir: " + pppPromissoria.getListOfErrors(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        pppPromissoria.addBitmap(bitmap1);
+        pppPromissoria.addBitmap(bitmap2);
+        pppPromissoria.addLine("");
+        pppPromissoria.execute();
     }
 
     private void toast(final String text) {
