@@ -8,14 +8,21 @@ import android.widget.EditText;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.MessageDigest;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Objects;
+
+import br.com.zenitech.siacmobile.domains.ContasBancarias;
 
 public class ClassAuxiliar {
 
@@ -344,5 +351,111 @@ public class ClassAuxiliar {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String zerosAEsquerda(String numero, String banco) {
+        // RETIRA TUDO QUE NÃO FOR NÚMERO
+        numero = this.soNumeros(numero);
+        Log.e("Numero", numero);
+
+        // VERIFICA QUAL É O BANCO
+        if (banco.equalsIgnoreCase("BB")) {
+            numero = String.format("%08d", Integer.parseInt(numero));
+        } else {
+            numero = String.format("%08d", Integer.parseInt(numero));
+        }
+        Log.e("Numero", numero);
+        return numero;
+    }
+
+    public String DiffDias(String data1, String data2) throws ParseException {
+        // Dando um exemplo: quantos dias se passam desde 07/09/1822 até 05/06/2006?
+        DateFormat df = new SimpleDateFormat ("dd/MM/yyyy");
+        df.setLenient(false);
+        Date d1 = df.parse (data1); //"07/09/1822"
+        System.out.println (d1);
+        Date d2 = df.parse (data2); //"05/06/2006"
+        System.out.println (d2);
+        long dt = (Objects.requireNonNull(d2).getTime() - Objects.requireNonNull(d1).getTime()) + 3600000; // 1 hora para compensar horário de verão
+        System.out.println (dt / 86400000L); // passaram-se 67111 dias
+
+        return String.valueOf(dt / 86400000L);
+    }
+
+    public String numCodBarraBB(String valor, DatabaseHelper bd) {
+
+        /*
+            FORMATO DO CÓDIGO DE BARRAS PARA CONVÊNIOS DA CARTEIRA SEM
+            REGISTRO – COM "NOSSO NÚMERO" LIVRE DE 17 POSIÇÕES.
+            ------------------------------------------------------------------------------------
+            Posição     Tamanho     Picture     Conteúdo
+            01 a 03     03          9(3)        Código do Banco na Câmara de Compensação = '001'
+            04 a 04     01          9(1)        Código da Moeda = '9'
+            05 a 05     01          9(1)        DV do Código de Barras (Anexo VI)
+            06 a 09     04          9(04)       Fator de Vencimento (Anexo IV)
+            10 a 19     10          9(08)       V(2) Valor
+            20 a 25     06          9(6)        Número do Convênio de Seis Posições
+            26 a 42     17          9(17)       Nosso Número Livre do cliente.
+            43 a 44     02          02          '21' Tipo de Modalidade de Cobrança.
+        */
+
+        //
+        ContasBancarias conta = bd.updateFinalizarVenda();
+
+        // GERAR CÓDIGO BARRA BOLETO BANCO DO BRASIL
+        StringBuilder numCodBarra = new StringBuilder();
+
+        /*long meses = 0;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            //define datas
+            LocalDateTime dataCadastro;
+            dataCadastro = LocalDateTime.of(1997, 10, 7, 0, 0, 0);
+
+            //LocalDateTime hoje = LocalDateTime.now();
+            LocalDateTime hoje = LocalDateTime.of(2000, 7, 4, 0, 0, 0);
+            meses = dataCadastro.until(hoje, ChronoUnit.DAYS);
+        } else {
+            //define datas
+            Calendar dataCadastro = Calendar.getInstance();
+            dataCadastro.set(1997, 10, 7);
+            Calendar hoje = Calendar.getInstance();
+            hoje.set(2000, 7, 4);
+
+            //calcula diferença
+            meses = (hoje.get(Calendar.YEAR) * 12 + hoje.get(Calendar.MONTH))
+                    - (dataCadastro.get(Calendar.YEAR) * 12 + dataCadastro.get(Calendar.MONTH));
+        }*/
+
+        String dias = "";
+        try {
+            dias = this.DiffDias("07/10/1997", "17/11/2010");//"04/07/2000"
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //dias = String.valueOf(this.somar(new String[]{dias, "1"}));
+
+        // Parte 1
+        numCodBarra.append("001");  // Código do Banco na Câmara de Compensação = "001"
+        // Parte 2
+        numCodBarra.append("9");    // Código da Moeda = "9"
+        // Parte 3
+        numCodBarra.append("|");     // DV do Código de Barras (Anexo VI)
+        // Parte 4
+        numCodBarra.append(dias);     // Fator de Vencimento (Anexo IV)
+        numCodBarra.append("|");
+        // Parte 5
+        numCodBarra.append(this.zerosAEsquerda(valor, "BB"));  // Valor
+        // Parte 6
+        numCodBarra.append("");     // Número do Convênio de Seis Posições
+        // Parte 7
+        numCodBarra.append("");     // Nosso Número Livre do cliente.
+        // Parte 8
+        numCodBarra.append("");     // "21" Tipo de Modalidade de Cobrança.
+
+
+        return numCodBarra.toString();
     }
 }

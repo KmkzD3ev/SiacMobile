@@ -438,12 +438,16 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         PosPrintProvider pppPromissoria = new PosPrintProvider(this);
 
+        String valor = cAux.numCodBarraBB("R$ 240,59", bd);
 
         // PARTE 1
         /*pppPromissoria.addLine(new CentralizedBigText("***  BOLETO  ***"));
         pppPromissoria.addLine("");
         pppPromissoria.addLine(new CentralizedBigText("***  TESTE ***"));*/
         //pppPromissoria.addLine("");
+
+        TextView txtValorCanhotoBoleto = findViewById(R.id.txtValorCanhotoBoleto);
+        txtValorCanhotoBoleto.setText(valor);
 
         LinearLayout impressora1 = findViewById(R.id.printBoletoCanhoto); // 520 x 260
         Bitmap bitmap1 = printViewHelper.createBitmapFromView90(impressora1, 452, 220);
@@ -464,7 +468,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         });
 
         pppPromissoria.addBitmap(bitmap1);
-        pppPromissoria.addBitmap(bitmap2);
+        //pppPromissoria.addBitmap(bitmap2);
         pppPromissoria.addLine("");
         pppPromissoria.execute();
     }

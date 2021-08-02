@@ -2286,12 +2286,18 @@
                     android:gravity="center"
                     android:padding="2dp">
 
-                    <TextView
+                    <!--<TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="BANCO ITAU S.A."
                         android:textColor="@android:color/black"
-                        android:textSize="10sp" />
+                        android:textSize="10sp" />-->
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="16dp"
+                        android:contentDescription="@string/app_name"
+                        android:src="@drawable/logo_bb" />
 
                 </LinearLayout>
 
@@ -3160,6 +3166,7 @@
             android:layout_width="450dp"
             android:layout_height="260dp"
             android:background="@android:color/white"
+            android:visibility="visible"
             android:orientation="horizontal">
 
             <View
@@ -3187,12 +3194,18 @@
                         android:gravity="center"
                         android:padding="2dp">
 
-                        <TextView
+                        <!--<TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="BANCO ITAU S.A."
                             android:textColor="@android:color/black"
-                            android:textSize="10sp" />
+                            android:textSize="10sp" />-->
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="16dp"
+                            android:contentDescription="@string/app_name"
+                            android:src="@drawable/logo_bb" />
 
                     </LinearLayout>
 
@@ -3579,6 +3592,7 @@
                                 android:textSize="8sp" />
 
                             <TextView
+                                android:id="@+id/txtValorCanhotoBoleto"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:gravity="end"

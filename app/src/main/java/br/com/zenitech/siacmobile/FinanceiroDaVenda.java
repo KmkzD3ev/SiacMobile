@@ -420,6 +420,58 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 //Intent intent = new Intent(this, SomeActivity.class);
                 //launchSomeActivity.launch(i);
             }
+
+            // IMPRESSÃO DO BOLETO
+            if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")) {
+                v++;
+                String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
+                Intent i;
+                if (configuracoes.GetDevice()) {
+                    i = new Intent(context, ImpressoraPOS.class);
+                } else {
+                    i = new Intent(context, Impressora.class);
+                }
+
+                //
+                i.putExtra("razao_social", nomeCliente);
+                i.putExtra("tel_contato", "");
+                //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+                i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+                i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
+                i.putExtra("valor", val);
+                //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
+                i.putExtra("id_cliente", codigo_cliente);
+                i.putExtra("cpfcnpj", cpfcnpjCliente);
+                i.putExtra("endereco", enderecoCliente);
+                i.putExtra("imprimir", "Promissoria");
+
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
+                //Intent intent = new Intent(this, SomeActivity.class);
+                //launchSomeActivity.launch(i);
+            }
+
+            //
+            Intent i;
+            if (configuracoes.GetDevice()) {
+                i = new Intent(context, ImpressoraPOS.class);
+            } else {
+                i = new Intent(context, Impressora.class);
+            }
+            i.putExtra("razao_social", nomeCliente);
+            i.putExtra("tel_contato", "");
+            //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+            i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+            i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
+            //i.putExtra("valor", val);
+            //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
+            i.putExtra("id_cliente", codigo_cliente);
+            i.putExtra("cpfcnpj", cpfcnpjCliente);
+            i.putExtra("endereco", enderecoCliente);
+            i.putExtra("imprimir", "Teste");
+
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
         }
 
         if (v == 0) finish();
