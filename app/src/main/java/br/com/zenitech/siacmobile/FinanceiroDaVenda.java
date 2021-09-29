@@ -71,6 +71,7 @@ import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.FinanceiroVendasAdapter;
 import br.com.zenitech.siacmobile.domains.Conta;
+import br.com.zenitech.siacmobile.domains.ContasBancarias;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.PosApp;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
@@ -383,7 +384,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
     private void _verificarFPgVenda() {
         // VERIFICA SE É PARA IMPRIMIR A PROMISSORIA, CASO SEJA 0, NÃO AVANÇA.
-        if (prefs.getString("print_promissoria", "0").equalsIgnoreCase("0")) {
+        if (Objects.requireNonNull(prefs.getString("print_promissoria", "0")).equalsIgnoreCase("0")
+                && Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("0")) {
             finish();
             return;
         }
@@ -392,7 +394,41 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         for (int a = 0; a < listaFinanceiroCliente.size(); a++) {
             //Log.e("FINANCEIRO", listaFinanceiroCliente.get(a).getFpagamento_financeiro());
 
-            if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")) {
+            // IMPRESSÃO DA PROMISSORIA
+            if (Objects.requireNonNull(prefs.getString("print_promissoria", "0")).equalsIgnoreCase("1")) {
+                //if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")) {
+                if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").contains("PROMISSORIA")) {
+                    v++;
+                    String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
+                    Intent i;
+                    if (configuracoes.GetDevice()) {
+                        i = new Intent(context, ImpressoraPOS.class);
+                    } else {
+                        i = new Intent(context, Impressora.class);
+                    }
+
+                    //
+                    i.putExtra("razao_social", nomeCliente);
+                    i.putExtra("tel_contato", "");
+                    //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+                    i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+                    i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
+                    i.putExtra("valor", val);
+                    //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
+                    i.putExtra("id_cliente", codigo_cliente);
+                    i.putExtra("cpfcnpj", cpfcnpjCliente);
+                    i.putExtra("endereco", enderecoCliente);
+                    i.putExtra("imprimir", "Promissoria");
+
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(i);
+                    //Intent intent = new Intent(this, SomeActivity.class);
+                    //launchSomeActivity.launch(i);
+                }
+            }
+
+
+            /*if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")) {
                 v++;
                 String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
                 Intent i;
@@ -420,58 +456,45 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 //Intent intent = new Intent(this, SomeActivity.class);
                 //launchSomeActivity.launch(i);
             }
+            */
 
             // IMPRESSÃO DO BOLETO
-            if (listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", "").equalsIgnoreCase("PROMISSORIA")) {
-                v++;
-                String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
-                Intent i;
-                if (configuracoes.GetDevice()) {
-                    i = new Intent(context, ImpressoraPOS.class);
-                } else {
-                    i = new Intent(context, Impressora.class);
+            if (Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("1")) {
+
+                String contaBancFormPag = bd.getContaBancariaFormaPagamento(listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", ""));
+                if (!contaBancFormPag.equalsIgnoreCase("0")) {
+
+                    String CodContaBanc = bd.getCodContaBancaria(contaBancFormPag);
+
+                    // SE FOR IGUAL A 1 CÓD BB, IMPRIMI
+                    if (CodContaBanc.equalsIgnoreCase("1")) {
+
+                        Intent i;
+                        String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
+                        if (configuracoes.GetDevice()) {
+                            i = new Intent(context, ImpressoraPOS.class);
+                        } else {
+                            i = new Intent(context, Impressora.class);
+                        }
+                        i.putExtra("razao_social", nomeCliente);
+                        i.putExtra("tel_contato", "");
+                        //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+                        i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+                        i.putExtra("vencimento", listaFinanceiroCliente.get(a).getVencimento_financeiro());// txtVencimentoFormaPagamento.getText().toString());
+                        //i.putExtra("valor", val);
+                        i.putExtra("valor", val);
+                        i.putExtra("id_cliente", codigo_cliente);
+                        i.putExtra("cpfcnpj", cpfcnpjCliente);
+                        i.putExtra("endereco", enderecoCliente);
+                        i.putExtra("imprimir", "Boleto");
+
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(i);
+                    } else {
+                        finish();
+                    }
                 }
-
-                //
-                i.putExtra("razao_social", nomeCliente);
-                i.putExtra("tel_contato", "");
-                //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
-                i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
-                i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
-                i.putExtra("valor", val);
-                //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
-                i.putExtra("id_cliente", codigo_cliente);
-                i.putExtra("cpfcnpj", cpfcnpjCliente);
-                i.putExtra("endereco", enderecoCliente);
-                i.putExtra("imprimir", "Promissoria");
-
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-                //Intent intent = new Intent(this, SomeActivity.class);
-                //launchSomeActivity.launch(i);
             }
-
-            //
-            Intent i;
-            if (configuracoes.GetDevice()) {
-                i = new Intent(context, ImpressoraPOS.class);
-            } else {
-                i = new Intent(context, Impressora.class);
-            }
-            i.putExtra("razao_social", nomeCliente);
-            i.putExtra("tel_contato", "");
-            //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
-            i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
-            i.putExtra("vencimento", txtVencimentoFormaPagamento.getText().toString());
-            //i.putExtra("valor", val);
-            //i.putExtra("valor", financeiroVendasDomain.getValor_financeiro());
-            i.putExtra("id_cliente", codigo_cliente);
-            i.putExtra("cpfcnpj", cpfcnpjCliente);
-            i.putExtra("endereco", enderecoCliente);
-            i.putExtra("imprimir", "Teste");
-
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
         }
 
         if (v == 0) finish();
@@ -666,6 +689,15 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 "" + prefs.getInt("id_venda_app", 1)
         ));
 
+        //if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
+        if (fPag[0].contains("PROMISSORIA")) {
+            bd.updatePosApp(txtDocumentoFormaPagamento.getText().toString());
+            txtDocumentoFormaPagamento.setText("");
+        } else if (!bd.getContaBancariaFormaPagamento(fPag[0]).equalsIgnoreCase("0")) {
+            bd.updateUltimoBoleto(txtDocumentoFormaPagamento.getText().toString());
+            txtDocumentoFormaPagamento.setText("");
+        }
+
         //
         listaFinanceiroCliente = bd.getFinanceiroCliente(prefs.getInt("id_venda_app", 1));
         adapter = new FinanceiroVendasAdapter(this, listaFinanceiroCliente);
@@ -718,7 +750,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+        txtDocumentoFormaPagamento.setText("");
         String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
         if (fPag[1].equals("A PRAZO")) {
 
@@ -726,18 +758,41 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 tilDocumento.setVisibility(View.VISIBLE);
                 tilVencimento.setVisibility(View.VISIBLE);
 
-                if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
+                posApp = bd.getPos();
+                //if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
+                if (fPag[0].contains("PROMISSORIA")) {
                     if (posApp.getUltpromissoria().equalsIgnoreCase("0")) {
-                        nDoc = posApp.getSerie() + "00000001";
+                        //nDoc = posApp.getSerie() + "00000001";
+                        int n = (Integer.parseInt(posApp.getSerie()) * 100000000) + 1;
+                        nDoc = String.valueOf(n);
                     } else {
-                        String[] soma = {posApp.getUltpromissoria(), "1"};
+                        /*String[] soma = {posApp.getUltpromissoria(), "1"};
                         String[] totSoma = String.valueOf(classAuxiliar.somar(soma)).split("[.]");
-                        nDoc = classAuxiliar.soNumeros(totSoma[0]);
+                        nDoc = classAuxiliar.soNumeros(totSoma[0]);*/
+                        nDoc = String.valueOf(Integer.parseInt(posApp.getUltpromissoria()) + 1);
+                    }
+
+                    txtDocumentoFormaPagamento.setText(nDoc);
+                    txtDocumentoFormaPagamento.setEnabled(false);
+                } else if (!bd.getContaBancariaFormaPagamento(fPag[0]).equalsIgnoreCase("0") &&
+                        !bd.getContaBancariaFormaPagamento(fPag[0]).equalsIgnoreCase("")) {
+                    //else if (fPag[0].equalsIgnoreCase("BOLETO")) {
+                    if (posApp.getUltboleto().equalsIgnoreCase("0")) {
+                        //nDoc = posApp.getSerie() + "00000001";
+                        int n = (Integer.parseInt(posApp.getSerie_boleto()) * 100000000) + 1;
+                        nDoc = String.valueOf(n);
+                    } else {
+                        nDoc = String.valueOf(Integer.parseInt(posApp.getUltboleto()) + 1);
+                        //String[] soma = {posApp.getUltpromissoria(), "1"};
+                        //String[] totSoma = String.valueOf(classAuxiliar.somar(soma)).split("[.]");
+                        //nDoc = classAuxiliar.soNumeros(totSoma[0]);
                     }
 
                     txtDocumentoFormaPagamento.setText(nDoc);
                     txtDocumentoFormaPagamento.setEnabled(false);
                 }
+
+                //int n = (serieBoleto * 100000000) + 1;
 
                 //atualizarDataVencimento(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
                 txtVencimentoFormaPagamento.setText(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
@@ -1027,9 +1082,6 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
     private void finalizarFinanceiroVenda() {
         bd.updateFinalizarVenda(String.valueOf(prefs.getInt("id_venda_app", 1)));
-        if (!nDoc.equalsIgnoreCase("")) {
-            bd.updatePosApp(nDoc);
-        }
 
         msg("Venda Finalizada Com Sucesso.");
 

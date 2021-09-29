@@ -15,10 +15,7 @@ public class FinanceiroReceberClientes {
     String status_app;
     String baixa_finalizada_app;
 
-    public FinanceiroReceberClientes(
-            String codigo_financeiro, String nosso_numero_financeiro, String data_financeiro, String codigo_cliente,
-            String nome_cliente, String documento_financeiro, String fpagamento_financeiro, String vencimento_financeiro,
-            String valor_financeiro, String total_pago, String codigo_pagamento, String status_app, String baixa_finalizada_app) {
+    public FinanceiroReceberClientes(String codigo_financeiro, String nosso_numero_financeiro, String data_financeiro, String codigo_cliente, String nome_cliente, String documento_financeiro, String fpagamento_financeiro, String vencimento_financeiro, String valor_financeiro, String total_pago, String codigo_pagamento, String status_app, String baixa_finalizada_app) {
         this.codigo_financeiro = codigo_financeiro;
         this.nosso_numero_financeiro = nosso_numero_financeiro;
         this.data_financeiro = data_financeiro;
@@ -134,7 +131,7 @@ public class FinanceiroReceberClientes {
         return baixa_finalizada_app;
     }
 
-    public void setBaixa_finalizada_app(String baixa_finalizada) {
-        this.baixa_finalizada_app = baixa_finalizada;
+    public void setBaixa_finalizada_app(String baixa_finalizada_app) {
+        this.baixa_finalizada_app = baixa_finalizada_app;
     }
 }

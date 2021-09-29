@@ -16,7 +16,7 @@ public class Configuracoes {
     // INFORMA SE O APARELHO UTILIZADO É UM POS
     // SEMPRE RETORNAR FALSE CONFORME FOR GERADO O BUILD PARA PLAYSTORE
     public boolean GetDevice() {
-        return true;
+        return false;
     }
 
     // RETORNASE O AMBIENTE É DE PRODUÇÃO OU DE TESTE
@@ -34,7 +34,7 @@ public class Configuracoes {
     }
 
     public String GetUrlServer() {
-        return  "https://emissorweb.com.br/";
+        return  "https://emissorweb.com.br";
     }
 
     public String GetUFCeara(){

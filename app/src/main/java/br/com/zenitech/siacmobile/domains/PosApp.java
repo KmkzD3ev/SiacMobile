@@ -16,8 +16,9 @@ public class PosApp {
     private String autovencimento;
     private String modulo_pedidos;
     private String baixa_a_prazo;
+    private String serie_boleto;
 
-    public PosApp(String codigo, String serial, String unidade, String serie, String ultnfce, String ultboleto, String nota_remessa, String serie_remessa, String limite_credito, String ultpromissoria, String autovencimento, String modulo_pedidos, String baixa_a_prazo) {
+    public PosApp(String codigo, String serial, String unidade, String serie, String ultnfce, String ultboleto, String nota_remessa, String serie_remessa, String limite_credito, String ultpromissoria, String autovencimento, String modulo_pedidos, String baixa_a_prazo, String serie_boleto) {
         this.codigo = codigo;
         this.serial = serial;
         this.unidade = unidade;
@@ -31,6 +32,7 @@ public class PosApp {
         this.autovencimento = autovencimento;
         this.modulo_pedidos = modulo_pedidos;
         this.baixa_a_prazo = baixa_a_prazo;
+        this.serie_boleto = serie_boleto;
     }
 
     public String getCodigo() {
@@ -135,5 +137,13 @@ public class PosApp {
 
     public void setBaixa_a_prazo(String baixa_a_prazo) {
         this.baixa_a_prazo = baixa_a_prazo;
+    }
+
+    public String getSerie_boleto() {
+        return serie_boleto;
+    }
+
+    public void setSerie_boleto(String serie_boleto) {
+        this.serie_boleto = serie_boleto;
     }
 }

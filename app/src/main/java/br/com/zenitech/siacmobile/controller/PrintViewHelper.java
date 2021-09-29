@@ -125,7 +125,34 @@ public class PrintViewHelper {
         return RotateBitmap(bitmap, -90);
     }
 
-    public static Bitmap RotateBitmap(Bitmap source, float angle)
+    // IMAGEM GIRADA 90º
+    public @NonNull
+    Bitmap createBitmap(@NonNull View view) {
+        if (view.getLayoutParams().width > 0 && view.getLayoutParams().height > 0) {
+            view.measure(View.MeasureSpec.makeMeasureSpec(DynamicUnitUtils
+                            .convertDpToPixels(view.getLayoutParams().width), View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(DynamicUnitUtils
+                            .convertDpToPixels(view.getLayoutParams().height), View.MeasureSpec.EXACTLY));
+        }
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+
+        //float degrees = 45; //rotation degree
+        //Matrix matrix = new Matrix();
+        //matrix.setRotate(degrees);
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        Drawable background = view.getBackground();
+
+        if (background != null) {
+            background.draw(canvas);
+        }
+        view.draw(canvas);
+
+        //return bitmap;
+        return RotateBitmap(bitmap, -90);
+    }
+
+    public Bitmap RotateBitmap(Bitmap source, float angle)
     {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);

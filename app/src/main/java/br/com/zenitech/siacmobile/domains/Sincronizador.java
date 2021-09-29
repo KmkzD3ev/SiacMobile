@@ -5,12 +5,18 @@ public class Sincronizador {
     private String verificar_posicao_cliente;
     private String erro;
     private String print_promissoria;
+    private String print_boleto;
+    private String mostrar_contas_receber;
+    private String codigo_instalacao;
 
-    public Sincronizador(String serial, String verificar_posicao_cliente, String erro, String print_promissoria) {
+    public Sincronizador(String serial, String verificar_posicao_cliente, String erro, String print_promissoria, String print_boleto, String mostrar_contas_receber, String codigo_instalacao) {
         this.serial = serial;
         this.verificar_posicao_cliente = verificar_posicao_cliente;
         this.erro = erro;
         this.print_promissoria = print_promissoria;
+        this.print_boleto = print_boleto;
+        this.mostrar_contas_receber = mostrar_contas_receber;
+        this.codigo_instalacao = codigo_instalacao;
     }
 
     public String getSerial() {
@@ -43,5 +49,29 @@ public class Sincronizador {
 
     public void setPrint_promissoria(String print_promissoria) {
         this.print_promissoria = print_promissoria;
+    }
+
+    public String getPrint_boleto() {
+        return print_boleto;
+    }
+
+    public void setPrint_boleto(String print_boleto) {
+        this.print_boleto = print_boleto;
+    }
+
+    public String getMostrar_contas_receber() {
+        return mostrar_contas_receber;
+    }
+
+    public void setMostrar_contas_receber(String mostrar_contas_receber) {
+        this.mostrar_contas_receber = mostrar_contas_receber;
+    }
+
+    public String getCodigo_instalacao() {
+        return codigo_instalacao;
+    }
+
+    public void setCodigo_instalacao(String codigo_instalacao) {
+        this.codigo_instalacao = codigo_instalacao;
     }
 }

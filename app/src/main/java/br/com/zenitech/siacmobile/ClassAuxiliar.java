@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.domains.ContasBancarias;
+import br.com.zenitech.siacmobile.domains.PosApp;
 
 public class ClassAuxiliar {
 
@@ -356,33 +357,34 @@ public class ClassAuxiliar {
     public String zerosAEsquerda(String numero, String banco) {
         // RETIRA TUDO QUE NÃO FOR NÚMERO
         numero = this.soNumeros(numero);
-        Log.e("Numero", numero);
+        //Log.e("Numero", numero);
 
         // VERIFICA QUAL É O BANCO
         if (banco.equalsIgnoreCase("BB")) {
-            numero = String.format("%08d", Integer.parseInt(numero));
+            numero = String.format("%010d", Integer.parseInt(numero));
         } else {
             numero = String.format("%08d", Integer.parseInt(numero));
         }
-        Log.e("Numero", numero);
+        //Log.e("Numero", numero);
         return numero;
     }
 
     public String DiffDias(String data1, String data2) throws ParseException {
         // Dando um exemplo: quantos dias se passam desde 07/09/1822 até 05/06/2006?
-        DateFormat df = new SimpleDateFormat ("dd/MM/yyyy");
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         df.setLenient(false);
-        Date d1 = df.parse (data1); //"07/09/1822"
-        System.out.println (d1);
-        Date d2 = df.parse (data2); //"05/06/2006"
-        System.out.println (d2);
+        Date d1 = df.parse(data1); //"07/09/1822"
+        System.out.println(d1);
+        Date d2 = df.parse(data2); //"05/06/2006"
+        System.out.println(d2);
         long dt = (Objects.requireNonNull(d2).getTime() - Objects.requireNonNull(d1).getTime()) + 3600000; // 1 hora para compensar horário de verão
-        System.out.println (dt / 86400000L); // passaram-se 67111 dias
+        System.out.println(dt / 86400000L); // passaram-se 67111 dias
 
         return String.valueOf(dt / 86400000L);
     }
 
-    public String numCodBarraBB(String valor, DatabaseHelper bd) {
+    // GERAR NÚMERO CÓDGIO BARRAS BOLETO
+    public String numCodBarraBB(String valor, String vencimento, String numeroDoc, DatabaseHelper bd) {
 
         /*
             FORMATO DO CÓDIGO DE BARRAS PARA CONVÊNIOS DA CARTEIRA SEM
@@ -400,7 +402,8 @@ public class ClassAuxiliar {
         */
 
         //
-        ContasBancarias conta = bd.updateFinalizarVenda();
+        ContasBancarias conta = bd.contasBancarias();
+        //PosApp
 
         // GERAR CÓDIGO BARRA BOLETO BANCO DO BRASIL
         StringBuilder numCodBarra = new StringBuilder();
@@ -427,35 +430,273 @@ public class ClassAuxiliar {
             meses = (hoje.get(Calendar.YEAR) * 12 + hoje.get(Calendar.MONTH))
                     - (dataCadastro.get(Calendar.YEAR) * 12 + dataCadastro.get(Calendar.MONTH));
         }*/
-
+        Log.e("BOLETO vencimento", vencimento);
         String dias = "";
         try {
-            dias = this.DiffDias("07/10/1997", "17/11/2010");//"04/07/2000"
+            dias = this.DiffDias("07/10/1997", vencimento);//"04/07/2000" - "17/11/2010"
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
         //dias = String.valueOf(this.somar(new String[]{dias, "1"}));
 
+        // Código do Banco na Câmara de Compensação = "001"
+        String codBanco = "001";
+        Log.e("BOLETO codBanco", codBanco);
+        // Código da Moeda = "9"
+        String codMoeda = "9";
+        Log.e("BOLETO codMoeda", codMoeda);
+        // Fator de Vencimento (Anexo IV)
+        String fatorVencimento = dias;
+        Log.e("BOLETO fatorVencimento", fatorVencimento);
+        // Valor
+        String valorBoleto = this.zerosAEsquerda(valor, "BB");
+        Log.e("BOLETO valorBoleto", valorBoleto);
+        // Zeros de Seis Posições
+        String zeros = "000000";
+        Log.e("BOLETO zeros", zeros);
+        // Nosso Número Livre do cliente.
+        String nossonumero = this.nossoNumero(conta.getConvenio(), numeroDoc);
+        Log.e("BOLETO nossonumero", nossonumero);
+        // "21" Tipo de Modalidade de Cobrança.
+        String carteira = conta.getCarteira();
+        Log.e("BOLETO carteira", carteira);
+        // DV do Código de Barras (Anexo VI)
+        //String dvCodBarra = digitoVerificadorModulo11(codBanco + codMoeda + fatorVencimento + valorBoleto + zeros + nossonumero + carteira); //"0019373700000001000500940144816060680935031"
+        String dvCodBarra = modulo11(codBanco + codMoeda + fatorVencimento + valorBoleto + zeros + nossonumero + carteira);
+        Log.e("BOLETO dvCodBarra", dvCodBarra);
+
         // Parte 1
-        numCodBarra.append("001");  // Código do Banco na Câmara de Compensação = "001"
+        numCodBarra.append(codBanco);
         // Parte 2
-        numCodBarra.append("9");    // Código da Moeda = "9"
+        numCodBarra.append(codMoeda);
         // Parte 3
-        numCodBarra.append("|");     // DV do Código de Barras (Anexo VI)
+        numCodBarra.append(dvCodBarra);
         // Parte 4
-        numCodBarra.append(dias);     // Fator de Vencimento (Anexo IV)
-        numCodBarra.append("|");
+        numCodBarra.append(fatorVencimento);
         // Parte 5
-        numCodBarra.append(this.zerosAEsquerda(valor, "BB"));  // Valor
+        numCodBarra.append(valorBoleto);
         // Parte 6
-        numCodBarra.append("");     // Número do Convênio de Seis Posições
+        numCodBarra.append(zeros);
         // Parte 7
-        numCodBarra.append("");     // Nosso Número Livre do cliente.
+        numCodBarra.append(nossonumero);
         // Parte 8
-        numCodBarra.append("");     // "21" Tipo de Modalidade de Cobrança.
+        numCodBarra.append(carteira);
 
-
+        Log.e("CODIGO BOLETO", numCodBarra.toString());
         return numCodBarra.toString();
+    }
+
+    // GERAR NÚMERO DA LINHA DIGITÁVEL DO BOLETO
+    public String numlinhaDigitavel(String numCodBarraBB) {
+        // CAMPO 1
+        String c1p1 = numCodBarraBB.substring(0, 3);
+        String c1p2 = numCodBarraBB.substring(3, 4);
+        String c1p3 = numCodBarraBB.substring(19, 24);
+        //String c1 = this.digitoVerificadoModulo10("" + c1p1 + c1p2 + c1p3);
+        String c1 = c1p1 + c1p2 + c1p3 + this.modulo10("" + c1p1 + c1p2 + c1p3);
+        StringBuilder sc1 = new StringBuilder(c1);
+        sc1.insert(c1.length() - 5, ".");
+        // CAMPO 2
+        String c2p1 = numCodBarraBB.substring(24, 34);
+        //String c2 = this.digitoVerificadoModulo10(c2p1);
+        String c2 = c2p1 + this.modulo10(c2p1);
+        StringBuilder sc2 = new StringBuilder(c2);
+        sc2.insert(c2.length() - 6, ".");
+        // CAMPO 3
+        String c3p1 = numCodBarraBB.substring(34, 44);
+        //String c3 = this.digitoVerificadoModulo10(c3p1);
+        String c3 = c3p1 + this.modulo10(c3p1);
+        StringBuilder sc3 = new StringBuilder(c3);
+        sc3.insert(c3.length() - 6, ".");
+        // CAMPO 4
+        String c4 = numCodBarraBB.substring(4, 5);
+        // CAMPO 5
+        String c5p1 = numCodBarraBB.substring(5, 9);
+        String c5p2 = numCodBarraBB.substring(9, 19);
+        String c5 = c5p1 + c5p2;
+        String format = String.format("%s      %s      %s      %s      %s", sc1.toString(), sc2.toString(), sc3.toString(), c4, c5);
+        Log.e("CODIGO BOLETO", format);
+        return format;
+    }
+
+    // NOSSO NÚMERO BOLETO - CONVÊNIO + SERIE NA CASA DE MILHÃO, COM ZEROS A ESQUERDA
+    public String nossoNumero(String convenio, String serieBoleto) {
+        //int n = (serieBoleto * 100000000) + 1;
+        return String.format("%s%s", convenio, this.zerosAEsquerda(String.valueOf(serieBoleto), "BB"));
+    }
+
+    public String digitoVerificadorModulo11(String chave) {
+
+        //
+        int[] pesos = {4, 3, 2, 9, 8, 7, 6, 5};
+        int somaPonderada = 0;
+        for (int i = 0; i < chave.length(); i++) {
+            somaPonderada += pesos[i % 8] * (Integer.parseInt(chave.substring(i, i + 1)));
+        }
+
+        //
+        //MODULO 11 PARA GERAR O DIGITO VERIFICADOR
+        int MODULO11 = 11;
+        int DV = (MODULO11 - somaPonderada % MODULO11);
+        Log.e("DIGITO 1", String.valueOf(DV));
+        if (DV == 0 || DV == 10 || DV == 11) {
+            DV = 1;
+        }
+        Log.e("DIGITO 2", String.valueOf(DV));
+        return String.valueOf(DV);
+    }
+
+    //MODULO 11 PARA GERAR O DIGITO VERIFICADOR DA NOTA NFC-E
+    //private final int MODULO10 = 10;
+
+    public String digitoVerificadoModulo10(String chave) {
+        int MODULO10 = 10;
+        int[] pesos = {4, 3, 2, 9, 8, 7, 6, 5};
+        int somaPonderada = 0;
+        for (int i = 0; i < chave.length(); i++) {
+            somaPonderada += pesos[i % 8] * (Integer.parseInt(chave.substring(i, i + 1)));
+        }
+        int DV = (MODULO10 - somaPonderada % MODULO10);
+        if (DV >= 10) {
+            DV = 0;
+        }
+        return chave + DV;
+    }
+
+    /**
+     * @author :Allan Tenorio
+     * @see :Calculo do Modulo 10 para geracao do digito verificador de boletos bancários.
+     * @since :10/07/2012
+     */
+
+    //Módulo 10
+    //Conforme o esquema abaixo, cada dígito do número, começando da direita para a esquerda
+    //(menos significativo para o mais significativo) é multiplicado, na ordem, por 2, depois 1, depois 2, depois 1 e
+    //assim sucessivamente.
+    //Em vez de ser feito o somatório das multiplicações, será feito o somatório dos dígitos das multiplicações
+    //(se uma multiplicação der 12, por exemplo, será somado 1 + 2 = 3).
+    //O somatório será dividido por 10 e se o resto (módulo 10) for diferente de zero, o dígito será 10 menos este valor.
+    //Número exemplo: 261533-4
+    //  +---+---+---+---+---+---+   +---+
+    //  | 2 | 6 | 1 | 5 | 3 | 3 | - | 4 |
+    //  +---+---+---+---+---+---+   +---+
+    //    |   |   |   |   |   |
+    //   x1  x2  x1  x2  x1  x2
+    //    |   |   |   |   |   |
+    //   =2 =12  =1 =10  =3  =6
+    //    +---+---+---+---+---+-> = (16 / 10) = 1, resto 6 => DV = (10 - 6) = 4
+    public String modulo10(String num) {
+
+        //variáveis de instancia
+        int soma = 0;
+        int resto = 0;
+        int dv = 0;
+        String[] numeros = new String[num.length() + 1];
+        int multiplicador = 2;
+        String aux;
+        String aux2;
+        String aux3;
+
+        for (int i = num.length(); i > 0; i--) {
+            //Multiplica da direita pra esquerda, alternando os algarismos 2 e 1
+            if (multiplicador % 2 == 0) {
+                // pega cada numero isoladamente
+                numeros[i] = String.valueOf(Integer.valueOf(num.substring(i - 1, i)) * 2);
+                multiplicador = 1;
+            } else {
+                numeros[i] = String.valueOf(Integer.valueOf(num.substring(i - 1, i)) * 1);
+                multiplicador = 2;
+            }
+        }
+
+        // Realiza a soma dos campos de acordo com a regra
+        for (int i = (numeros.length - 1); i > 0; i--) {
+            aux = String.valueOf(Integer.valueOf(numeros[i]));
+
+            if (aux.length() > 1) {
+                aux2 = aux.substring(0, aux.length() - 1);
+                aux3 = aux.substring(aux.length() - 1, aux.length());
+                numeros[i] = String.valueOf(Integer.valueOf(aux2) + Integer.valueOf(aux3));
+            } else {
+                numeros[i] = aux;
+            }
+        }
+
+        //Realiza a soma de todos os elementos do array e calcula o digito verificador
+        //na base 10 de acordo com a regra.
+        for (int i = numeros.length; i > 0; i--) {
+            if (numeros[i - 1] != null) {
+                soma += Integer.valueOf(numeros[i - 1]);
+            }
+        }
+        resto = soma % 10;
+        dv = 10 - resto;
+        if (dv == 10) dv = 0;
+        //retorna o digito verificador
+        Log.e("BOLETO", "DV M10 " + dv);
+        return String.valueOf(dv);
+    }
+
+    /**
+     * @author :Allan Tenorio
+     * @see :Calculo do Modulo 11 para geracao do digito verificador de boletos bancários.
+     * @since :11/07/2012
+     */
+
+    //Módulo 11
+    //Conforme o esquema abaixo, para calcular o primeiro dígito verificador, cada dígito do número,
+    //começando da direita para a esquerda (do dígito menos significativo para o dígito mais significativo)
+    //é multiplicado, na ordem, por 2, depois 3, depois 4 e assim sucessivamente, até o primeiro dígito do número.
+    //O somatório dessas multiplicações dividido por 11. O resto desta divisão (módulo 11) é subtraido da base (11),
+    //o resultado é o dígito verificador. Para calcular o próximo dígito, considera-se o dígito anterior como parte
+    //do número e efetua-se o mesmo processo. No exemplo, foi considerado o número 261533:
+    //  +---+---+---+---+---+---+   +---+
+    //  | 2 | 6 | 1 | 5 | 3 | 3 | - | 9 |
+    //  +---+---+---+---+---+---+   +---+
+    //    |   |   |   |   |   |
+    //   x7  x6  x5  x4  x3  x2
+    //    |   |   |   |   |   |
+    //   =14 =36  =5 =20  =9  =6 soma = 90
+    //    +---+---+---+---+---+-> = (90 / 11) = 8,1818 , resto 2 => DV = (11 - 2) = 9
+    public String modulo11(String num) {
+
+        //variáveis de instancia
+        int soma = 0;
+        int resto = 0;
+        int dv = 0;
+        String[] numeros = new String[num.length() + 1];
+        int multiplicador = 2;
+
+        for (int i = num.length(); i > 0; i--) {
+            //Multiplica da direita pra esquerda, incrementando o multiplicador de 2 a 9
+            //Caso o multiplicador seja maior que 9 o mesmo recomeça em 2
+            if (multiplicador > 9) {
+                // pega cada numero isoladamente
+                multiplicador = 2;
+                numeros[i] = String.valueOf(Integer.valueOf(num.substring(i - 1, i)) * multiplicador);
+                multiplicador++;
+            } else {
+                numeros[i] = String.valueOf(Integer.valueOf(num.substring(i - 1, i)) * multiplicador);
+                multiplicador++;
+            }
+        }
+
+        //Realiza a soma de todos os elementos do array e calcula o digito verificador
+        //na base 11 de acordo com a regra.
+        for (int i = numeros.length; i > 0; i--) {
+            if (numeros[i - 1] != null) {
+                soma += Integer.valueOf(numeros[i - 1]);
+            }
+        }
+        resto = soma % 11;
+        dv = 11 - resto;
+
+        if (dv == 0 || dv == 10 || dv == 11) {
+            dv = 1;
+        }
+
+        //retorna o digito verificador
+        return String.valueOf(dv);
     }
 }

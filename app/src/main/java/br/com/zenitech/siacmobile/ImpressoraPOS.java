@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,13 +20,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.datecs.api.BuildInfo;
-/*import com.google.zxing.BarcodeFormat;
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;*/
+import com.google.zxing.oned.Code128Writer;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -143,7 +147,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             printRelatorioNFCE58mm();
         } else if (tipoImpressao.equals("Promissoria")) {
             printPromissoria();
-        }else{
+        } else {
             printBoleto();
         }
 
@@ -411,8 +415,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         Double s = Double.parseDouble(quantItens);
 
         ppp.addLine(new CentralizedBigText("TOTAL DE VENDAS: " + elementosPedidos.size()));
-        ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: "+s.intValue()));
-        ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ "+cAux.maskMoney(new BigDecimal(valTotalPed))));
+        ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: " + s.intValue()));
+        ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed))));
 
         ppp.addLine("");
         ppp.addLine("");
@@ -438,7 +442,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         PosPrintProvider pppPromissoria = new PosPrintProvider(this);
 
-        String valor = cAux.numCodBarraBB("R$ 240,59", bd);
+        String numCodBarraBB = cAux.numCodBarraBB("R$ 240,59", vencimento, numero, bd);
+        String numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarraBB);
 
         // PARTE 1
         /*pppPromissoria.addLine(new CentralizedBigText("***  BOLETO  ***"));
@@ -446,18 +451,96 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         pppPromissoria.addLine(new CentralizedBigText("***  TESTE ***"));*/
         //pppPromissoria.addLine("");
 
+        // IDS TEXT CANHOTO BOLETO
+        TextView txtCodBancoMoedaCanhoto = findViewById(R.id.txtCodBancoMoedaCanhoto);
+        TextView txtCodBancoMoedaBoleto = findViewById(R.id.txtCodBancoMoedaBoleto);
+        //
         TextView txtValorCanhotoBoleto = findViewById(R.id.txtValorCanhotoBoleto);
-        txtValorCanhotoBoleto.setText(valor);
+        TextView txtValorBoleto = findViewById(R.id.txtValorBoleto);
+        //
+        TextView txtLinhaDigitavelCanhoto = findViewById(R.id.txtLinhaDigitavelCanhoto);
+        TextView txtLinhaDigitavelBoleto = findViewById(R.id.txtLinhaDigitavelBoleto);
+
+        //
+        txtCodBancoMoedaCanhoto.setText("001-9");
+        txtCodBancoMoedaBoleto.setText("001-9");
+        //
+        txtValorCanhotoBoleto.setText("R$ 240,59");
+        txtValorBoleto.setText("R$ 240,59");
+        //
+        txtLinhaDigitavelCanhoto.setText(numlinhaDigitavel);
+        txtLinhaDigitavelBoleto.setText(numlinhaDigitavel);
+
+        // ********************************************************
+        /*MultiFormatWriter writer = new MultiFormatWriter();
+        String finaldata = Uri.encode(numCodBarraBB, "utf-8");
+        BitMatrix bm = null;
+        try {
+            bm = writer.encode(finaldata, BarcodeFormat.ITF, 250, 250);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+        Bitmap ImageBitmap = Bitmap.createBitmap(400, 40, Bitmap.Config.ARGB_8888);
+        for (int i = 0; i < 400; i++) {//width
+            for (int j = 0; j < 40; j++) {//height
+                ImageBitmap.setPixel(i, j, bm.get(i, j) ? Color.BLACK : Color.WHITE);
+            }
+        }
+        //qrcode.setImageBitmap(ImageBitmap);
+        SaveImage(ImageBitmap);
+        ImageView imgCodBarraBoleto = findViewById(R.id.imgCodBarraBoleto);
+        imgCodBarraBoleto.setImageBitmap(ImageBitmap);
+        //imgCodBarraBoleto.setScaleType(ImageView.ScaleType.CENTER_CROP);*/
+
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        Bitmap bp = null;
+        try {
+            BitMatrix bitMatrix = multiFormatWriter.encode(numCodBarraBB, BarcodeFormat.ITF, 378, 37);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            bp = barcodeEncoder.createBitmap(bitMatrix);
+            SaveImage(bp);
+
+            ImageView imgCodBarraBoleto = findViewById(R.id.imgCodBarraBoleto);
+            //ImageView imgCodBarraBoleto = findViewById(R.id.imgB);
+            imgCodBarraBoleto.setImageBitmap(bp);
+            //imgCodBarraBoleto.setScaleType(ImageView.ScaleType.FIT_START);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+        // Retorna o caminho da imagem do qrcode
+        /*File sdcard = Environment.getExternalStorageDirectory().getAbsoluteFile();
+        File dir = new File(sdcard, "Emissor_Web/");
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+
+        FileInputStream inputStream;
+        BufferedInputStream bufferedInputStream;
+
+        try {
+            inputStream = new FileInputStream(dir.getPath() + "/qrcode.png");
+            bufferedInputStream = new BufferedInputStream(inputStream);
+            Bitmap bitmap = BitmapFactory.decodeStream(bufferedInputStream, null, options);
+            ImageView imgCodBarraBoleto = findViewById(R.id.imgCodBarraBoleto);
+            imgCodBarraBoleto.setImageBitmap(bitmap);
+            imgCodBarraBoleto.setScaleType(ImageView.ScaleType.FIT_START);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }*/
+        // *********************************************
 
         LinearLayout impressora1 = findViewById(R.id.printBoletoCanhoto); // 520 x 260
-        Bitmap bitmap1 = printViewHelper.createBitmapFromView90(impressora1, 452, 220);
+        //Bitmap bitmap1 = printViewHelper.createBitmapFromView90(impressora1, 452, 220);
+        Bitmap bitmap1 = printViewHelper.createBitmap(impressora1);
+
         LinearLayout impressora2 = findViewById(R.id.printBoleto); // 520 x 260
-        Bitmap bitmap2 = printViewHelper.createBitmapFromView90(impressora2, 590, 220);
+        //Bitmap bitmap2 = printViewHelper.createBitmapFromView90(impressora2, 590, 220);
+        Bitmap bitmap2 = printViewHelper.createBitmap(impressora2);
 
         pppPromissoria.setConnectionCallback(new StoneCallbackInterface() {
             @Override
             public void onSuccess() {
-                liberarImpressora();
+                //liberarImpressora();
             }
 
             @Override
@@ -469,6 +552,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         pppPromissoria.addBitmap(bitmap1);
         //pppPromissoria.addBitmap(bitmap2);
+        Bitmap bitmap = printViewHelper.RotateBitmap(bitmap1, 90);
+        pppPromissoria.addBitmap(bitmap);
         pppPromissoria.addLine("");
         pppPromissoria.execute();
     }

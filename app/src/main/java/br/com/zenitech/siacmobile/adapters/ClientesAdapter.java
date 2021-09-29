@@ -65,6 +65,10 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
         TextView nome = holder.tvNome;
         nome.setText(clientes.getNome());
 
+        //
+        TextView apelido = holder.tvApelido;
+        apelido.setText(clientes.getApelido_cliente());
+
         holder.LlList.setOnClickListener(v -> {
 
             Log.e("Pos_Cliente", clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente());
@@ -97,16 +101,16 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout LlList;
-        TextView tvCodigo;
-        TextView tvNome;
+        TextView tvCodigo, tvNome, tvApelido;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             //
-            LlList = (LinearLayout) itemView.findViewById(R.id.LlList);
-            tvCodigo = (TextView) itemView.findViewById(R.id.codCliente);
-            tvNome = (TextView) itemView.findViewById(R.id.nomeCliente);
+            LlList = itemView.findViewById(R.id.LlList);
+            tvCodigo = itemView.findViewById(R.id.codCliente);
+            tvNome = itemView.findViewById(R.id.nomeCliente);
+            tvApelido =  itemView.findViewById(R.id.apelidoCliente);
         }
     }
 

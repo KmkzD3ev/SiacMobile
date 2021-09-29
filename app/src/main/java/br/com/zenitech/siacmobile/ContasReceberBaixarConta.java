@@ -308,7 +308,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
             if (fPag[1].equals("A PRAZO")) {
 
                 //SE O NÚMERO DO DOCUMENTO ESTIVER VÁSIO MOSTRA A MENSAGEM
-                if (txtDocumentoFormaPagamento.getText().toString().equals("")) {
+                if (txtDocumentoFormaPagamento.getText().toString().equals("") && fPag[2].equals("1")) {
                     //
                     Toast.makeText(getBaseContext(), "Número do documento é obrigatório.", Toast.LENGTH_LONG).show();
                 }

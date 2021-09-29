@@ -8,13 +8,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
+import br.com.zenitech.siacmobile.BuildConfig;
 import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.ContasReceberConsultarCliente;
 import br.com.zenitech.siacmobile.DatabaseHelper;
@@ -23,6 +26,8 @@ import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.SincronizarBancoDados;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
+import br.com.zenitech.siacmobile.domains.PosApp;
+import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -34,11 +39,17 @@ public class HomeFragment extends Fragment {
     private AlertDialog alerta;
     Context context;
 
+    TextView textView, txtTransmitida, txtContigencia, txtStatusTransmissao, txtVersao, txtEmpresa, txtCodUnidade, txtDataUltimoSinc;
+    PosApp posApp;
+    ArrayList<UnidadesDomain> elementosUnidades;
+    UnidadesDomain unidades;
+    View view;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        final View view = inflater.inflate(
+        view = inflater.inflate(
                 R.layout.fragment_principal_content, container, false);
         setHasOptionsMenu(true);
 
@@ -128,7 +139,13 @@ public class HomeFragment extends Fragment {
         });
 
         //CONSULTAR CLIENTE CONTAS RECEBER
-        view.findViewById(R.id.cv_contas_receber).setOnClickListener(view13 -> startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class)));
+        view.findViewById(R.id.cv_contas_receber).setOnClickListener(view13 -> {
+            if (prefs.getString("mostrar_contas_receber", "0").equalsIgnoreCase("0")) {
+                alertaContaReceber();
+                return;
+            }
+            startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class));
+        });
 
         //CONSULTAR CLIENTE CONTAS RECEBER
         view.findViewById(R.id.cv_emissor_notas).setOnClickListener(view12 -> {
@@ -147,8 +164,47 @@ public class HomeFragment extends Fragment {
             }
         }
 
+        elementosUnidades = bd.getUnidades();
+        unidades = elementosUnidades.get(0);
+        //elementosPos = bd.getPos();
+        posApp = bd.getPos();
 
+        //
+        txtEmpresa = view.findViewById(R.id.txtEmpresa);
+        txtCodUnidade = view.findViewById(R.id.txtCodUnidade);
+        textView = view.findViewById(R.id.text_home);
+        txtVersao = view.findViewById(R.id.txtVersao);
+        txtDataUltimoSinc = view.findViewById(R.id.txtDataUltimoSinc);
+        txtEmpresa.setText(unidades.getRazao_social());
+        txtCodUnidade.setText(posApp.getUnidade());
+        //
+        textView.setText(String.format("%s | %s", posApp.getSerial(), posApp.getSerie()));
+        //txtVersao.setText(String.format("Versão %s", BuildConfig.VERSION_NAME));
+        txtVersao.setText(BuildConfig.VERSION_NAME);
+        txtDataUltimoSinc.setText(prefs.getString("data_sincronizado", ""));
         return view;
+    }
+
+    private void alertaContaReceber() {
+
+        //Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setIcon(R.drawable.logosiac);
+        //define o titulo
+        builder.setTitle("Atenção");
+        //define a mensagem
+        builder.setMessage("Esta opção não está disponível para esse serial.");
+        //define um botão como positivo
+        builder.setPositiveButton("Ok", (arg0, arg1) -> {
+        });
+        //define um botão como negativo.
+        /*builder.setNegativeButton("Não", (arg0, arg1) -> {
+            //Toast.makeText(InformacoesVagas.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
+        });*/
+        //cria o AlertDialog
+        alerta = builder.create();
+        //Exibe alerta
+        alerta.show();
     }
 
     private void alerta() {
@@ -226,5 +282,22 @@ public class HomeFragment extends Fragment {
         //Exibe alerta
         alerta.show();
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        try {
+            String[] dados_venda = bd.getUltimaVendasCliente();
+            if (dados_venda.length != 0) {
+                view.findViewById(R.id.cv_editar_ultima_venda).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.cv_excluir_ultima_venda).setVisibility(View.GONE);
+            } else {
+                view.findViewById(R.id.cv_editar_ultima_venda).setVisibility(View.GONE);
+                view.findViewById(R.id.cv_excluir_ultima_venda).setVisibility(View.GONE);
+            }
+        } catch (Exception ignored) {
+
+        }
     }
 }

@@ -3,6 +3,7 @@ package br.com.zenitech.siacmobile;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -13,12 +14,23 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import java.util.ArrayList;
 import java.util.Objects;
+
+import br.com.zenitech.siacmobile.domains.PosApp;
+import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 
 public class Principal2 extends AppCompatActivity {
 
+    private DatabaseHelper bd;
+    ClassAuxiliar aux;
     private SharedPreferences prefs;
     AlertDialog alerta;
+    TextView textView, txtTransmitida, txtContigencia, txtStatusTransmissao, txtVersao, txtEmpresa, txtCodUnidade, txtDataUltimoSinc;
+    ArrayList<PosApp> elementosPos;
+    PosApp posApp;
+    ArrayList<UnidadesDomain> elementosUnidades;
+    UnidadesDomain unidades;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +74,32 @@ public class Principal2 extends AppCompatActivity {
 
             }
         }
+
+
+        //
+        bd = new DatabaseHelper(this);
+        aux = new ClassAuxiliar();
+
+        /*elementosUnidades = bd.getUnidades();
+        unidades = elementosUnidades.get(0);
+        //elementosPos = bd.getPos();
+        posApp = bd.getPos();
+
+        //
+        txtEmpresa = findViewById(R.id.txtEmpresa);
+        txtCodUnidade = findViewById(R.id.txtCodUnidade);
+        textView = findViewById(R.id.text_home);
+        txtVersao = findViewById(R.id.txtVersao);
+        txtDataUltimoSinc = findViewById(R.id.txtDataUltimoSinc);
+
+
+        txtEmpresa.setText(unidades.getRazao_social());
+        txtCodUnidade.setText(posApp.getUnidade());
+        //
+        textView.setText(String.format("%s | %s", posApp.getSerial(), posApp.getSerie()));
+        //txtVersao.setText(String.format("Versão %s", BuildConfig.VERSION_NAME));
+        txtVersao.setText(BuildConfig.VERSION_NAME);
+        txtDataUltimoSinc.setText(prefs.getString("data_sincronizado", ""));*/
     }
 
     private void callDialog(String impressora) {

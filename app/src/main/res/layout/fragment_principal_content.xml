@@ -16,295 +16,466 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_editar_ultima_venda"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="16dp">
+                android:layout_height="90dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/imgEmissor"
+                    android:layout_width="100dp"
+                    android:layout_height="70dp"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/logosiac"
+                    android:visibility="visible" />
 
                 <LinearLayout
-                    android:id="@+id/ll_editar_ultima_venda"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|bottom"
+                    android:orientation="vertical">
 
-                    <FrameLayout
-                        android:layout_width="65dp"
-                        android:layout_height="65dp">
-
-                        <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_edit"
-                            app:tint="@color/icons" />
-
-                    </FrameLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_marginEnd="16dp"
+                        android:text="Versão do App" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="EDITAR VENDA"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Edite a última venda realizada"
-                            android:textSize="16sp" />
-
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_excluir_ultima_venda"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:id="@+id/ll_excluir_ultima_venda"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <FrameLayout
-                        android:layout_width="65dp"
-                        android:layout_height="65dp">
-
-                        <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/app_name"
-                            app:srcCompat="@drawable/ic_delete_forever"
-                            app:tint="@color/icons" />
-
-                    </FrameLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/txtVersao"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_marginEnd="16dp"
+                        android:gravity="end"
+                        android:text="0.0.0"
+                        android:textSize="20sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="EXCLUIR VENDA"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.8dp"
+                        android:background="@color/colorAccent" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Excluir última venda realizada"
-                            android:textSize="16sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:gravity="end"
+                        android:text="POS Iniciado em:"
+                        android:textSize="16sp" />
 
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/txtDataUltimoSinc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:gravity="end"
+                        android:text="00/00/0000 - 00:00:00"
+                        android:textSize="16sp" />
+
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
 
-            <!--<View
-                android:layout_width="match_parent"
-                android:layout_height="0.8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@color/colorAccent" />-->
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
                 <LinearLayout
-                    android:id="@+id/cv_venda"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:gravity="left"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <FrameLayout
-                        android:layout_width="65dp"
-                        android:layout_height="65dp">
+                    <TextView
+                        android:id="@+id/txtEmpresa"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="14sp" />
 
-                        <ImageView
-                            android:id="@+id/imageView"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_motorbike"
-                            app:tint="@color/icons" />
-
-                    </FrameLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.8dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:background="@drawable/bg_btn" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                        <TextView
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Serial | Série:"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/text_home"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="000000000"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="24sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="NOVAS VENDAS"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
+                            android:gravity="end"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Vender Produtos"
-                            android:textSize="16sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Cód. Unidade:"
+                                android:textSize="14sp" />
 
+                            <TextView
+                                android:id="@+id/txtCodUnidade"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="24sp" />
+                        </LinearLayout>
                     </LinearLayout>
+
                 </LinearLayout>
+
             </androidx.cardview.widget.CardView>
 
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="16dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/cv_contas_receber"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cv_editar_ultima_venda"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <FrameLayout
-                        android:layout_width="65dp"
-                        android:layout_height="65dp">
-
-                        <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_user"
-                            app:tint="@color/icons" />
-
-                        <ImageView
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="bottom|right|end"
-                            android:layout_marginEnd="6dp"
-                            android:layout_marginRight="6dp"
-                            android:layout_marginBottom="6dp"
-                            app:srcCompat="@drawable/ic_money"
-                            app:tint="@color/colorPrimary" />
-
-                    </FrameLayout>
-
+                    android:layout_marginTop="16dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/ll_editar_ultima_venda"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
-                        <TextView
+                        <FrameLayout
+                            android:layout_width="65dp"
+                            android:layout_height="65dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_edit"
+                                app:tint="@color/icons" />
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EDITAR VENDA"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Edite a última venda realizada"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="CONTAS A RECEBER"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Receber contas dos clientes"
-                            android:textSize="16sp" />
-
+                            android:src="@drawable/ic_baseline_keyboard_arrow_right"
+                            app:tint="@color/icons" />
                     </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="16dp">
-
-                <LinearLayout
-                    android:id="@+id/cv_emissor_notas"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cv_excluir_ultima_venda"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <FrameLayout
-                        android:layout_width="65dp"
-                        android:layout_height="65dp">
-
-                        <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_gravity="center"
-                            app:srcCompat="@drawable/ic_user"
-                            app:tint="@color/icons" />
-
-                        <ImageView
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="bottom|right|end"
-                            android:layout_marginEnd="6dp"
-                            android:layout_marginRight="6dp"
-                            android:layout_marginBottom="6dp"
-                            app:srcCompat="@drawable/ic_money"
-                            app:tint="@color/colorPrimary" />
-
-                    </FrameLayout>
-
+                    android:layout_marginTop="16dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/ll_excluir_ultima_venda"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
-                        <TextView
+                        <FrameLayout
+                            android:layout_width="65dp"
+                            android:layout_height="65dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/app_name"
+                                app:srcCompat="@drawable/ic_delete_forever"
+                                app:tint="@color/icons" />
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EXCLUIR VENDA"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Excluir última venda realizada"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="EMISSOR WEB"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="20sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Emitir notas"
-                            android:textSize="16sp" />
-
+                            android:src="@drawable/ic_baseline_keyboard_arrow_right"
+                            app:tint="@color/icons" />
                     </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                </androidx.cardview.widget.CardView>
 
+                <!--<View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/colorAccent" />-->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
+
+                    <LinearLayout
+                        android:id="@+id/cv_venda"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="65dp"
+                            android:layout_height="65dp">
+
+                            <ImageView
+                                android:id="@+id/imageView"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_motorbike"
+                                app:tint="@color/icons" />
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="NOVAS VENDAS"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Vender Produtos"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_baseline_keyboard_arrow_right"
+                            app:tint="@color/icons" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
+
+                    <LinearLayout
+                        android:id="@+id/cv_contas_receber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="65dp"
+                            android:layout_height="65dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_user"
+                                app:tint="@color/icons" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="bottom|right|end"
+                                android:layout_marginEnd="6dp"
+                                android:layout_marginRight="6dp"
+                                android:layout_marginBottom="6dp"
+                                app:srcCompat="@drawable/ic_money"
+                                app:tint="@color/colorPrimary" />
+
+                        </FrameLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="CONTAS A RECEBER"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Receber contas dos clientes"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_baseline_keyboard_arrow_right"
+                            app:tint="@color/icons" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:id="@+id/cv_emissor_notas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <FrameLayout
+                            android:layout_width="65dp"
+                            android:layout_height="65dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_user"
+                                app:tint="@color/icons" />
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="bottom|right|end"
+                                android:layout_marginEnd="6dp"
+                                android:layout_marginRight="6dp"
+                                android:layout_marginBottom="6dp"
+                                app:srcCompat="@drawable/ic_money"
+                                app:tint="@color/colorPrimary" />
+
+                        </FrameLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EMISSOR WEB"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Emitir notas"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

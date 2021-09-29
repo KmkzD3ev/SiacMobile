@@ -74,11 +74,18 @@ public class VendasConsultarClientes extends AppCompatActivity implements Search
         newText = newText.toLowerCase();
         ArrayList<Clientes> newlist = new ArrayList<>();
         for (Clientes clientes : listaClientes) {
+            String codigo;
             //
-            String codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase();
+            if (clientes.getApelido_cliente() != null) {
+                codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase() +
+                        " - " + clientes.getApelido_cliente().toLowerCase();
+            } else {
+                codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase();
+            }
             if (codigo.contains(newText)) {
                 newlist.add(clientes);
             }
+
             //
             /*String nome = clientes.getNome().toLowerCase();
             if (nome.contains(newText)) {

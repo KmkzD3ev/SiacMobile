@@ -14,14 +14,14 @@ import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.ContasReceberCliente;
 import br.com.zenitech.siacmobile.R;
-import br.com.zenitech.siacmobile.domains.FinanceiroReceberClientes;
+import br.com.zenitech.siacmobile.domains.ClientesContasReceber;
 
 public class ClientesContasReceberAdapter extends RecyclerView.Adapter<ClientesContasReceberAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<FinanceiroReceberClientes> elementos;
+    private ArrayList<ClientesContasReceber> elementos;
 
-    public ClientesContasReceberAdapter(Context context, ArrayList<FinanceiroReceberClientes> elementos) {
+    public ClientesContasReceberAdapter(Context context, ArrayList<ClientesContasReceber> elementos) {
         this.context = context;
         this.elementos = elementos;
     }
@@ -49,23 +49,27 @@ public class ClientesContasReceberAdapter extends RecyclerView.Adapter<ClientesC
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         //
-        final FinanceiroReceberClientes clientes = elementos.get(position);
+        final ClientesContasReceber clientes = elementos.get(position);
 
         //
         TextView codigo = holder.tvCodigo;
-        codigo.setText(clientes.getCodigo_cliente());
+        codigo.setText(clientes.codigo_cliente);
 
         //
         TextView nome = holder.tvNome;
-        nome.setText(clientes.getNome_cliente());
+        nome.setText(clientes.nome_cliente);
+
+        //
+        TextView apelido = holder.tvApelido;
+        apelido.setText(clientes.apelido_cliente);
 
         holder.LlList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent in = new Intent(context, ContasReceberCliente.class);
                 in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                in.putExtra("codigo", clientes.getCodigo_cliente());
-                in.putExtra("nome", clientes.getNome_cliente());
+                in.putExtra("codigo", clientes.codigo_cliente);
+                in.putExtra("nome", clientes.nome_cliente);
                 context.startActivity(in);
             }
         });
@@ -79,19 +83,20 @@ public class ClientesContasReceberAdapter extends RecyclerView.Adapter<ClientesC
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout LlList;
-        TextView tvCodigo, tvNome;
+        TextView tvCodigo, tvNome, tvApelido;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             //
-            LlList = (LinearLayout) itemView.findViewById(R.id.LlList);
-            tvCodigo = (TextView) itemView.findViewById(R.id.codCliente);
-            tvNome = (TextView) itemView.findViewById(R.id.nomeCliente);
+            LlList = itemView.findViewById(R.id.LlList);
+            tvCodigo = itemView.findViewById(R.id.codCliente);
+            tvNome = itemView.findViewById(R.id.nomeCliente);
+            tvApelido =  itemView.findViewById(R.id.apelidoCliente);
         }
     }
 
-    public void setFilter(ArrayList<FinanceiroReceberClientes> newlist){
+    public void setFilter(ArrayList<ClientesContasReceber> newlist){
         elementos = new ArrayList<>();
         elementos.addAll(newlist);
         notifyDataSetChanged();

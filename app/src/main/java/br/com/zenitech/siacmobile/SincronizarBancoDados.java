@@ -15,9 +15,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -53,7 +56,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
     public static final int REQUEST_PERMISSIONS_CODE = 128;
     VerificarOnline online;
     AlertDialog alerta;
-    EditText serial;
+    EditText serial, cod1, cod2, cod3;
     TextView txtTotMemoria, txt_msg_sincronizando, txtAppFinalizado;
     LinearLayout ll_sincronizar, ll_sincronizando, ll_sucesso, ll_erro;
     Context context;
@@ -81,6 +84,90 @@ public class SincronizarBancoDados extends AppCompatActivity {
         ll_erro = findViewById(R.id.ll_erro);
         txtTotMemoria = findViewById(R.id.txtTotMemoria);
         serial = findViewById(R.id.serial);
+        cod1 = findViewById(R.id.cod1);
+        cod1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 3) {
+                    cod1.clearFocus();
+                    cod2.requestFocus();
+                    cod2.setCursorVisible(true);
+                }
+            }
+        });
+        cod2 = findViewById(R.id.cod2);
+        cod2.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 3) {
+                    cod2.clearFocus();
+                    cod3.requestFocus();
+                    cod3.setCursorVisible(true);
+                }
+            }
+        });
+        cod3 = findViewById(R.id.cod3);
+        cod3.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 3) {
+
+                    //
+                    _iniciarVerificacoes();
+                }
+            }
+        });
+        cod3.setOnEditorActionListener((v, actionId, event) -> {
+            boolean handled = false;
+
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+
+                //ESCODER O TECLADO
+                // TODO Auto-generated method stub
+                try {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(), 0);
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
+
+                //
+                _iniciarVerificacoes();
+
+                handled = true;
+            }
+            return handled;
+        });
 
         //
         if (!Objects.requireNonNull(prefs.getString("serial_app", "")).equalsIgnoreCase("")) {
@@ -142,6 +229,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
             startActivity(i);
         });
 
+        findViewById(R.id.btnInfoCod).setOnClickListener(view -> alertaCod());
     }
 
     @Override
@@ -258,7 +346,8 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
 
-        final Call<Sincronizador> call = iSincronizar.verificarSerial("verificar_serial", serial.getText().toString());
+        final Call<Sincronizador> call = iSincronizar.verificarSerial(
+                "verificar_serial_siac", serial.getText().toString());
 
         call.enqueue(new Callback<Sincronizador>() {
             @Override
@@ -266,10 +355,57 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
                 //
                 final Sincronizador sincronizacao = response.body();
-                if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")) {
+
+                if (prefs.getBoolean("cod_instalacao", false)) {
+                    if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")) {
+                        gerarBancoOnline(serial.getText().toString());
+                    } else {
+                        //
+                        erro = true;
+                        msgErro = "O serial ou código de instalação é inválido ou já está sendo usado em outro aparelho! \nVerifique o serial e tente novamente.";
+                        _limparDadosSincronizacao(false);
+                        _resetarSincronismo(5000, true);
+                    }
+                } else {
+                    String cod = cod1.getText().toString() + cod2.getText().toString() + cod3.getText().toString();
+
+                    if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")
+                            && cod.equalsIgnoreCase("*0101010#")) {
+                        // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
+                        prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
+                        prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
+                        prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
+                        prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
+                        // INICIA A GERAÇÃO DO BANCO ONLINE
+                        gerarBancoOnline(serial.getText().toString());
+                        //gerarBancoOnline(serial.getText().toString());
+                    } else {
+                        if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro") &&
+                                cod.equalsIgnoreCase(sincronizacao.getCodigo_instalacao())) {
+                            // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
+                            prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
+                            prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
+                            prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
+                            prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
+                            // INICIA A GERAÇÃO DO BANCO ONLINE
+                            gerarBancoOnline(serial.getText().toString());
+                            //gerarBancoOnline(serial.getText().toString());
+                        } else {
+                            //
+                            erro = true;
+                            msgErro = "O serial ou código de instalação é inválido ou já está sendo usado em outro aparelho! \nVerifique o serial e tente novamente.";
+                            _limparDadosSincronizacao(false);
+                            _resetarSincronismo(5000, true);
+                        }
+                    }
+                }
+
+                /*if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")) {
                     // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
                     prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
                     prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
+                    prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
+                    prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
                     // INICIA A GERAÇÃO DO BANCO ONLINE
                     gerarBancoOnline(serial.getText().toString());
 
@@ -281,7 +417,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                     msgErro = "Serial inválido! Verifique o serial e tente novamente.";
                     _limparDadosSincronizacao(false);
                     _resetarSincronismo(5000, true);
-                }
+                }*/
             }
 
             @Override
@@ -630,6 +766,8 @@ public class SincronizarBancoDados extends AppCompatActivity {
         prefs.edit().putString("data_movimento_atual", new ClassAuxiliar().inserirDataAtual()).apply();
         new Handler().postDelayed(() -> {
             prefs.edit().putBoolean("sincronizado", true).apply();
+            ClassAuxiliar cAux = new ClassAuxiliar();
+            prefs.edit().putString("data_sincronizado", String.format("%s %s", cAux.exibirDataAtual(), cAux.horaAtual())).apply();
 
             //ABRI A TELA PRINCIPAL
             //Intent i = new Intent(context, Principal2.class);
@@ -817,6 +955,32 @@ public class SincronizarBancoDados extends AppCompatActivity {
         builder.setNeutralButton("Avise-me depois", (arg0, arg1) -> {
             Toast.makeText(context, "Ok, depois te avisaremos dessa novidade!", Toast.LENGTH_SHORT).show();
             //prefs.edit().putBoolean("mostrar_alerta_versao", false).apply();
+        });
+
+        //cria o AlertDialog
+        alerta = builder.create();
+
+        //Exibe
+        alerta.show();
+    }
+
+    private void alertaCod() {
+
+        //
+        //Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        //builder.setIcon(R.drawable.logo_emissor_web);
+        //define o titulo
+        builder.setTitle("Código de Instalação:");
+        String str = "Verifique o código de instação na listagem de POS no Siac Web.\n\nPara mais informações, contate nosso suporte!";
+        //define a mensagem
+        builder.setMessage(str);
+
+        //define um botão como positivo
+        //builder.setPositiveButton("Sim", (arg0, arg1) -> _finalizarApp());
+
+        //define um botão como negativo.
+        builder.setPositiveButton("OK", (arg0, arg1) -> {
         });
 
         //cria o AlertDialog

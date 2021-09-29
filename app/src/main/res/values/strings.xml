@@ -140,6 +140,7 @@
     <string name="msg_printing_page">Printing page&#8230;</string>
     <string name="msg_printing_barcode">Printing barcode&#8230;</string>
     <string name="msg_printing_relatorio">Imprimindo Ralatório&#8230;</string>
+    <string name="msg_printing_boleto">Imprimindo Boleto&#8230;</string>
     <string name="msg_reading_magstripe">Reading magnetic card&#8230;</string>
     <string name="msg_reading_barcode">Reading barcode&#8230;</string>
     <string name="msg_connecting">Conectando ao dispositivo&#8230;</string>

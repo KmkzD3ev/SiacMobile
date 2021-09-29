@@ -194,15 +194,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private Clientes cursorToCliente(Cursor cursor) {
-        Clientes clientes = new Clientes(null, null, null, null, null, null, null);
+        Clientes clientes = new Clientes(null, null, null, null, null, null, null, null);
         //clientes.setCodigo(Integer.parseInt(cursor.getString(0)));
         clientes.setCodigo(cursor.getString(0));
         clientes.setNome(cursor.getString(1));
-        clientes.setLatitude_cliente(cursor.getString(2));
-        clientes.setLongitude_cliente(cursor.getString(3));
-        clientes.setSaldo(cursor.getString(4));
-        clientes.setCpfcnpj(cursor.getString(5));
-        clientes.setEndereco(cursor.getString(6));
+        clientes.setApelido_cliente(cursor.getString(2));
+        clientes.setLatitude_cliente(cursor.getString(3));
+        clientes.setLongitude_cliente(cursor.getString(4));
+        clientes.setSaldo(cursor.getString(5));
+        clientes.setCpfcnpj(cursor.getString(6));
+        clientes.setEndereco(cursor.getString(7));
         return clientes;
     }
 
@@ -1342,7 +1343,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     "fpg.usuario_atual, fpg.data_cadastro, fpg.ativo, fpg.conta_bancaria\n" +
                     "FROM formas_pagamento fpg\n" +
                     "INNER JOIN formas_pagamento_cliente fpc ON fpc.pagamento_cliente = fpg.descricao_forma_pagamento\n" +
-                    "WHERE fpc.cliente_pagamento = '" + codigoCliente + "' AND fpg.ativo";
+                    "WHERE fpg.baixa_forma_pagamento = '2' AND fpc.cliente_pagamento = '" + codigoCliente + "' AND fpg.ativo";
         }
 
 
@@ -1615,6 +1616,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return i;
     }
 
+    // ATUALIZA OS VALORES DAS BAIXAS RECEBIDAS
+    public int updateUltimoBoleto(String valor) {
+        myDataBase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("ultboleto", valor);
+
+        int i = myDataBase.update(
+                "pos",
+                values,
+                null,
+                null
+        );
+        /* , "id" + " = ?", new String[]{id}*/
+        return i;
+    }
+
 
     //LISTAR TODOS OS ITENS DO FINANCEIRO
     public ArrayList<FinanceiroVendasDomain> getFinanceiroCliente(int id_financeiro_app) {
@@ -1783,7 +1800,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private FinanceiroReceberClientes cursorToContasReceberCliente(Cursor cursor) {
-        FinanceiroReceberClientes clientes = new FinanceiroReceberClientes(null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroReceberClientes clientes = new FinanceiroReceberClientes(null,  null, null, null, null, null, null, null, null, null, null, null, null);
         //
         clientes.setCodigo_financeiro(cursor.getString(0));
         clientes.setNosso_numero_financeiro(cursor.getString(1));
@@ -1802,8 +1819,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //LISTAR TODOS OS CLIENTES
-    public ArrayList<FinanceiroReceberClientes> getAllClientesContasReceber() {
-        ArrayList<FinanceiroReceberClientes> listaClientes = new ArrayList<>();
+    public ArrayList<ClientesContasReceber> getAllClientesContasReceber() {
+        ArrayList<ClientesContasReceber> listaClientes = new ArrayList<>();
 
         //
         /*String query = "SELECT * FROM financeiro_receber " +
@@ -1843,7 +1860,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //
         if (cursor.moveToFirst()) {
             do {
-                FinanceiroReceberClientes clientes = cursorToContasReceberCliente(cursor);
+                ClientesContasReceber clientes = new ClientesContasReceber();// cursorToContasReceberCliente(cursor);
+
+                clientes.codigo_financeiro = cursor.getString(0);
+                clientes.nosso_numero_financeiro = cursor.getString(1);
+                clientes.data_financeiro = cursor.getString(2);
+                clientes.codigo_cliente = cursor.getString(3);
+                clientes.nome_cliente = cursor.getString(4);
+                clientes.documento_financeiro = cursor.getString(5);
+                clientes.fpagamento_financeiro = cursor.getString(6);
+                clientes.vencimento_financeiro = cursor.getString(7);
+                clientes.valor_financeiro = cursor.getString(8);
+                clientes.total_pago = cursor.getString(9);
+                clientes.codigo_pagamento = cursor.getString(10);
+                clientes.status_app = cursor.getString(11);
+                clientes.baixa_finalizada_app = cursor.getString(12);
+                clientes.apelido_cliente = cursor.getString(16);
+
                 listaClientes.add(clientes);
             } while (cursor.moveToNext());
         }
@@ -1885,6 +1918,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return i;
     }
+
     //ALTERAR CLIENTE
     public int updatePosApp(String val) {
         myDataBase = this.getWritableDatabase();
@@ -2509,7 +2543,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //CURSOR POS
     private PosApp cursorToPos(Cursor cursor) {
-        PosApp posApp = new PosApp(null, null, null, null, null, null, null, null, null, null, null, null, null);
+        PosApp posApp = new PosApp(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         //
         posApp.setCodigo(cursor.getString(0));
@@ -2525,12 +2559,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         posApp.setAutovencimento(cursor.getString(10));
         posApp.setModulo_pedidos(cursor.getString(11));
         posApp.setBaixa_a_prazo(cursor.getString(12));
+        posApp.setSerie_boleto(cursor.getString(13));
         return posApp;
     }
 
     //LISTAR TODAS AS UNIDADES
     public PosApp getPos() {
-        PosApp posApp = new PosApp(null, null, null, null, null, null, null, null, null, null, null, null, null);
+        PosApp posApp = new PosApp(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         String query = "SELECT * FROM pos LIMIT 1";
 
@@ -2545,6 +2580,171 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         myDataBase.close();
         return posApp;
+    }
+
+    private ContasBancarias cursorContasBancarias(Cursor cursor) {
+        ContasBancarias conta = new ContasBancarias(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        conta.setCodigo(cursor.getString(0));
+        conta.setBanco_conta(cursor.getString(1));
+        conta.setAgencia(cursor.getString(2));
+        conta.setConta(cursor.getString(3));
+        conta.setDv_conta(cursor.getString(4));
+        conta.setConvenio(cursor.getString(5));
+        conta.setContrato(cursor.getString(6));
+        conta.setCarteira(cursor.getString(7));
+        conta.setVariacao(cursor.getString(8));
+        conta.setConta_cedente(cursor.getString(9));
+        conta.setDv_conta_cedente(cursor.getString(10));
+        conta.setCedente(cursor.getString(11));
+        conta.setCpf_cnpj(cursor.getString(12));
+        conta.setEndereco(cursor.getString(13));
+        conta.setCidade_uf(cursor.getString(14));
+        conta.setInstrucoes(cursor.getString(15));
+        conta.setInicio_nosso_numero(cursor.getString(16));
+        conta.setDv_agencia(cursor.getString(17));
+        conta.setTaxa_boleto(cursor.getString(18));
+
+        return conta;
+    }
+
+    //ULTIMO PEDIDO
+    public ContasBancarias contasBancarias() {
+
+        ContasBancarias contasBancarias = null;
+        String query = "SELECT * FROM contas_bancarias ORDER BY codigo DESC LIMIT 1";
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                contasBancarias = cursorContasBancarias(cursor);
+            } while (cursor.moveToNext());
+        }
+
+        return contasBancarias;
+    }
+
+    //CONSULTAR CLIENTE
+    public Clientes cliente(String codigo) {
+        Clientes cliente = null;
+        String query = "SELECT * FROM clientes WHERE codigo_cliente = " + codigo + " LIMIT 1";
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                cliente = cursorToCliente(cursor);
+            } while (cursor.moveToNext());
+        }
+
+        return cliente;
+    }
+
+    //
+    public String getContaBancariaFormaPagamento(String descFormaPagamento) {
+
+        myDataBase = this.getReadableDatabase();
+
+        String selectQuery = "SELECT conta_bancaria FROM formas_pagamento WHERE descricao_forma_pagamento = '" + descFormaPagamento + "'";
+
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+
+        String str = "";
+        try {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                str = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return str;
+    }
+
+    //
+    public String getCodContaBancaria(String contaBancFormaPagamento) {
+
+        myDataBase = this.getReadableDatabase();
+
+        String selectQuery = "SELECT banco_conta FROM contas_bancarias WHERE codigo = '" + contaBancFormaPagamento + "' LIMIT 1";
+
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+
+        String str = "";
+        try {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                str = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return str;
+    }
+
+
+    //CURSOR PEDIDOS
+    private UnidadesDomain cursorToUnidade(Cursor cursor) {
+        UnidadesDomain unidades = new UnidadesDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        //
+        unidades.setId_unidade(cursor.getString(0));
+        unidades.setDescricao_unidade(cursor.getString(1));
+        unidades.setRazao_social(cursor.getString(2));
+        unidades.setCnpj(cursor.getString(3));
+        unidades.setEndereco(cursor.getString(4));
+        unidades.setNumero(cursor.getString(5));
+        unidades.setBairro(cursor.getString(6));
+        unidades.setCep(cursor.getString(7));
+        unidades.setTelefone(cursor.getString(8));
+        unidades.setIe(cursor.getString(9));
+        unidades.setCidade(cursor.getString(10));
+        unidades.setUf(cursor.getString(11));
+        unidades.setCodigo_ibge(cursor.getString(12));
+        unidades.setUrl_consulta(cursor.getString(13));
+        return unidades;
+    }
+
+    //LISTAR TODAS AS UNIDADES
+    public ArrayList<UnidadesDomain> getUnidades() {
+        ArrayList<UnidadesDomain> listaUnidades = new ArrayList<>();
+
+        String query = "SELECT * FROM unidades";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                UnidadesDomain unidades = cursorToUnidade(cursor);
+                listaUnidades.add(unidades);
+            } while (cursor.moveToNext());
+        }
+
+        return listaUnidades;
     }
 
     public void FecharConexao() {

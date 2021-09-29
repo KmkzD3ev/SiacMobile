@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.ClientesContasReceberAdapter;
-import br.com.zenitech.siacmobile.domains.FinanceiroReceberClientes;
+import br.com.zenitech.siacmobile.domains.ClientesContasReceber;
 
 public class ContasReceberConsultarCliente extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     DatabaseHelper bd;
-    ArrayList<FinanceiroReceberClientes> listaClientes;
+    ArrayList<ClientesContasReceber> listaClientes;
     ClientesContasReceberAdapter adapter;
 
     //
@@ -83,13 +83,25 @@ public class ContasReceberConsultarCliente extends AppCompatActivity implements 
     public boolean onQueryTextChange(String newText) {
 
         newText = newText.toLowerCase();
-        ArrayList<FinanceiroReceberClientes> newlist = new ArrayList<>();
-        for (FinanceiroReceberClientes clientes : listaClientes) {
+        ArrayList<ClientesContasReceber> newlist = new ArrayList<>();
+        for (ClientesContasReceber clientes : listaClientes) {
             //
-            String codigo = clientes.getCodigo_cliente().toLowerCase() + " - " + clientes.getNome_cliente().toLowerCase();
+            String codigo;
+            //
+            if (clientes.apelido_cliente != null) {
+                codigo = clientes.codigo_cliente.toLowerCase() + " - " + clientes.nome_cliente.toLowerCase() +
+                        " - " + clientes.apelido_cliente.toLowerCase();
+            } else {
+                codigo = clientes.codigo_cliente.toLowerCase() + " - " + clientes.nome_cliente.toLowerCase();
+            }
             if (codigo.contains(newText)) {
                 newlist.add(clientes);
             }
+            /*String codigo = clientes.getCodigo_cliente().toLowerCase() + " - " + clientes.getNome_cliente().toLowerCase() +
+                    " - " + clientes.getApelido_cliente().toLowerCase();
+            if (codigo.contains(newText)) {
+                newlist.add(clientes);
+            }*/
             //
             /*String nome = clientes.getNome().toLowerCase();
             if (nome.contains(newText)) {

@@ -21,6 +21,7 @@ import br.com.zenitech.siacmobile.Impressora;
 import br.com.zenitech.siacmobile.ImpressoraPOS;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import br.com.zenitech.siacmobile.domains.PosApp;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 
 import static br.com.zenitech.siacmobile.FinanceiroDaVenda.bgTotal;
@@ -83,7 +84,8 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
                 financeiroVendasDomain.getCodigo_financeiro(),
                 financeiroVendasDomain.getId_financeiro_app(),
                 financeiroVendasDomain.getValor_financeiro(),
-                position
+                position,
+                financeiroVendasDomain.getFpagamento_financeiro()
         ));
 
         /*String val = classAuxiliar.maskMoney(new BigDecimal(financeiroVendasDomain.getValor_financeiro()));
@@ -138,12 +140,19 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
         }
     }
 
-    public void excluirItem(String codigo, String codigo_financeiro_app, String totalVenda, int position) {
+    public void excluirItem(String codigo, String codigo_financeiro_app, String totalVenda, int position, String fpagamento_financeiro) {
         FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         DatabaseHelper bd;
         bd = new DatabaseHelper(context);
         bd.deleteItemFinanceiro(financeiroVendasDomain);
-
+        if (fpagamento_financeiro.equalsIgnoreCase("PROMISSORIA")) {
+            PosApp posApp = bd.getPos();
+            bd.updatePosApp(String.valueOf(Integer.parseInt(posApp.getUltpromissoria()) - 1));
+        }
+        if (fpagamento_financeiro.equalsIgnoreCase("BOLETO")) {
+            PosApp posApp = bd.getPos();
+            bd.updateUltimoBoleto(String.valueOf(Integer.parseInt(posApp.getUltboleto()) - 1));
+        }
 
         elementos.remove(position);
         notifyItemRemoved(position);
