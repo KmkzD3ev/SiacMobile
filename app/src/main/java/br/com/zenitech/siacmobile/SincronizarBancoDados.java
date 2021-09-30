@@ -174,6 +174,11 @@ public class SincronizarBancoDados extends AppCompatActivity {
             serial.setEnabled(false);
             txtAppFinalizado.setVisibility(View.VISIBLE);
         }
+        //prefs.edit().putBoolean("cod_instalacao", false).apply();
+        if (!Objects.requireNonNull(prefs.getString("serial_app", "")).equalsIgnoreCase("")
+                && prefs.getBoolean("cod_instalacao", false)) {
+            findViewById(R.id.llCodInstalacao).setVisibility(View.GONE);
+        }
         serial.setText(prefs.getString("serial_app", ""));
         _verificarTotalArmazenamento();
 
@@ -347,7 +352,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
 
         final Call<Sincronizador> call = iSincronizar.verificarSerial(
-                "verificar_serial_siac", serial.getText().toString());
+                "verificar_serial_siac2", serial.getText().toString());
 
         call.enqueue(new Callback<Sincronizador>() {
             @Override
