@@ -198,12 +198,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //clientes.setCodigo(Integer.parseInt(cursor.getString(0)));
         clientes.setCodigo(cursor.getString(0));
         clientes.setNome(cursor.getString(1));
-        clientes.setApelido_cliente(cursor.getString(2));
-        clientes.setLatitude_cliente(cursor.getString(3));
-        clientes.setLongitude_cliente(cursor.getString(4));
-        clientes.setSaldo(cursor.getString(5));
-        clientes.setCpfcnpj(cursor.getString(6));
-        clientes.setEndereco(cursor.getString(7));
+        clientes.setLatitude_cliente(cursor.getString(2));
+        clientes.setLongitude_cliente(cursor.getString(3));
+        clientes.setSaldo(cursor.getString(4));
+        clientes.setCpfcnpj(cursor.getString(5));
+        clientes.setEndereco(cursor.getString(6));
+        clientes.setApelido_cliente(cursor.getString(7));
         return clientes;
     }
 
@@ -1875,7 +1875,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 clientes.codigo_pagamento = cursor.getString(10);
                 clientes.status_app = cursor.getString(11);
                 clientes.baixa_finalizada_app = cursor.getString(12);
-                clientes.apelido_cliente = cursor.getString(16);
+                clientes.apelido_cliente = cursor.getString(21);
 
                 listaClientes.add(clientes);
             } while (cursor.moveToNext());

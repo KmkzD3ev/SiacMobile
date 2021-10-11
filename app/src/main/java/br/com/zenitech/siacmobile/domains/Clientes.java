@@ -3,22 +3,22 @@ package br.com.zenitech.siacmobile.domains;
 public class Clientes {
     private String codigo;
     private String nome;
-    private String apelido_cliente;
     private String latitude_cliente;
     private String longitude_cliente;
     private String saldo;
     private String cpfcnpj;
     private String endereco;
+    private String apelido_cliente;
 
-    public Clientes(String codigo, String nome, String apelido_cliente, String latitude_cliente, String longitude_cliente, String saldo, String cpfcnpj, String endereco) {
+    public Clientes(String codigo, String nome, String latitude_cliente, String longitude_cliente, String saldo, String cpfcnpj, String endereco, String apelido_cliente) {
         this.codigo = codigo;
         this.nome = nome;
-        this.apelido_cliente = apelido_cliente;
         this.latitude_cliente = latitude_cliente;
         this.longitude_cliente = longitude_cliente;
         this.saldo = saldo;
         this.cpfcnpj = cpfcnpj;
         this.endereco = endereco;
+        this.apelido_cliente = apelido_cliente;
     }
 
     public String getCodigo() {
@@ -35,14 +35,6 @@ public class Clientes {
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public String getApelido_cliente() {
-        return apelido_cliente;
-    }
-
-    public void setApelido_cliente(String apelido_cliente) {
-        this.apelido_cliente = apelido_cliente;
     }
 
     public String getLatitude_cliente() {
@@ -83,5 +75,13 @@ public class Clientes {
 
     public void setEndereco(String endereco) {
         this.endereco = endereco;
+    }
+
+    public String getApelido_cliente() {
+        return apelido_cliente;
+    }
+
+    public void setApelido_cliente(String apelido_cliente) {
+        this.apelido_cliente = apelido_cliente;
     }
 }

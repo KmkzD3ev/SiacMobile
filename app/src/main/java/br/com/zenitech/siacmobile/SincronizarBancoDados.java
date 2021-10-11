@@ -771,6 +771,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
         prefs.edit().putString("data_movimento_atual", new ClassAuxiliar().inserirDataAtual()).apply();
         new Handler().postDelayed(() -> {
             prefs.edit().putBoolean("sincronizado", true).apply();
+            prefs.edit().putBoolean("cod_instalacao", true).apply();
             ClassAuxiliar cAux = new ClassAuxiliar();
             prefs.edit().putString("data_sincronizado", String.format("%s %s", cAux.exibirDataAtual(), cAux.horaAtual())).apply();
 
