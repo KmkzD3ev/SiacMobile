@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.RelatorioContasReceberAdapter;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
@@ -46,13 +47,13 @@ public class RelatorioContasReceber extends AppCompatActivity {
         setContentView(R.layout.activity_relatorio_contas_receber);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //
         context = getBaseContext();
 
         //
-        prefs = getSharedPreferences("preferencias", this.MODE_PRIVATE);
+        prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
 
         bd = new DatabaseHelper(this);

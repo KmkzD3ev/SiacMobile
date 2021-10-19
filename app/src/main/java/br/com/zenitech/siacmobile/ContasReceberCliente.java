@@ -66,7 +66,7 @@ public class ContasReceberCliente extends AppCompatActivity {
 
 
         bd = new DatabaseHelper(this);
-        ArrayList<FinanceiroVendasDomain> financeiroVendasDomains = bd.getRelatorioContasReceber();
+        //ArrayList<FinanceiroVendasDomain> financeiroVendasDomains = bd.getRelatorioContasReceber();
         /*if (financeiroVendasDomains.size() > 0) {
             id_baixa_app = financeiroVendasDomains.size() + 1;
             ed.putInt("id_baixa_app", id_baixa_app).apply();
@@ -135,7 +135,7 @@ public class ContasReceberCliente extends AppCompatActivity {
     }
 
     private void cancelarVenda() {
-        int i = bd.deleteFinanceiroRecebidos(Integer.parseInt(codigo_cliente));
+        //int i = bd.deleteFinanceiroRecebidos(Integer.parseInt(codigo_cliente));
         finish();
 
         /*//Cria o gerador do AlertDialog

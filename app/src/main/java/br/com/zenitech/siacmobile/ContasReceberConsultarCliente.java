@@ -45,7 +45,10 @@ public class ContasReceberConsultarCliente extends AppCompatActivity implements 
         llNCReceber = findViewById(R.id.llNCReceber);
         rvClientes = findViewById(R.id.rvClientes);
         rvClientes.setLayoutManager(new LinearLayoutManager(ContasReceberConsultarCliente.this));
+
+        // LISTA OS CLIENTE DO CONTAS A RECEBER
         listaClientes = bd.getAllClientesContasReceber();
+
         if (listaClientes.size() > 0) {
             rvClientes.setVisibility(View.VISIBLE);
             llNCReceber.setVisibility(View.GONE);

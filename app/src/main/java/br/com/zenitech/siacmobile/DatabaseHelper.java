@@ -1054,7 +1054,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         db.beginTransaction();
 
-        //
+        //valor_financeiro
         String selectQuery = "SELECT valor_financeiro " +
                 "FROM recebidos " +
                 "WHERE codigo_financeiro = " + codigo_finan + " " +
