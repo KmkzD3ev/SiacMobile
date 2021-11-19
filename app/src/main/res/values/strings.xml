@@ -59,6 +59,7 @@
     <string name="title_activity_principal2">MainActivity</string>
     <string name="title_activity_teste">Enviar Dados</string>
     <string name="title_activity_impressora">Impressora</string>
+    <string name="title_activity_relatorio_vendas_pedidos">Relatório Vendas Pedido</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>

@@ -61,6 +61,10 @@ public class RelatorioVendasPedidosAdapter extends RecyclerView.Adapter<Relatori
         TextView produto = holder.txtProduto;
         produto.setText(vendasDomain.getProduto_venda());
         //
+        TextView formasPagamento = holder.txtFormasPagamento;
+        formasPagamento.setText(vendasDomain.getFormas_pagamento());
+
+        //
         TextView codigo = holder.txtQuantidade;
         codigo.setText(vendasDomain.getQuantidade_venda());
         //
@@ -97,7 +101,7 @@ public class RelatorioVendasPedidosAdapter extends RecyclerView.Adapter<Relatori
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout llRelatorioVendas;
-        TextView txtProduto, txtQuantidade, txtValor, txtTotal, txtNomeCliente;
+        TextView txtProduto, txtQuantidade, txtValor, txtTotal, txtNomeCliente, txtFormasPagamento;
         ImageButton btnExcluirVenda;
 
         public ViewHolder(View itemView) {
@@ -111,6 +115,7 @@ public class RelatorioVendasPedidosAdapter extends RecyclerView.Adapter<Relatori
             txtTotal = itemView.findViewById(R.id.txtTotal);
             txtNomeCliente = itemView.findViewById(R.id.txtNomeCliente);
             btnExcluirVenda = itemView.findViewById(R.id.btnExcluirVenda);
+            txtFormasPagamento = itemView.findViewById(R.id.txtFormasPagamento);
         }
     }
 }

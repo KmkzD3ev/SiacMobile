@@ -9,6 +9,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -21,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.domains.EnviarDados;
+import br.com.zenitech.siacmobile.domains.Sincronizador;
 import br.com.zenitech.siacmobile.domains.VendasDomain;
 import br.com.zenitech.siacmobile.interfaces.IEnviarDados;
+import br.com.zenitech.siacmobile.interfaces.ISincronizar;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,6 +70,8 @@ public class EnviarDadosServidor extends AppCompatActivity {
         Log.i(TAG + " Financeiro", dadosFin[2]);
         Log.i(TAG + " Financeiro", dadosFin[3]);
         Log.i(TAG + " Financeiro", dadosFin[4]);
+        Log.i(TAG + " Financeiro", dadosFin[5]);
+        Log.i(TAG + " Financeiro", dadosFin[6]);
 
         //
         dadosContasReceber = bd.EnviarDadosContasReceber();
@@ -111,7 +116,8 @@ public class EnviarDadosServidor extends AppCompatActivity {
                 "" + dadosFin[2],
                 "" + dadosFin[3],
                 "" + dadosFin[4],
-                "" + dadosFin[5]
+                "" + dadosFin[5],
+                "" + dadosFin[6]
         );
 
         call.enqueue(new Callback<ArrayList<EnviarDados>>() {
@@ -122,7 +128,7 @@ public class EnviarDadosServidor extends AppCompatActivity {
                 final ArrayList<EnviarDados> sincronizacao = response.body();
                 if (sincronizacao != null) {
 
-                    Log.i(TAG, sincronizacao.get(0).getnVenda());
+                    /*Log.i(TAG, sincronizacao.get(0).getnVenda());
                     Log.i(TAG, sincronizacao.get(0).getnVendaSiac());
 
                     for (EnviarDados enviarDados : sincronizacao) {
@@ -156,7 +162,9 @@ public class EnviarDadosServidor extends AppCompatActivity {
                     Intent i = new Intent(context, SincronizarBancoDados.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
-                    finish();
+                    finish();*/
+
+                    FinalizarPOS();
                 }
             }
 
@@ -211,7 +219,7 @@ public class EnviarDadosServidor extends AppCompatActivity {
                     }*/
 
 
-                    prefs.edit().putBoolean("sincronizado", false).apply();
+                    /*prefs.edit().putBoolean("sincronizado", false).apply();
                     prefs.edit().putString("unidade_vendedor", "").apply();
                     prefs.edit().putString("unidade_usuario", "").apply();
                     prefs.edit().putString("codigo_usuario", "").apply();
@@ -235,7 +243,9 @@ public class EnviarDadosServidor extends AppCompatActivity {
                     Intent i = new Intent(context, SincronizarBancoDados.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
-                    finish();
+                    finish();*/
+
+                    FinalizarPOS();
                 }
             }
 
@@ -248,6 +258,67 @@ public class EnviarDadosServidor extends AppCompatActivity {
                 }
             }
         });
+    }
+
+
+    void FinalizarPOS() {
+
+        //MOSTRA A MENSAGEM DE SINCRONIZAÇÃO
+        pd = ProgressDialog.show(context, "Finalizando POS...", "Aguarde...",
+                true, false);
+
+        final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
+
+        final Call<Sincronizador> call = iSincronizar.ativarDesativarPOS("desativar", prefs.getString("serial_app", ""));
+
+        call.enqueue(new Callback<Sincronizador>() {
+            @Override
+            public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
+
+                //
+                final Sincronizador sincronizacao = response.body();
+                if (sincronizacao != null) {
+                    if(sincronizacao.getErro().equalsIgnoreCase("0")){
+
+                    }
+                } else {
+                    Toast.makeText(context, "Não foi possível Finalizar o POS!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Sincronizador> call, @NonNull Throwable t) {
+                //msgErro = "Não conseguimos ativar o app! Tente novamente em alguns instantes.";
+                Toast.makeText(context, "Falha - " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //
+        prefs.edit().putBoolean("sincronizado", false).apply();
+        prefs.edit().putString("unidade_vendedor", "").apply();
+        prefs.edit().putString("unidade_usuario", "").apply();
+        prefs.edit().putString("codigo_usuario", "").apply();
+        prefs.edit().putString("login_usuario", "").apply();
+        prefs.edit().putString("senha_usuario", "").apply();
+        prefs.edit().putString("usuario_atual", "").apply();
+        prefs.edit().putString("nome_vendedor", "").apply();
+        prefs.edit().putString("data_movimento", "").apply();
+        prefs.edit().putString("biometria", "").apply();
+
+        //CANCELA A MENSAGEM DE SINCRONIZAÇÃO
+        if (pd != null && pd.isShowing()) {
+            pd.dismiss();
+        }
+
+        Toast.makeText(context, "POS Finalizado!", Toast.LENGTH_SHORT).show();
+
+
+        //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+        context.deleteDatabase("siacmobileDB");
+        Intent i = new Intent(context, SincronizarBancoDados.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
     }
 
     @Override

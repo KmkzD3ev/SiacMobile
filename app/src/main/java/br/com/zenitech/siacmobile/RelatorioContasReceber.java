@@ -21,6 +21,10 @@ import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.RelatorioContasReceberAdapter;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
+import stone.application.StoneStart;
+import stone.utils.Stone;
+
+import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 public class RelatorioContasReceber extends AppCompatActivity {
     //
@@ -40,6 +44,7 @@ public class RelatorioContasReceber extends AppCompatActivity {
 
     private LinearLayout erroRelatorio;
     private Button venderProdutos;
+    Configuracoes configuracoes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +82,55 @@ public class RelatorioContasReceber extends AppCompatActivity {
                 finish();
             });
         }
+
+        configuracoes = new Configuracoes();
+        findViewById(R.id.btnPrintRelPed).setOnClickListener(v -> {
+            Intent i;
+            i = new Intent(context, ImpressoraPOS.class);
+            /*if (configuracoes.GetDevice()) {
+                i = new Intent(context, ImpressoraPOS.class);
+            } else {
+                i = new Intent(context, Impressora.class);
+            }*/
+
+            //
+            i.putExtra("imprimir", "relatorioBaixa");
+
+            //i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
+        if (configuracoes.GetDevice()) {
+            iniciarStone();
+        }
+    }
+
+    // MODULO STONE **
+
+    // Iniciar o Stone
+    void iniciarStone() {
+        // O primeiro passo é inicializar o SDK.
+        StoneStart.init(context);
+        /*Em seguida, é necessário chamar o método setAppName da classe Stone,
+        que recebe como parâmetro uma String referente ao nome da sua aplicação.*/
+        Stone.setAppName(getApplicationName(context));
+        //Ambiente de Sandbox "Teste"
+        /*Stone.setEnvironment(new Configuracoes().Ambiente());
+        //Ambiente de Produção
+        //Stone.setEnvironment((Environment.PRODUCTION));
+
+        // Esse método deve ser executado para inicializar o SDK
+        List<UserModel> userList = StoneStart.init(context);
+
+        // Quando é retornado null, o SDK ainda não foi ativado
+        if (userList != null) {
+            // O SDK já foi ativado.
+            _pinpadAtivado();
+
+        } else {
+            // Inicia a ativação do SDK
+            ativarStoneCode();
+        }*/
     }
 
     @Override

@@ -172,12 +172,12 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
             startActivity(i);
         });
 
-        view.findViewById(R.id.cv_enviar_dados).setOnClickListener(v -> enviarDados());
+        //view.findViewById(R.id.cv_enviar_dados).setOnClickListener(v -> enviarDados());
 
         return view;
     }
 
-    private void enviarDados() {
+    /*private void enviarDados() {
         String[] dados = bd.EnviarDados();
 
         Log.i("Dados: ", dados[0]);
@@ -200,7 +200,7 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
         final IEnviarDados iEnviarDados = IEnviarDados.retrofit.create(IEnviarDados.class);
 
         //
-        /*
+        *//*
         VENDAS.toString(),
                 CLIENTES.toString(),
                 PRODUTOS.toString(),
@@ -213,7 +213,7 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
                 VALORESFIN.toString(),
                 FPAGAMENTOS.toString(),
                 DOCUMENTOS.toString()
-        * */
+        * *//*
         final Call<ArrayList<EnviarDados>> call = iEnviarDados.enviarDados(
                 "850",
                 "419000026",
@@ -255,7 +255,7 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
                 }
             }
         });
-    }
+    }*/
 
 
     //exporting database

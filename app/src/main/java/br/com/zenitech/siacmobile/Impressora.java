@@ -115,7 +115,7 @@ public class Impressora extends AppCompatActivity {
     private ClassAuxiliar cAux;
 
     //DADOS PARA IMPRESSÃO
-    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco;
+    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, nota_fiscal;
 
     TextView total;
     public TextView imprimindo;
@@ -205,6 +205,7 @@ public class Impressora extends AppCompatActivity {
                 tel_contato = params.getString("tel_contato");
                 cpfcnpj = params.getString("cpfcnpj");
                 endereco = params.getString("endereco");
+                nota_fiscal = params.getString("nota_fiscal");
 
             } else {
                 Toast.makeText(context, "Envie algo para imprimir!", Toast.LENGTH_LONG).show();
@@ -286,7 +287,7 @@ public class Impressora extends AppCompatActivity {
             txtAgenciaBeneficiarioBoleto.setText(String.format("%s/%s-%s", conta.getAgencia(), conta.getConta(), conta.getDv_conta()));
             txtNossoNumeroBoleto.setText(cAux.nossoNumero(conta.getConvenio(), numero));
             txtDataDocumentoBoleto.setText(cAux.exibirDataAtual());
-            txtInstrucoesBoleto.setText(conta.getInstrucoes());
+            txtInstrucoesBoleto.setText(String.format("%s%s", conta.getInstrucoes(), !nota_fiscal.equalsIgnoreCase("") ? "\nREFERENTE A NOTA FISCAL: " + nota_fiscal : ""));
             txtNumeroDocumentoBoleto.setText(numero);//cAux.nossoNumero(conta.getConvenio(), 2));
             txtCarteiraBoleto.setText(conta.getCarteira());
             txtEspecieBoleto.setText("9");
@@ -1297,7 +1298,7 @@ public class Impressora extends AppCompatActivity {
 
         runTask((dialog, printer) -> {
             Log.d(LOG_TAG, "Print Relatório NFC-e");
-            printer.reset();
+            //printer.reset();
 
             elementosPedidos = bd.getRelatorioVendasPedidos();
             /*String serie = bd.getSeriePOS();*/
@@ -1319,6 +1320,7 @@ public class Impressora extends AppCompatActivity {
             textBuffer.append(tamFont).append("{br}");
             textBuffer.append(tamFont).append("Unidade: ").append(unidade.getDescricao_unidade()).append("{br}");
             textBuffer.append(tamFont).append("Serial: ").append(prefs.getString("serial", "")).append("{br}");
+            textBuffer.append(tamFont).append("Data Movimento: ").append(cAux.exibirData(prefs.getString("data_movimento_atual", ""))).append("{br}");
 
             textBuffer.append(tamFont).append("{br}");
             textBuffer.append(tamFont).append("{br}").append("         *** ITENS ***").append("{br}");
@@ -1348,6 +1350,10 @@ public class Impressora extends AppCompatActivity {
                     textBuffer.append(tamFont).append("PRODUTO: ").append(pedidos.getProduto_venda()).append("{br}");
                     textBuffer.append(tamFont).append("QTDE.: ").append(" | VL.UNIT: ").append(" | VL.TOTAL: ").append("{br}");
                     textBuffer.append(tamFont).append(pedidos.getQuantidade_venda()).append("       | ").append(cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario()))).append("    | ").append(cAux.maskMoney(new BigDecimal(pedidos.getValor_total()))).append("{br}");
+
+                    textBuffer.append(tamFont).append("FORMA(S) PAGAMENTO: ").append("{br}");
+                    textBuffer.append(tamFont).append(pedidos.getFormas_pagamento()).append("{br}");
+
                     textBuffer.append(tamFont).append("CLIENTE: ").append(pedidos.getCodigo_cliente()).append("{br}");
                     textBuffer.append(tamFont).append("-------------------------------").append("{br}");
 
@@ -1374,7 +1380,7 @@ public class Impressora extends AppCompatActivity {
 
             textBuffer.append("{br}{br}");
 
-            printer.reset();
+            //printer.reset();
             printer.selectPageMode();
             printer.setPageXY(0, 0);
             printer.setAlign(0);

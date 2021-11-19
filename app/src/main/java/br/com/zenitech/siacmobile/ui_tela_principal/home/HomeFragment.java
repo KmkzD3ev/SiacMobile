@@ -178,7 +178,7 @@ public class HomeFragment extends Fragment {
         txtEmpresa.setText(unidades.getRazao_social());
         txtCodUnidade.setText(posApp.getUnidade());
         //
-        textView.setText(String.format("%s | %s", posApp.getSerial(), posApp.getSerie()));
+        textView.setText(String.format("%s | %s", prefs.getString("serial_app", ""), posApp.getSerie()));
         //txtVersao.setText(String.format("Versão %s", BuildConfig.VERSION_NAME));
         txtVersao.setText(BuildConfig.VERSION_NAME);
         txtDataUltimoSinc.setText(prefs.getString("data_sincronizado", ""));

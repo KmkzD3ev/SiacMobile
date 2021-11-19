@@ -21,8 +21,8 @@
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:tint="#333"
-            app:srcCompat="@drawable/ic_equalizer" />
+            app:srcCompat="@drawable/ic_equalizer"
+            app:tint="#333" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -43,8 +43,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRelatorioContasReceber"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:scrollbars="vertical" />
+
+    <Button
+        android:id="@+id/btnPrintRelPed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Imprimir Relatório" />
 
 </LinearLayout>

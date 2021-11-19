@@ -105,6 +105,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     public static EditText txtDocumentoFormaPagamento;
     public static EditText txtVencimentoFormaPagamento, txtValorFormaPagamento;
     public static LinearLayout bgTotal;
+    public EditText txtNotaFiscal;
 
     //LISTAR VENDAS
     private ArrayList<FinanceiroVendasDomain> listaFinanceiroCliente;
@@ -118,7 +119,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private String total_venda = "0.0";
     private ClassAuxiliar classAuxiliar;
 
-    TextInputLayout tilDocumento, tilVencimento;
+    TextInputLayout tilDocumento, tilVencimento, tilNotaFiscal;
     private AlertDialog alerta;
 
     //DADOS PARA PASSAR AO EMISSOR WEB
@@ -197,6 +198,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //
         tilDocumento = findViewById(R.id.tilDocumento);
         tilVencimento = findViewById(R.id.tilVencimento);
+        tilNotaFiscal = findViewById(R.id.tilNotaFiscal);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -210,6 +212,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         txtValorFormaPagamento.addTextChangedListener(new FinanceiroDaVenda.MoneyTextWatcher(txtValorFormaPagamento));
 
         txtDocumentoFormaPagamento = findViewById(R.id.txtDocumentoFormaPagamento);
+        txtNotaFiscal = findViewById(R.id.txtNotaFiscal);
 
         //
         txtVencimentoFormaPagamento = findViewById(R.id.txtVencimentoFormaPagamento);
@@ -487,6 +490,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                         i.putExtra("cpfcnpj", cpfcnpjCliente);
                         i.putExtra("endereco", enderecoCliente);
                         i.putExtra("imprimir", "Boleto");
+                        i.putExtra("nota_fiscal", listaFinanceiroCliente.get(a).getNota_fiscal());
 
                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(i);
@@ -686,8 +690,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 "" + classAuxiliar.inserirDataAtual(),//DATA_INCLUSAO
                 "",//NOSSO_NUMERO_FINANCEIRO
                 "" + prefs.getInt("id_vendedor", 1),//ID_VENDEDOR_FINANCEIRO
-                "" + prefs.getInt("id_venda_app", 1)
-        ));
+                "" + prefs.getInt("id_venda_app", 1),
+                txtNotaFiscal.getText().toString()
+        ));//sdsdfd
 
         //if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
         if (fPag[0].contains("PROMISSORIA")) {
@@ -790,6 +795,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
                     txtDocumentoFormaPagamento.setText(nDoc);
                     txtDocumentoFormaPagamento.setEnabled(false);
+                    tilNotaFiscal.setVisibility(View.VISIBLE);
                 }
 
                 //int n = (serieBoleto * 100000000) + 1;
@@ -807,6 +813,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             runOnUiThread(() -> {
                 tilDocumento.setVisibility(View.VISIBLE);
                 tilVencimento.setVisibility(View.GONE);
+                //
+                tilNotaFiscal.setVisibility(View.GONE);
+                txtNotaFiscal.setText("");
                 //
                 txtVencimentoFormaPagamento.setText(classAuxiliar.exibirDataAtual());
 

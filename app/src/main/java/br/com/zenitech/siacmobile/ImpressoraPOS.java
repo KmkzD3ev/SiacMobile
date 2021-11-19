@@ -42,6 +42,7 @@ import br.com.zenitech.siacmobile.controller.PrintViewHelper;
 import br.com.zenitech.siacmobile.domains.ItensPedidos;
 import br.com.zenitech.siacmobile.domains.Pedidos;
 import br.com.zenitech.siacmobile.domains.PedidosNFE;*/
+import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import stone.application.enums.Action;
@@ -70,6 +71,9 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
     ArrayList<VendasPedidosDomain> elementosPedidos;
     VendasPedidosDomain pedidos;
+
+    ArrayList<FinanceiroVendasDomain> elementosRecebidos;
+    FinanceiroVendasDomain recebidos;
 
     UnidadesDomain unidade;
 
@@ -145,6 +149,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         if (tipoImpressao.equals("relatorio")) {
             printRelatorioNFCE58mm();
+        }if (tipoImpressao.equals("relatorioBaixa")) {
+            printRelatorioBaixas58mm();
         } else if (tipoImpressao.equals("Promissoria")) {
             printPromissoria();
         } else {
@@ -396,6 +402,10 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 ppp.addLine(new CentralizedBigText("PRODUTO: " + pedidos.getProduto_venda()));
                 ppp.addLine(new CentralizedBigText("QTDE.:  | VL.UNIT:  | VL.TOTAL: "));
                 ppp.addLine(new CentralizedBigText(pedidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(pedidos.getValor_total()))));
+
+                ppp.addLine(new CentralizedBigText("FORMA(S) PAGAMENTO: "));
+                ppp.addLine(new CentralizedBigText(pedidos.getFormas_pagamento()));
+
                 ppp.addLine(new CentralizedBigText("CLIENTE: " + pedidos.getCodigo_cliente()));
                 ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
 
@@ -416,6 +426,97 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         ppp.addLine(new CentralizedBigText("TOTAL DE VENDAS: " + elementosPedidos.size()));
         ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: " + s.intValue()));
+        ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed))));
+
+        ppp.addLine("");
+        ppp.addLine("");
+
+        ppp.setConnectionCallback(new StoneCallbackInterface() {
+            @Override
+            public void onSuccess() {
+                liberarImpressora();
+            }
+
+            @Override
+            public void onError() {
+                liberarImpressora();
+                Toast.makeText(context, "Erro ao imprimir: " + ppp.getListOfErrors(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //ppp.addLine(textBuffer.toString());
+        ppp.execute();
+    }
+
+    private void printRelatorioBaixas58mm() {
+        PosPrintProvider ppp = new PosPrintProvider(this);
+
+        elementosRecebidos = bd.getRelatorioContasReceber();
+        /*String serie = bd.getSeriePOS();*/
+        //elementosUnidade = bd.getUnidade();
+        //unidade = elementosUnidade.get(0);
+
+        unidade = bd.getUnidade();
+
+        String quantItens = "0";
+        String valTotalPed = "0";
+
+        int posicaoNota;
+
+        //IMPRIMIR CABEÇALHO
+        ppp.addLine(new CentralizedBigText("***  RELATORIO BAIXAS  ***"));
+        ppp.addLine("");
+
+        ppp.addLine(new CentralizedBigText("Unidade: " + unidade.getDescricao_unidade()));
+        ppp.addLine(new CentralizedBigText("Serial: " + prefs.getString("serial", "")));
+
+        ppp.addLine("");
+        ppp.addLine(new CentralizedBigText("*** ITENS ***"));
+        ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+
+        // TOTAL DE PRODUTOS
+        int totalProdutos = 0;
+        int totalProdutosNFE = 0;
+
+        //DADOS DAS NOTAS NFC-e
+        if (elementosRecebidos.size() > 0) {
+            for (int n = 0; n < elementosRecebidos.size(); n++) {
+
+                //DADOS DOS PEDIDO
+                recebidos = elementosRecebidos.get(n);
+
+                // SOMA A QUANTIDADE DE ITENS
+                //String[] somarItens = {quantItens, recebidos.getQuantidade_venda()};
+                //quantItens = String.valueOf(cAux.somar(somarItens));
+
+                // SOMA O VALOR TOTAL DOS PEDIDOS
+                String[] somarValTot = {valTotalPed, recebidos.getPago()};
+                valTotalPed = String.valueOf(cAux.somar(somarValTot));
+
+                //IMPRIMIR TEXTO
+                ppp.addLine(new CentralizedBigText(recebidos.getFpagamento_financeiro().replace(" _ ", "") + "  " + cAux.maskMoney(new BigDecimal(recebidos.getPago()))));
+                //ppp.addLine(new CentralizedBigText("QTDE.:  | VL.UNIT:  | VL.TOTAL: "));
+                //ppp.addLine(new CentralizedBigText(recebidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(recebidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(recebidos.getValor_total()))));
+                //ppp.addLine(new CentralizedBigText("CLIENTE: " + pedidos.getCodigo_cliente()));
+                ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+
+                try {
+                    String[] sum = {String.valueOf(n), "1"};
+                    imprimindo.setText(String.valueOf(cAux.somar(sum)));
+                } catch (Exception ignored) {
+
+                }
+                //totalProdutos += Integer.parseInt(itensPedidos.getQuantidade());
+            }
+        }
+
+        ppp.addLine(new CentralizedBigText("*** TOTAIS ***"));
+        ppp.addLine("");
+
+        Double s = Double.parseDouble(quantItens);
+
+        ppp.addLine(new CentralizedBigText("FORMAS DE PAGAMENTO: " + elementosRecebidos.size()));
+        //ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: " + s.intValue()));
         ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed))));
 
         ppp.addLine("");

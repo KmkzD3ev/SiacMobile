@@ -107,7 +107,7 @@ public class FinanceiroContasReceberAdapter extends RecyclerView.Adapter<Finance
     }
 
     public void excluirItem(String codigo, String codigo_financeiro_app, double totalVenda, int position) {
-        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo, null,null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         DatabaseHelper bd;
         bd = new DatabaseHelper(context);
         bd.deleteItemFinanceiroReceber(financeiroVendasDomain);

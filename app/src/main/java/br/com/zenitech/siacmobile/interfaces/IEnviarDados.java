@@ -44,7 +44,8 @@ public interface IEnviarDados {
             @Field("VENCIMENTOS") String VENCIMENTOS,
             @Field("VALORESFIN") String VALORESFIN,
             @Field("FPAGAMENTOS") String FPAGAMENTOS,
-            @Field("DOCUMENTOS") String DOCUMENTOS
+            @Field("DOCUMENTOS") String DOCUMENTOS,
+            @Field("NOTASFISCAIS") String NOTASFISCAIS
     );
 
     @FormUrlEncoded

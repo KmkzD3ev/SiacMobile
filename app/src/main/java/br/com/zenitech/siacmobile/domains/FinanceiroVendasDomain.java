@@ -18,8 +18,9 @@ public class FinanceiroVendasDomain {
     private String nosso_numero_financeiro;
     private String id_vendedor_financeiro;
     private String id_financeiro_app;
+    private String nota_fiscal;
 
-    public FinanceiroVendasDomain(String codigo_financeiro, String unidade_financeiro, String data_financeiro, String codigo_cliente_financeiro, String fpagamento_financeiro, String documento_financeiro, String vencimento_financeiro, String valor_financeiro, String status_autorizacao, String pago, String vasilhame_ref, String usuario_atual, String data_inclusao, String nosso_numero_financeiro, String id_vendedor_financeiro, String id_financeiro_app) {
+    public FinanceiroVendasDomain(String codigo_financeiro, String unidade_financeiro, String data_financeiro, String codigo_cliente_financeiro, String fpagamento_financeiro, String documento_financeiro, String vencimento_financeiro, String valor_financeiro, String status_autorizacao, String pago, String vasilhame_ref, String usuario_atual, String data_inclusao, String nosso_numero_financeiro, String id_vendedor_financeiro, String id_financeiro_app, String nota_fiscal) {
         this.codigo_financeiro = codigo_financeiro;
         this.unidade_financeiro = unidade_financeiro;
         this.data_financeiro = data_financeiro;
@@ -36,6 +37,7 @@ public class FinanceiroVendasDomain {
         this.nosso_numero_financeiro = nosso_numero_financeiro;
         this.id_vendedor_financeiro = id_vendedor_financeiro;
         this.id_financeiro_app = id_financeiro_app;
+        this.nota_fiscal = nota_fiscal;
     }
 
     public String getCodigo_financeiro() {
@@ -164,5 +166,13 @@ public class FinanceiroVendasDomain {
 
     public void setId_financeiro_app(String id_financeiro_app) {
         this.id_financeiro_app = id_financeiro_app;
+    }
+
+    public String getNota_fiscal() {
+        return nota_fiscal;
+    }
+
+    public void setNota_fiscal(String nota_fiscal) {
+        this.nota_fiscal = nota_fiscal;
     }
 }

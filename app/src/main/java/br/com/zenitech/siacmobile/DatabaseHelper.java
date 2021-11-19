@@ -494,6 +494,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null,
+                null,
                 null, null, null, null, null);
         vendas.setCodigo_venda(cursor.getString(0));
         vendas.setCodigo_cliente(cursor.getString(1));
@@ -511,6 +512,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         vendas.setData_cadastro(cursor.getString(13));
         vendas.setCodigo_venda_app(cursor.getString(14));
         vendas.setVenda_finalizada_app(cursor.getString(15));
+        // ASSUME COMO FORMAS DE PAGAMENTO PARA LISTAGEM
+        vendas.setFormas_pagamento(cursor.getString(16));
         return vendas;
     }
 
@@ -864,7 +867,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "quantidade_venda,  preco_unitario,  (preco_unitario * quantidade_venda) valor_total, " +
                 "vendedor_venda,  status_autorizacao_venda,  entrega_futura_venda, " +
                 "entrega_futura_realizada,  usuario_atual,  data_cadastro,  codigo_venda_app, " +
-                "venda_finalizada_app  chave_importacao " +
+                "venda_finalizada_app chave_importacao, " +
+                "(" +
+                "SELECT GROUP_CONCAT(fin.fpagamento_financeiro || ':  ' || [REPLACE]('R$ ' || printf('%.2f', fin.valor_financeiro),'.',','), '\n') " +
+                "FROM financeiro fin " +
+                "WHERE fin.id_financeiro_app = codigo_venda_app " +
+                ") formas_pagamento " +
                 "FROM " + TABELA_VENDAS + " " +
                 "INNER JOIN clientes ON clientes.codigo_cliente = vendas_app.codigo_cliente " +
                 "WHERE venda_finalizada_app = '1' ORDER BY produto_venda";// GROUP BY " + PRODUTO_VENDA
@@ -996,7 +1004,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     public FinanceiroVendasDomain getBaixaRecebida(String codigo_finan) {
-        FinanceiroVendasDomain listaVendas = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroVendasDomain listaVendas = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         String query = "SELECT " +
                 "codigo_financeiro, unidade_financeiro, data_financeiro, " +
@@ -1440,6 +1448,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String NOSSO_NUMERO_FINANCEIRO = "nosso_numero_financeiro";
     private static final String ID_VENDEDOR_FINANCEIRO = "id_vendedor_financeiro";
     private static final String ID_FINANCEIRO_APP = "id_financeiro_app";
+    private static final String NOTA_FISCAL = "nota_fiscal";
 
     private static final String[] COLUNAS_FINANCEIRO = {
             CODIGO_FINANCEIRO,
@@ -1462,7 +1471,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private FinanceiroVendasDomain cursorToFinanceiroVendasDomain(Cursor cursor) {
-        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         financeiroVendasDomain.setCodigo_financeiro(cursor.getString(0));
         financeiroVendasDomain.setUnidade_financeiro(cursor.getString(1));
@@ -1480,6 +1489,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         financeiroVendasDomain.setNosso_numero_financeiro(cursor.getString(13));
         financeiroVendasDomain.setId_vendedor_financeiro(cursor.getString(14));
         financeiroVendasDomain.setId_financeiro_app(cursor.getString(15));
+        financeiroVendasDomain.setNota_fiscal(cursor.getString(16));
 
         return financeiroVendasDomain;
     }
@@ -1517,6 +1527,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(NOSSO_NUMERO_FINANCEIRO, financeiroVendasDomain.getNosso_numero_financeiro());
         values.put(ID_VENDEDOR_FINANCEIRO, financeiroVendasDomain.getId_vendedor_financeiro());
         values.put(ID_FINANCEIRO_APP, financeiroVendasDomain.getId_financeiro_app());
+        values.put(NOTA_FISCAL, financeiroVendasDomain.getNota_fiscal());
         db.insert(TABELA_FINANCEIRO, null, values);
         db.close();
     }
@@ -1800,7 +1811,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private FinanceiroReceberClientes cursorToContasReceberCliente(Cursor cursor) {
-        FinanceiroReceberClientes clientes = new FinanceiroReceberClientes(null,  null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroReceberClientes clientes = new FinanceiroReceberClientes(null, null, null, null, null, null, null, null, null, null, null, null, null);
         //
         clientes.setCodigo_financeiro(cursor.getString(0));
         clientes.setNosso_numero_financeiro(cursor.getString(1));
@@ -2339,6 +2350,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder VALORESFIN = new StringBuilder();
         StringBuilder FPAGAMENTOS = new StringBuilder();
         StringBuilder DOCUMENTOS = new StringBuilder();
+        StringBuilder NOTASFISCAIS = new StringBuilder();
 
         String query = "SELECT *, (fin.valor_financeiro * 100) as valFin " +
                 "FROM " + TABELA_VENDAS + " ven " +
@@ -2390,6 +2402,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // **
                 DOCUMENTOS.append(",");
                 DOCUMENTOS.append(cursor.getString(cursor.getColumnIndex("documento_financeiro")));
+
+                // **
+                NOTASFISCAIS.append(",");
+                NOTASFISCAIS.append(cursor.getString(cursor.getColumnIndex("nota_fiscal")));
             } while (cursor.moveToNext());
         }
 
@@ -2416,7 +2432,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 VENCIMENTOS.toString(),
                 VALORESFIN.toString(),
                 FPAGAMENTOS.toString(),
-                DOCUMENTOS.toString()
+                DOCUMENTOS.toString(),
+                NOTASFISCAIS.toString()
         };
 
         return ret;

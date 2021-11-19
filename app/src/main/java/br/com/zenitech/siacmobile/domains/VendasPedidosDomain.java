@@ -19,8 +19,9 @@ public class VendasPedidosDomain {
     private String codigo_venda_app;
     private String venda_finalizada_app;
     private String chave_importacao;
+    private String formas_pagamento;
 
-    public VendasPedidosDomain(String codigo_venda, String codigo_cliente, String unidade_venda, String produto_venda, String data_movimento, String quantidade_venda, String preco_unitario, String valor_total, String vendedor_venda, String status_autorizacao_venda, String entrega_futura_venda, String entrega_futura_realizada, String usuario_atual, String data_cadastro, String codigo_venda_app, String venda_finalizada_app, String chave_importacao) {
+    public VendasPedidosDomain(String codigo_venda, String codigo_cliente, String unidade_venda, String produto_venda, String data_movimento, String quantidade_venda, String preco_unitario, String valor_total, String vendedor_venda, String status_autorizacao_venda, String entrega_futura_venda, String entrega_futura_realizada, String usuario_atual, String data_cadastro, String codigo_venda_app, String venda_finalizada_app, String chave_importacao, String formas_pagamento) {
         this.codigo_venda = codigo_venda;
         this.codigo_cliente = codigo_cliente;
         this.unidade_venda = unidade_venda;
@@ -38,6 +39,7 @@ public class VendasPedidosDomain {
         this.codigo_venda_app = codigo_venda_app;
         this.venda_finalizada_app = venda_finalizada_app;
         this.chave_importacao = chave_importacao;
+        this.formas_pagamento = formas_pagamento;
     }
 
     public String getCodigo_venda() {
@@ -174,5 +176,13 @@ public class VendasPedidosDomain {
 
     public void setChave_importacao(String chave_importacao) {
         this.chave_importacao = chave_importacao;
+    }
+
+    public String getFormas_pagamento() {
+        return formas_pagamento;
+    }
+
+    public void setFormas_pagamento(String formas_pagamento) {
+        this.formas_pagamento = formas_pagamento;
     }
 }
