@@ -443,7 +443,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         //
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
-        final Call<Sincronizador> call = iSincronizar.sincronizar(serial);
+        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "1.1.9");
         call.enqueue(new Callback<Sincronizador>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
