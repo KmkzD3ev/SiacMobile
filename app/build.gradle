@@ -12,14 +12,13 @@ android {
         }
     }
     compileSdkVersion 30
-    buildToolsVersion '30.0.2'
 
     defaultConfig {
         applicationId "br.com.zenitech.siacmobile"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 32
-        versionName '1.8.8'
+        versionCode 38
+        versionName '1.9.5'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config
@@ -46,18 +45,12 @@ android {
     buildFeatures {
         viewBinding true
     }
-
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/ASL2.0'
-        exclude("META-INF/*.kotlin_module")
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/*.kotlin_module']
+        }
     }
+
 }
 
 dependencies {
@@ -85,7 +78,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.2'
     testImplementation 'junit:junit:4.13.2'
 
@@ -95,7 +88,7 @@ dependencies {
     // Localização
     implementation 'com.google.maps.android:android-maps-utils:2.2.3'
     implementation 'com.google.android.gms:play-services-location:18.0.0'
-    implementation 'com.google.android.gms:play-services-maps:17.0.1'
+    implementation 'com.google.android.gms:play-services-maps:18.0.0'
 
     //
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
@@ -107,7 +100,14 @@ dependencies {
     implementation 'com.google.zxing:core:3.4.1'
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0@aar'
 
-    // Stone ** 3.4.3.2
+    // Stone **
+    implementation 'br.com.stone:stone-sdk:3.14.10'
+    implementation 'br.com.stone:stone-sdk-posandroid:3.14.10'
+    implementation 'br.com.stone:stone-sdk-posandroid-ingenico:3.14.10'
+    implementation 'br.com.stone:stone-sdk-posandroid-sunmi:3.14.10'
+    implementation 'br.com.stone:stone-sdk-posandroid-gertec:3.14.10'
+
+    /*// Stone ** 3.4.3.2
     implementation 'br.com.stone:stone-sdk:3.11.8'
     implementation 'br.com.stone:stone-sdk-posandroid:3.11.8'
 
@@ -116,7 +116,7 @@ dependencies {
 
     // Terminais Gertec:3.10.0
     implementation 'br.com.stone:stone-sdk-posandroid-ingenico:3.11.8'
-    implementation 'br.com.stone:stone-sdk-posandroid-gertec:3.11.8'
+    implementation 'br.com.stone:stone-sdk-posandroid-gertec:3.11.8'*/
 
     // Multidex **
     implementation 'androidx.multidex:multidex:2.0.1'

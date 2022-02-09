@@ -159,5 +159,7 @@
     <string name="title_activity_relatorios_das_vendas">MainActivity</string>
     <string name="title_activity_relatorio_das_vendas">MainActivity</string>
     <string name="title_activity_relatorio_de_vendas_geral">MainActivity</string>
+    <string name="consultar_vale">CONSULTAR VALE</string>
+    <string name="n_mero_do_vale">Número do Vale</string>
 
 </resources>

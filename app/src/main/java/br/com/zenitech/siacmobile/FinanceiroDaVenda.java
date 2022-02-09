@@ -106,6 +106,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     public static EditText txtVencimentoFormaPagamento, txtValorFormaPagamento;
     public static LinearLayout bgTotal;
     public EditText txtNotaFiscal;
+    LinearLayout formFinan;
 
     //LISTAR VENDAS
     private ArrayList<FinanceiroVendasDomain> listaFinanceiroCliente;
@@ -200,10 +201,6 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         tilVencimento = findViewById(R.id.tilVencimento);
         tilNotaFiscal = findViewById(R.id.tilNotaFiscal);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
         //Total Venda: R$
         //txtNomeClienteFinanceiro = (TextView) findViewById(R.id.txtNomeClienteFinanceiro);
         txtTotalFinanceiro = findViewById(R.id.txtTotalFinanceiro);
@@ -222,14 +219,19 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         txtTotalItemFinanceiro = findViewById(R.id.txtTotalItemFinanceiro);
 
         //
+        formFinan = findViewById(R.id.formFinan);
         btnAddF = findViewById(R.id.btnAddF);
         btnAddF.setOnClickListener(v -> {
             //SE O USUÁRIO NÃO ADICIONAR NENHUM VALOR
-            if (txtValorFormaPagamento.getText().toString().equals("") || txtValorFormaPagamento.getText().toString().equals("R$0,00")) {
+            String val = classAuxiliar.soNumeros(txtValorFormaPagamento.getText().toString());
+            /*if (txtValorFormaPagamento.getText().toString().equals("") ||
+                    txtValorFormaPagamento.getText().toString().equals("R$0,00") ||
+                    txtValorFormaPagamento.getText().toString().equals("R$0,00")
+            ) {*/
+            if(val.equalsIgnoreCase("") || val.equalsIgnoreCase("000")){
                 //
                 Toast.makeText(FinanceiroDaVenda.this, "Adicione uma valor para esta forma de pagamento.", Toast.LENGTH_LONG).show();
             } else {
-
                 //
                 String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
 
@@ -246,7 +248,6 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
                         //SE O CAMPO VENCIMENTO FOR IGUAL A 00/00/0000 PEDE QUE INFORME A DATA DO VENCIMENTO
                         if (txtVencimentoFormaPagamento.getText().toString().equals("") || txtVencimentoFormaPagamento.getText().toString().equals("00/00/0000")) {
-
                             //
                             Toast.makeText(FinanceiroDaVenda.this, "Data do vencimento é obrigatório.", Toast.LENGTH_LONG).show();
                         }
@@ -462,40 +463,44 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             */
 
             // IMPRESSÃO DO BOLETO
-            if (Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("1")) {
+            if (!configuracoes.GetDevice()) {
+                if (Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("1")) {
 
-                String contaBancFormPag = bd.getContaBancariaFormaPagamento(listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", ""));
-                if (!contaBancFormPag.equalsIgnoreCase("0")) {
+                    String contaBancFormPag = bd.getContaBancariaFormaPagamento(listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", ""));
+                    if (!contaBancFormPag.equalsIgnoreCase("0")) {
 
-                    String CodContaBanc = bd.getCodContaBancaria(contaBancFormPag);
+                        String CodContaBanc = bd.getCodContaBancaria(contaBancFormPag);
 
-                    // SE FOR IGUAL A 1 CÓD BB, IMPRIMI
-                    if (CodContaBanc.equalsIgnoreCase("1")) {
+                        // SE FOR IGUAL A 1 CÓD BB, IMPRIMI
+                        if (CodContaBanc.equalsIgnoreCase("1")) {
 
-                        Intent i;
-                        String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
-                        if (configuracoes.GetDevice()) {
+                            Intent i;
+                            String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
+                        /*if (configuracoes.GetDevice()) {
                             i = new Intent(context, ImpressoraPOS.class);
                         } else {
                             i = new Intent(context, Impressora.class);
-                        }
-                        i.putExtra("razao_social", nomeCliente);
-                        i.putExtra("tel_contato", "");
-                        //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
-                        i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
-                        i.putExtra("vencimento", listaFinanceiroCliente.get(a).getVencimento_financeiro());// txtVencimentoFormaPagamento.getText().toString());
-                        //i.putExtra("valor", val);
-                        i.putExtra("valor", val);
-                        i.putExtra("id_cliente", codigo_cliente);
-                        i.putExtra("cpfcnpj", cpfcnpjCliente);
-                        i.putExtra("endereco", enderecoCliente);
-                        i.putExtra("imprimir", "Boleto");
-                        i.putExtra("nota_fiscal", listaFinanceiroCliente.get(a).getNota_fiscal());
+                        }*/
+                            i = new Intent(context, Impressora.class);
 
-                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(i);
-                    } else {
-                        finish();
+                            i.putExtra("razao_social", nomeCliente);
+                            i.putExtra("tel_contato", "");
+                            //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
+                            i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+                            i.putExtra("vencimento", listaFinanceiroCliente.get(a).getVencimento_financeiro());// txtVencimentoFormaPagamento.getText().toString());
+                            //i.putExtra("valor", val);
+                            i.putExtra("valor", val);
+                            i.putExtra("id_cliente", codigo_cliente);
+                            i.putExtra("cpfcnpj", cpfcnpjCliente);
+                            i.putExtra("endereco", enderecoCliente);
+                            i.putExtra("imprimir", "Boleto");
+                            i.putExtra("nota_fiscal", listaFinanceiroCliente.get(a).getNota_fiscal());
+
+                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(i);
+                        } else {
+                            finish();
+                        }
                     }
                 }
             }

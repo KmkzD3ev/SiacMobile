@@ -9,9 +9,11 @@ import static stone.environment.Environment.PRODUCTION;
 import static stone.environment.Environment.SANDBOX;
 
 public class Configuracoes {
+    // VERSÃO DO BANCO DE DADOS
+    public static int VERSAO_BD = 13;
 
     // FALSE PARA DEFINIR PRODUÇÃO
-    final boolean ambinteTeste = true;
+    final boolean ambinteTeste = false;
 
     // INFORMA SE O APARELHO UTILIZADO É UM POS
     // SEMPRE RETORNAR FALSE CONFORME FOR GERADO O BUILD PARA PLAYSTORE

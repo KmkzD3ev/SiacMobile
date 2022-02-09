@@ -42,6 +42,7 @@ import br.com.zenitech.siacmobile.controller.PrintViewHelper;
 import br.com.zenitech.siacmobile.domains.ItensPedidos;
 import br.com.zenitech.siacmobile.domains.Pedidos;
 import br.com.zenitech.siacmobile.domains.PedidosNFE;*/
+import br.com.zenitech.siacmobile.domains.FinanceiroReceberDomain;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
@@ -62,7 +63,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
     private ClassAuxiliar cAux;
 
     //DADOS PARA IMPRESSÃO
-    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco;
+    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, strFormPags;
 
     TextView total;
     public TextView imprimindo;
@@ -72,8 +73,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
     ArrayList<VendasPedidosDomain> elementosPedidos;
     VendasPedidosDomain pedidos;
 
-    ArrayList<FinanceiroVendasDomain> elementosRecebidos;
-    FinanceiroVendasDomain recebidos;
+    ArrayList<FinanceiroReceberDomain> elementosRecebidos;
+    FinanceiroReceberDomain recebidos;
 
     UnidadesDomain unidade;
 
@@ -148,12 +149,13 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 //        ppp = new PosPrintProvider(context);
 
         if (tipoImpressao.equals("relatorio")) {
+            Log.e("IMPRESSORA", "Imprimir relatorio");
             printRelatorioNFCE58mm();
         }if (tipoImpressao.equals("relatorioBaixa")) {
             printRelatorioBaixas58mm();
         } else if (tipoImpressao.equals("Promissoria")) {
             printPromissoria();
-        } else {
+        }  else if (tipoImpressao.equals("Boleto")) {
             printBoleto();
         }
 
@@ -357,6 +359,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         PosPrintProvider ppp = new PosPrintProvider(this);
 
         elementosPedidos = bd.getRelatorioVendasPedidos();
+
+        strFormPags = bd.getFormPagRelatorioVendasPedidos();
         /*String serie = bd.getSeriePOS();*/
         //elementosUnidade = bd.getUnidade();
         //unidade = elementosUnidade.get(0);
@@ -374,6 +378,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         ppp.addLine(new CentralizedBigText("Unidade: " + unidade.getDescricao_unidade()));
         ppp.addLine(new CentralizedBigText("Serial: " + prefs.getString("serial", "")));
+        ppp.addLine(new CentralizedBigText("Data Movimento: " + cAux.exibirData(prefs.getString("data_movimento_atual", ""))));
 
         ppp.addLine("");
         ppp.addLine(new CentralizedBigText("*** ITENS ***"));
@@ -426,6 +431,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         ppp.addLine(new CentralizedBigText("TOTAL DE VENDAS: " + elementosPedidos.size()));
         ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: " + s.intValue()));
+        ppp.addLine(new CentralizedBigText("FORMAS PAGAMENTO: "));
+        ppp.addLine(new CentralizedBigText(strFormPags));
         ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed))));
 
         ppp.addLine("");

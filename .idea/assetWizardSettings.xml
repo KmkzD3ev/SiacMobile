@@ -308,7 +308,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/keyboard_arrow_right/baseline_keyboard_arrow_right_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialicons/sticky_note_2/baseline_sticky_note_2_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -318,7 +318,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_baseline_keyboard_arrow_right" />
+                            <entry key="outputName" value="ic_baseline_sticky_note_2_24" />
                             <entry key="sourceFile" value="C:\Users\kma_s\Documents\PROJETOS ANDROID\ZENITECH\SIAC_MOBILE - LOGGAS\SiacMobile" />
                           </map>
                         </option>

@@ -75,13 +75,13 @@ public class NotificationsFragment extends Fragment {
 
         view.findViewById(R.id.cv_btn_print).setOnClickListener(v -> {
             Intent i = new Intent(getContext(), ImpressoraPOS.class);
-            i.putExtra("imprimir", "Teste");
+            i.putExtra("imprimir", "Boleto");
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
         });
 
         //
-        if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0) {
+        if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0 || bd.getAllVales().size() > 0) {
             cv_enviar_dados.setVisibility(View.VISIBLE);
             //cv_btn_resetar_app.setVisibility(View.GONE);
             cv_btn_finalizar_app.setVisibility(View.GONE);
@@ -229,7 +229,7 @@ public class NotificationsFragment extends Fragment {
                         Intent i = new Intent(context, SincronizarBancoDados.class);
                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(i);
-                        requireActivity().onBackPressed();
+                        //requireActivity().onBackPressed();
                     }
                 } else {
                     Toast.makeText(context, "Não foi possível Finalizar o POS!", Toast.LENGTH_SHORT).show();

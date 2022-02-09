@@ -115,7 +115,7 @@ public class Impressora extends AppCompatActivity {
     private ClassAuxiliar cAux;
 
     //DADOS PARA IMPRESSÃO
-    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, nota_fiscal;
+    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, nota_fiscal, strFormPags;
 
     TextView total;
     public TextView imprimindo;
@@ -1301,6 +1301,8 @@ public class Impressora extends AppCompatActivity {
             //printer.reset();
 
             elementosPedidos = bd.getRelatorioVendasPedidos();
+
+            strFormPags = bd.getFormPagRelatorioVendasPedidos();
             /*String serie = bd.getSeriePOS();*/
             //elementosUnidade = bd.getUnidade();
             //unidade = elementosUnidade.get(0);
@@ -1376,6 +1378,7 @@ public class Impressora extends AppCompatActivity {
             Double s = Double.parseDouble(quantItens);
             textBuffer.append(tamFont).append("TOTAL DE VENDAS: ").append(elementosPedidos.size()).append("{br}");
             textBuffer.append(tamFont).append("TOTAL DE ITENS: ").append(s.intValue()).append("{br}");
+            textBuffer.append(tamFont).append("FORMAS PAGAMENTO: ").append("{br}").append(strFormPags).append("{br}");
             textBuffer.append(tamFont).append("VALOR TOTAL: R$ ").append(cAux.maskMoney(new BigDecimal(valTotalPed))).append("{br}");
 
             textBuffer.append("{br}{br}");

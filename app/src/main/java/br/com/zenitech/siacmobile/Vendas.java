@@ -303,7 +303,7 @@ public class Vendas extends AppCompatActivity {
                     "" + id_cliente,//CODIGO_CLIENTE_VENDA
                     "" + prefs.getString("unidade", ""),//UNIDADE_VENDA
                     "" + spProduto.getSelectedItem().toString(),//PRODUTO_VENDA
-                    "" + classAuxiliar.inserirDataAtual(),//DATA_MOVIMENTO
+                    "" + classAuxiliar.formatarData(prefs.getString("data_movimento", "")),//DATA_MOVIMENTO classAuxiliar.inserirDataAtual()
                     "" + etQuantidade.getText().toString(),//QUANTIDADE_VENDA
                     "" + valorUnit,//PRECO_UNITARIO
                     "" + total,//VALOR_TOTAL

@@ -1,5 +1,7 @@
 package br.com.zenitech.siacmobile;
 
+import static br.com.zenitech.siacmobile.Configuracoes.VERSAO_BD;
+
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,13 +25,13 @@ import br.com.zenitech.siacmobile.domains.*;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private String TAG = "DatabaseHelper";
-    private String DB_PATH;
-    private static String DB_NAME = "siacmobileDB";
+    private final String TAG = "DatabaseHelper";
+    private final String DB_PATH;
+    private static final String DB_NAME = "siacmobileDB";
     private SQLiteDatabase myDataBase;
     private SQLiteDatabase db;
     final Context context;
-    private ClassAuxiliar aux = new ClassAuxiliar();
+    private final ClassAuxiliar aux = new ClassAuxiliar();
 
 
     //CONSTANTES CLIENTES
@@ -58,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @SuppressLint("SdCardPath")
     public DatabaseHelper(Context context) {
-        super(context, DB_NAME, null, 12);
+        super(context, DB_NAME, null, VERSAO_BD);//12
         this.context = context;
         //this.DB_PATH = context.getFilesDir().getPath() + "/" + context.getPackageName() + "/" + "databases/";
         //this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
@@ -555,6 +557,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return listaVendas;
     }
 
+    //LISTAR TODOS OS CLIENTES
+    public ArrayList<ValesDomain> getAllVales() {
+        ArrayList<ValesDomain> listaVales = new ArrayList<>();
+
+        String query = "SELECT * FROM vale v WHERE v.situacao_vale = 'UTILIZADO'";
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                ValesDomain vendas = cursorToValesDomain(cursor);
+                listaVales.add(vendas);
+            } while (cursor.moveToNext());
+        }
+
+        return listaVales;
+    }
+
     //LISTAR TODOS OS ITENS DA VENDA
     public ArrayList<VendasDomain> getVendasCliente(int codigo_venda_app) {
         ArrayList<VendasDomain> listaVendas = new ArrayList<>();
@@ -854,7 +875,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
 
-        myDataBase.close();
+        //myDataBase.close();
         return listaVendas;
     }
 
@@ -877,6 +898,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "INNER JOIN clientes ON clientes.codigo_cliente = vendas_app.codigo_cliente " +
                 "WHERE venda_finalizada_app = '1' ORDER BY produto_venda";// GROUP BY " + PRODUTO_VENDA
 
+        /*String query = "SELECT vapp.codigo_venda, " +
+                "       cli.nome_cliente AS codigo_cliente, " +
+                "       vapp.unidade_venda, " +
+                "       vapp.produto_venda, " +
+                "       vapp.data_movimento, " +
+                "       vapp.quantidade_venda, " +
+                "       vapp.preco_unitario, " +
+                "       (vapp.preco_unitario * vapp.quantidade_venda) valor_total, " +
+                "       vapp.vendedor_venda, " +
+                "       vapp.status_autorizacao_venda, " +
+                "       vapp.entrega_futura_venda, " +
+                "       vapp.entrega_futura_realizada, " +
+                "       vapp.usuario_atual, " +
+                "       vapp.data_cadastro, " +
+                "       vapp.codigo_venda_app, " +
+                "       vapp.venda_finalizada_app chave_importacao, " +
+                "       (fin.fpagamento_financeiro || ':  ' || [REPLACE]('R$ ' || printf('%.2f', fin.valor_financeiro), '.', ',') ) AS formas_pagamento " +
+                "  FROM vendas_app vapp " +
+                "       INNER JOIN " +
+                "       clientes cli ON cli.codigo_cliente = vapp.codigo_cliente " +
+                "       INNER JOIN " +
+                "       financeiro fin ON fin.id_financeiro_app = codigo_venda_app " +
+                " WHERE vapp.venda_finalizada_app = '1' " +
+                " ORDER BY vapp.produto_venda;";*/
+
         Log.e("SQL = ", query);
 
 
@@ -890,8 +936,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
 
-        myDataBase.close();
+        //myDataBase.close();
         return listaVendas;
+    }
+
+    public String getFormPagRelatorioVendasPedidos() {
+
+        StringBuilder formsP = new StringBuilder();
+        String query = "SELECT fin.fpagamento_financeiro, " +
+                "       (sum(fin.valor_financeiro) * 100) valor_financeiro " +
+                "  FROM financeiro fin " +
+                "       INNER JOIN " +
+                "       vendas_app vapp ON vapp.codigo_venda_app = fin.id_financeiro_app " +
+                " WHERE vapp.venda_finalizada_app = '1' " +
+                " GROUP BY fin.fpagamento_financeiro;";
+
+        Log.e("SQL = ", query);
+
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                /*VendasPedidosDomain vendas = cursorToVendasPedidos(cursor);
+                listaVendas.add(vendas);*/
+
+                formsP.append(cursor.getString(cursor.getColumnIndex("fpagamento_financeiro")));
+                formsP.append(": ");
+                formsP.append(aux.maskMoney(aux.converterValores(cursor.getString(cursor.getColumnIndex("valor_financeiro")))));
+                formsP.append("\n");
+            } while (cursor.moveToNext());
+        }
+
+        return formsP.toString();
     }
 
     //
@@ -963,8 +1041,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //
-    public ArrayList<FinanceiroVendasDomain> getRelatorioContasReceber() {
-        ArrayList<FinanceiroVendasDomain> listaVendas = new ArrayList<>();
+    public ArrayList<FinanceiroReceberDomain> getRelatorioContasReceber() {
+        ArrayList<FinanceiroReceberDomain> listaVendas = new ArrayList<>();
 
         String query = "SELECT " +
                 "codigo_financeiro, " +
@@ -989,12 +1067,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //Log.e("SQL = ", query);
 
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
 
         if (cursor.moveToFirst()) {
             do {
-                FinanceiroVendasDomain vendas = cursorToFinanceiroVendasDomain(cursor);
+                FinanceiroReceberDomain vendas = cursorToFinanceiroReceberDomain(cursor);
                 listaVendas.add(vendas);
             } while (cursor.moveToNext());
         }
@@ -1495,6 +1573,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //
+    private FinanceiroReceberDomain cursorToFinanceiroReceberDomain(Cursor cursor) {
+        FinanceiroReceberDomain financeiroReceberDomain = new FinanceiroReceberDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+        financeiroReceberDomain.setCodigo_financeiro(cursor.getString(0));
+        financeiroReceberDomain.setUnidade_financeiro(cursor.getString(1));
+        financeiroReceberDomain.setData_financeiro(cursor.getString(2));
+        financeiroReceberDomain.setCodigo_cliente_financeiro(cursor.getString(3));
+        financeiroReceberDomain.setFpagamento_financeiro(cursor.getString(4));
+        financeiroReceberDomain.setDocumento_financeiro(cursor.getString(5));
+        financeiroReceberDomain.setVencimento_financeiro(cursor.getString(6));
+        financeiroReceberDomain.setValor_financeiro(cursor.getString(7));
+        financeiroReceberDomain.setStatus_autorizacao(cursor.getString(8));
+        financeiroReceberDomain.setPago(cursor.getString(9));
+        financeiroReceberDomain.setVasilhame_ref(cursor.getString(10));
+        financeiroReceberDomain.setUsuario_atual(cursor.getString(11));
+        financeiroReceberDomain.setData_inclusao(cursor.getString(12));
+        financeiroReceberDomain.setNosso_numero_financeiro(cursor.getString(13));
+        financeiroReceberDomain.setId_vendedor_financeiro(cursor.getString(14));
+        financeiroReceberDomain.setId_financeiro_app(cursor.getString(15));
+
+        return financeiroReceberDomain;
+    }
+
+    //
     private FormasPagamentoReceberTemp cursorToFormasPagamentoReceberTemp(Cursor cursor) {
         FormasPagamentoReceberTemp formasPagamentoReceberTemp = new FormasPagamentoReceberTemp(null, null, null, null);
 
@@ -1946,6 +2048,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return i;
     }
 
+    //ALTERAR CLIENTE
+    public int updatePosAppUltimoBoleto(String val) {
+        Log.e("BOLETO SQL", val);
+        myDataBase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("ultboleto", val);
+
+        int i = myDataBase.update(
+                "pos",
+                values,
+                null,
+                null
+        );
+        //myDataBase.close();
+        return i;
+    }
+
     //SOMAR O VALOR DO FINANCEIRO
     public String getValorTotalFinanceiro(String codigo_financeiro_app) {
 
@@ -2262,7 +2381,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // ** Enviar dados VENDAS
-    public String[] EnviarDados() {
+    public String[] EnviarDados(String dataMovimento) {
 
         // **
         StringBuilder VENDAS = new StringBuilder();
@@ -2300,9 +2419,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 QUANTIDADES.append(",");
                 QUANTIDADES.append(cursor.getString(cursor.getColumnIndex("quantidade_venda")));
 
-                // **
+                // ** aux.exibirData(cursor.getString(cursor.getColumnIndex("data_movimento")))
                 DATAS.append(",");
-                DATAS.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("data_movimento"))));
+                DATAS.append(dataMovimento);
 
                 // **
                 VALORES.append(",");
@@ -2316,7 +2435,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     pre_unit = aux.soNumeros(cursor.getString(cursor.getColumnIndex("preco_unitario")));
                 }*/
                 VALORES.append(cursor.getString(cursor.getColumnIndex("valPreVen")));
-                Log.i(TAG + " Peço unit.", cursor.getString(cursor.getColumnIndex("valPreVen")));
+                Log.i(TAG, " Peço unit." + cursor.getString(cursor.getColumnIndex("valPreVen")));
             } while (cursor.moveToNext());
         }
 
@@ -2392,7 +2511,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 //String val_fin = String.valueOf(aux.multiplicar(valMlt));
 
                 VALORESFIN.append(cursor.getString(cursor.getColumnIndex("valFin")));
-                Log.i(TAG + " Valor Fin.", cursor.getString(cursor.getColumnIndex("valFin")));
+                Log.i(TAG, " Valor Fin." + cursor.getString(cursor.getColumnIndex("valFin")));
                 //VALORESFIN.append(aux.soNumeros(cursor.getString(cursor.getColumnIndex("valor_financeiro"))));
 
                 // **
@@ -2536,6 +2655,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 data_inclusao.toString(),
                 nosso_numero_financeiro.toString(),
                 id_vendedor_financeiro.toString()
+        };
+
+        return ret;
+    }
+
+    // ** Enviar dados VALES
+    public String[] EnviarDadosVales(String dataMov) {
+
+        // **
+        StringBuilder CODVALES = new StringBuilder();
+        StringBuilder UNIDADES = new StringBuilder();
+        StringBuilder NUMEROS = new StringBuilder();
+        StringBuilder DATAMOV = new StringBuilder();
+
+        String query = "SELECT * " +
+                "FROM  vale  val " +
+                "WHERE val.situacao_vale = 'UTILIZADO'";
+
+        //Log.e("SQL = ", query);
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                // **
+                CODVALES.append(",");
+                CODVALES.append(cursor.getString(cursor.getColumnIndex("codigo_vale")));
+
+                // **
+                UNIDADES.append(",");
+                UNIDADES.append(cursor.getString(cursor.getColumnIndex("unidade_vale")));
+
+                // **
+                NUMEROS.append(",");
+                NUMEROS.append(cursor.getString(cursor.getColumnIndex("numero_vale")));
+
+                // **
+                DATAMOV.append(",");
+                DATAMOV.append(dataMov);
+            } while (cursor.moveToNext());
+        }
+
+        myDataBase.close();
+
+        String[] ret = {
+                CODVALES.toString(),
+                UNIDADES.toString(),
+                NUMEROS.toString(),
+                DATAMOV.toString()
         };
 
         return ret;
@@ -2762,6 +2931,73 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return listaUnidades;
+    }
+
+    //
+    private ValesDomain cursorToValesDomain(Cursor cursor) {
+        ValesDomain valesDomain = new ValesDomain(null, null, null, null, null, null, null);
+
+        valesDomain.setCodigo_vale(cursor.getString(0));
+        valesDomain.setUnidade_vale(cursor.getString(1));
+        valesDomain.setCodigo_cliente_vale(cursor.getString(2));
+        valesDomain.setNumero_vale(cursor.getString(3));
+        valesDomain.setValor_vale(cursor.getString(4));
+        valesDomain.setSituacao_vale(cursor.getString(5));
+        valesDomain.setProduto_vale(cursor.getString(6));
+
+        return valesDomain;
+    }
+
+    // CONSULTA VALE PRODUTO
+    public ValesDomain ConsVale(String codigo_vale) {
+        ValesDomain vale = null;
+
+        String query = "SELECT * " +
+                "FROM vale v " +
+                "WHERE v.numero_vale = '" + codigo_vale + "' " +
+                "LIMIT 1";
+
+        Log.e("SQL", query);
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                vale = cursorToValesDomain(cursor);
+            } while (cursor.moveToNext());
+        }
+
+        return vale;
+    }
+
+    public int UsarVale(String nVale) {
+        myDataBase = this.getWritableDatabase();
+
+        //
+        ContentValues values = new ContentValues();
+        values.put("situacao_vale", "UTILIZADO");
+        int a = 0;
+
+        try {
+            a = myDataBase.update(
+                    "vale",
+                    values,
+                    "numero_vale" + " = ?",
+                    new String[]{String.valueOf(nVale)}
+            );
+        } catch (Exception ignored) {
+
+        }
+        return a;
+    }
+
+    //
+    public void LimparDadosBanco() {
+        myDataBase = this.getWritableDatabase();
+        myDataBase.delete("vendas_app", null, null);
+        myDataBase.delete("recebidos", null, null);
+        myDataBase.delete("financeiro", null, null);
     }
 
     public void FecharConexao() {

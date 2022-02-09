@@ -8,8 +8,9 @@ public class Sincronizador {
     private String print_boleto;
     private String mostrar_contas_receber;
     private String codigo_instalacao;
+    private String baixar_vale;
 
-    public Sincronizador(String serial, String verificar_posicao_cliente, String erro, String print_promissoria, String print_boleto, String mostrar_contas_receber, String codigo_instalacao) {
+    public Sincronizador(String serial, String verificar_posicao_cliente, String erro, String print_promissoria, String print_boleto, String mostrar_contas_receber, String codigo_instalacao, String baixar_vale) {
         this.serial = serial;
         this.verificar_posicao_cliente = verificar_posicao_cliente;
         this.erro = erro;
@@ -17,6 +18,7 @@ public class Sincronizador {
         this.print_boleto = print_boleto;
         this.mostrar_contas_receber = mostrar_contas_receber;
         this.codigo_instalacao = codigo_instalacao;
+        this.baixar_vale = baixar_vale;
     }
 
     public String getSerial() {
@@ -73,5 +75,13 @@ public class Sincronizador {
 
     public void setCodigo_instalacao(String codigo_instalacao) {
         this.codigo_instalacao = codigo_instalacao;
+    }
+
+    public String getBaixar_vale() {
+        return baixar_vale;
+    }
+
+    public void setBaixar_vale(String baixar_vale) {
+        this.baixar_vale = baixar_vale;
     }
 }

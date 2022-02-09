@@ -51,7 +51,8 @@ public class RelatorioVendasPedido extends AppCompatActivity {
     private Button venderProdutos;
     Configuracoes configuracoes;
     VendasPedidosDomain pedidos;
-    TextView txtProdutoRelatorioVendas, txtQuantidadeRelatorioVendas, txtTotalRelatorioVendas;
+    TextView txtProdutoRelatorioVendas, txtQuantidadeRelatorioVendas, txtTotalRelatorioVendas, txtFormsPagRelat;
+    String strFormPags = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,11 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         vendasDomains = bd.getRelatorioVendasPedidos();
         adapter = new RelatorioVendasPedidosAdapter(this, vendasDomains);
         rvRelatorioVendas.setAdapter(adapter);
+
+        //
+        txtFormsPagRelat = findViewById(R.id.txtFormsPagRelat);
+        strFormPags = bd.getFormPagRelatorioVendasPedidos();
+        txtFormsPagRelat.setText(strFormPags);
 
         txtProdutoRelatorioVendas = findViewById(R.id.txtProdutoRelatorioVendas);
         txtQuantidadeRelatorioVendas = findViewById(R.id.txtQuantidadeRelatorioVendas);

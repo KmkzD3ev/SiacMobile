@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.EnviarDadosServidor;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.SincronizarBancoDados;
+import br.com.zenitech.siacmobile.Vales;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
 import br.com.zenitech.siacmobile.domains.PosApp;
@@ -43,6 +45,7 @@ public class HomeFragment extends Fragment {
     PosApp posApp;
     ArrayList<UnidadesDomain> elementosUnidades;
     UnidadesDomain unidades;
+    CardView cardv_vales;
     View view;
 
     @Override
@@ -157,6 +160,20 @@ public class HomeFragment extends Fragment {
             intent.putExtra("teste2", "vai dá certo");
             startActivity(intent);
         });
+
+        //CONSULTAR VALE PRODUTO
+        if(prefs.getString("baixar_vale", "0").equalsIgnoreCase("1")) {
+
+            cardv_vales = view.findViewById(R.id.cardv_vales);
+            cardv_vales.setVisibility(View.VISIBLE);
+            view.findViewById(R.id.cv_vales).setOnClickListener(view1 -> {
+                if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
+                    startActivity(new Intent(getContext(), Vales.class));
+                } else {
+                    alerta();
+                }
+            });
+        }
 
         if (!Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
             if (bd.getAllVendas().size() == 0 && bd.getAllRecebidos().size() == 0) {

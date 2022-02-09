@@ -15,15 +15,16 @@ import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.R;
+import br.com.zenitech.siacmobile.domains.FinanceiroReceberDomain;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 
 public class RelatorioContasReceberAdapter extends RecyclerView.Adapter<RelatorioContasReceberAdapter.ViewHolder> {
 
     private ClassAuxiliar classAuxiliar;
     private Context context;
-    private ArrayList<FinanceiroVendasDomain> elementos;
+    private ArrayList<FinanceiroReceberDomain> elementos;
 
-    public RelatorioContasReceberAdapter(Context context, ArrayList<FinanceiroVendasDomain> elementos) {
+    public RelatorioContasReceberAdapter(Context context, ArrayList<FinanceiroReceberDomain> elementos) {
         this.context = context;
         this.elementos = elementos;
     }
@@ -51,7 +52,7 @@ public class RelatorioContasReceberAdapter extends RecyclerView.Adapter<Relatori
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
         //
-        final FinanceiroVendasDomain financeiroVendasDomain = elementos.get(position);
+        final FinanceiroReceberDomain financeiroVendasDomain = elementos.get(position);
         classAuxiliar = new ClassAuxiliar();
 
         //

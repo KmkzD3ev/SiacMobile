@@ -3,6 +3,7 @@ package br.com.zenitech.siacmobile.interfaces;
 import java.util.concurrent.TimeUnit;
 
 import br.com.zenitech.siacmobile.Configuracoes;
+import br.com.zenitech.siacmobile.domains.PosApp;
 import br.com.zenitech.siacmobile.domains.Sincronizador;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -33,6 +34,11 @@ public interface ISincronizar {
     @FormUrlEncoded
     @POST("ativar_desativa_pos_app.php")
     Call<Sincronizador> verificarVersaoApp(@Field("opcao") String opcao);
+
+    //SINCRONIZAR
+    @FormUrlEncoded
+    @POST("ativar_desativa_pos_app.php")
+    Call<PosApp> ultimoBoletoPOS(@Field("opcao") String opcao, @Field("serial") String serial);
 
     //RESETAR APP
     @FormUrlEncoded

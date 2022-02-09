@@ -17,7 +17,6 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
-
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -46,6 +45,23 @@
         android:theme="@style/AppTheme"
         tools:replace="allowBackup"
         tools:targetApi="q">
+        <activity
+            android:name=".SplashScreen"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Vales"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="Vale Produto"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".RelatorioVendasPedido"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -84,18 +100,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label=""
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".SplashScreen"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:hardwareAccelerated="true"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".Sincronizar"
             android:configChanges="keyboardHidden|orientation|screenSize"

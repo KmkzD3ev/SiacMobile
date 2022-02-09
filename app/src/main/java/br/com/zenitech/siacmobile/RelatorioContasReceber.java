@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.RelatorioContasReceberAdapter;
+import br.com.zenitech.siacmobile.domains.FinanceiroReceberDomain;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import stone.application.StoneStart;
 import stone.utils.Stone;
@@ -33,7 +34,7 @@ public class RelatorioContasReceber extends AppCompatActivity {
 
     private AlertDialog alerta;
     private DatabaseHelper bd;
-    ArrayList<FinanceiroVendasDomain> financeiroVendasDomains;
+    ArrayList<FinanceiroReceberDomain> financeiroVendasDomains;
     RelatorioContasReceberAdapter adapter;
     //
     private RecyclerView rvRelatorioContasReceber;

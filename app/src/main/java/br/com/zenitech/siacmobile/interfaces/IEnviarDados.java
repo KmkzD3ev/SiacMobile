@@ -69,6 +69,16 @@ public interface IEnviarDados {
             @Field("id_vendedor_financeiro") String id_vendedor_financeiro
     );
 
+    @FormUrlEncoded
+    @POST("index_app_siac.php")
+    Call<ArrayList<EnviarDados>> enviarDadosVales(
+            @Field("TELA") String TELA,
+            @Field("SERIAL") String SERIAL,
+            @Field("CODIGOS") String CODIGOS,
+            @Field("VALES") String VALES,
+            @Field("DATAS") String DATAS
+    );
+
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://emissorweb.com.br/POSSIACN/")
             .addConverterFactory(GsonConverterFactory.create())

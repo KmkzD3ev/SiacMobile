@@ -35,11 +35,17 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.library.BuildConfig;
-
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import br.com.zenitech.siacmobile.domains.PosApp;
 import br.com.zenitech.siacmobile.domains.Sincronizador;
 import br.com.zenitech.siacmobile.interfaces.ISincronizar;
 import retrofit2.Call;
@@ -363,6 +369,13 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
                 if (prefs.getBoolean("cod_instalacao", false)) {
                     if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")) {
+                        // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
+                        prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
+                        prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
+                        prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
+                        prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
+                        prefs.edit().putString("baixar_vale", sincronizacao.getBaixar_vale()).apply();
+                        // INICIA A GERAÇÃO DO BANCO ONLINE
                         gerarBancoOnline(serial.getText().toString());
                     } else {
                         //
@@ -381,6 +394,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                         prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
                         prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
                         prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
+                        prefs.edit().putString("baixar_vale", sincronizacao.getBaixar_vale()).apply();
                         // INICIA A GERAÇÃO DO BANCO ONLINE
                         gerarBancoOnline(serial.getText().toString());
                         //gerarBancoOnline(serial.getText().toString());
@@ -392,6 +406,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                             prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
                             prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
                             prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
+                            prefs.edit().putString("baixar_vale", sincronizacao.getBaixar_vale()).apply();
                             // INICIA A GERAÇÃO DO BANCO ONLINE
                             gerarBancoOnline(serial.getText().toString());
                             //gerarBancoOnline(serial.getText().toString());
@@ -443,7 +458,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         //
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
-        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "1.1.9");
+        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "192");
         call.enqueue(new Callback<Sincronizador>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
@@ -458,10 +473,11 @@ public class SincronizarBancoDados extends AppCompatActivity {
                             erro = true;
                             msgErro = "Não foi possível gerar o banco de dados no app. \nNOTAS PENDENTES DE ENVIO NO EMISSOR WEB!";
                             _limparDadosSincronizacao(false);
-                            _resetarSincronismo(10000, true);
+                            //_resetarSincronismo(10000, true);
+                            _resetarSincronismo(1000, true);
                         } else {
                             prefs.edit().putString("serial", serial).apply();
-                            _aguardarTempoParaDowload(60000, serial);
+                            _aguardarTempoParaDowload(20000, serial);
                         }
                     });
                 } else {
@@ -469,7 +485,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                     erro = true;
                     msgErro = "Não foi possível gerar o banco.";
                     _limparDadosSincronizacao(false);
-                    _resetarSincronismo(3000, true);
+                    _resetarSincronismo(1000, true);
                 }
             }
 
@@ -482,28 +498,36 @@ public class SincronizarBancoDados extends AppCompatActivity {
                 erro = true;
                 msgErro = "Não foi possível gerar o banco.";
                 _limparDadosSincronizacao(false);
-                _resetarSincronismo(3000, true);
+                _resetarSincronismo(1000, true);
             }
         });
     }
 
     // LIMPA OS DADOS DA SINCRONIZAÇÃO
     void _limparDadosSincronizacao(boolean apagarBanco) {
-        //PEGA O CAMINHO DA PASTA DOWNLOAD DO APARELHO PARA VERIFICAR SE O BANCO EXISTE
-        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File arquivo = new File(path + "/siacmobileDB.db");
-        //APAGA O BANCO DA PASTA DOWNLOADS
-        if (arquivo.isFile()) arquivo.delete();
+        try {
+            //PEGA O CAMINHO DA PASTA DOWNLOAD DO APARELHO PARA VERIFICAR SE O BANCO EXISTE
+            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File arquivo = new File(path + "/siacmobileDB.db");
+            File arquivoZip = new File(path + "/siacmobileDBZip.zip");
+            //APAGA O BANCO DA PASTA DOWNLOADS
 
-        // Retorna o caminho da imagem do qrcode
-        File sdcard = Environment.getExternalStorageDirectory().getAbsoluteFile();
-        File dir = new File(sdcard, "Siac_Mobile/BD/siacmobileDB.db");
-        dir.delete();
+            if (arquivo.isFile()) arquivo.delete();
+            if (arquivoZip.isFile()) arquivoZip.delete();
 
-        // APAGAR BANCO DE DADOS IMPORTADO
-        if (apagarBanco) {
-            //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
-            context.deleteDatabase("siacmobileDB");
+
+            //
+            File sdcard = Environment.getExternalStorageDirectory().getAbsoluteFile();
+            File dir = new File(sdcard, "Siac_Mobile/BD/siacmobileDB.db");
+            if (dir.isFile()) dir.delete();
+
+            // APAGAR BANCO DE DADOS IMPORTADO
+            if (apagarBanco) {
+                //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+                context.deleteDatabase("siacmobileDB");
+            }
+        } catch (Exception e) {
+            Log.e("Error", Objects.requireNonNull(e.getMessage()));
         }
     }
 
@@ -540,10 +564,31 @@ public class SincronizarBancoDados extends AppCompatActivity {
     }
 
     public void startDownload(final String serial) {
-        txt_msg_sincronizando.setText(R.string.fazendo_dowloand_do_banco);
+        /*txt_msg_sincronizando.setText(R.string.fazendo_dowloand_do_banco);
 
         //String url = new Configuracoes().GetUrlServer() + "/POSSIAC/siacmobileDB" + serial + ".db";
         String url = new Configuracoes().GetUrlServer() + "/POSSIACN/bancos/banco_siac_" + serial + ".db";
+        Uri uri = Uri.parse(url);
+
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+
+        lastDownload = mgr.enqueue(new DownloadManager.Request(uri)
+                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                .setAllowedOverRoaming(false)
+                .setTitle("siacmobileDB")
+                .setDescription("BD SIAC MOBILE.")
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                        "siacmobileDB.db"));*/
+        // kleilson
+        //importarBD();
+        startDownloadZip(serial);
+    }
+
+    public void startDownloadZip(final String serial) {
+        txt_msg_sincronizando.setText(R.string.fazendo_dowloand_do_banco);
+
+        //String url = new Configuracoes().GetUrlServer() + "/POSSIAC/siacmobileDB" + serial + ".db";
+        String url = new Configuracoes().GetUrlServer() + "/POSSIACN/bancos/banco_siac_" + serial + ".db.zip";
         Uri uri = Uri.parse(url);
         /*String p = String.valueOf();
 
@@ -557,13 +602,48 @@ public class SincronizarBancoDados extends AppCompatActivity {
         lastDownload = mgr.enqueue(new DownloadManager.Request(uri)
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
                 .setAllowedOverRoaming(false)
-                .setTitle("siacmobileDB")
+                .setTitle("siacmobileDBZip")
                 .setDescription("BD SIAC MOBILE.")
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                        "siacmobileDB.db"));
+                        "siacmobileDBZip.zip"));
         // kleilson
         //importarBD();
 
+    }
+
+    // EXTRAIR BANCO DE DADOS COMPACTADO
+    public void unzip(File zipFile, File targetDirectory) throws IOException {
+        ZipInputStream zis = new ZipInputStream(
+                new BufferedInputStream(new FileInputStream(zipFile)));
+        try {
+            ZipEntry ze;
+            int count;
+            byte[] buffer = new byte[8192];
+            while ((ze = zis.getNextEntry()) != null) {
+                File file = new File(targetDirectory, ze.getName());
+                File dir = ze.isDirectory() ? file : file.getParentFile();
+                if (!dir.isDirectory() && !dir.mkdirs())
+                    throw new FileNotFoundException("Failed to ensure directory: " +
+                            dir.getAbsolutePath());
+                if (ze.isDirectory())
+                    continue;
+                FileOutputStream fout = new FileOutputStream(file);
+                try {
+                    while ((count = zis.read(buffer)) != -1)
+                        fout.write(buffer, 0, count);
+                } finally {
+                    fout.close();
+                }
+            /* if time should be restored as well
+            long time = ze.getTime();
+            if (time > 0)
+                file.setLastModified(time);
+            */
+            }
+        } finally {
+            importarBD();
+            zis.close();
+        }
     }
 
     public void queryStatus(View v) {
@@ -631,8 +711,19 @@ public class SincronizarBancoDados extends AppCompatActivity {
         public void onReceive(Context ctxt, Intent intent) {
 
             new Handler().postDelayed(() -> {
+                //
+                try {
+                    //PEGA O CAMINHO DA PASTA DOWNLOAD DO APARELHO PARA VERIFICAR SE O BANCO EXISTE
+                    File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    //CRIA O ARQUIVO DO BANCO - POR ALGUM MOTIVO O BANCO É SALVO EM .TXT
+                    File arquivo = new File(path + "/siacmobileDBZip.zip"); //.txt pasta);
+
+                    unzip(arquivo, path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 //IMPORTAR BANCO DE DADOS
-                importarBD();
+                // importarBD();
             }, 2000);
         }
     };
@@ -679,6 +770,32 @@ public class SincronizarBancoDados extends AppCompatActivity {
                 _resetarSincronismo(3000, true);
             }
         });
+    }// ATIVAR POS, INFORMA QUE O POS ESTÁ EM USO
+
+    private void pegarUltimoBoletoPos() {
+        //txt_msg_sincronizando.setText(R.string.ativando_serial);
+
+        final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
+
+        final Call<PosApp> call = iSincronizar.ultimoBoletoPOS("ultimoboleto", serial.getText().toString());
+
+        call.enqueue(new Callback<PosApp>() {
+            @Override
+            public void onResponse(@NonNull Call<PosApp> call, @NonNull Response<PosApp> response) {
+
+                //
+                final PosApp pos = response.body();
+                if (!pos.getUltboleto().equalsIgnoreCase("")) {
+
+                    Log.e("BOLETO", pos.getUltboleto());
+                    db.updatePosAppUltimoBoleto(pos.getUltboleto());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<PosApp> call, @NonNull Throwable t) {
+            }
+        });
     }
 
     int totVer = 0;
@@ -720,6 +837,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                 }
                 try {
                     db.openDataBase();
+                    db.LimparDadosBanco();
                 } catch (SQLException sqle) {
                     Log.d(TAG, Objects.requireNonNull(sqle.getMessage()));
                     erro = true;
@@ -731,6 +849,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
                     try {
                         //prefs.edit().putInt("id_pedido", Integer.parseInt(db.ultimoIdPedido())).apply();
                         prefs.edit().putString("serial_app", serial.getText().toString()).apply();
+                        pegarUltimoBoletoPos();
                         ativarPos();
                     } catch (Exception e) {
                         msgErro = "Importação do banco de dados falhou! Tente novamente.";
@@ -785,7 +904,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         }, 2000);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
