@@ -5,6 +5,7 @@ import static br.com.zenitech.siacmobile.Configuracoes.VERSAO_BD;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -12,6 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import br.com.zenitech.siacmobile.domains.*;
 
@@ -387,8 +390,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    String codigo_produto = cursor.getString(cursor.getColumnIndex("codigo_produto"));
-                    String descricao_produto = cursor.getString(cursor.getColumnIndex("descricao_produto"));
+                    String codigo_produto = cursor.getString(cursor.getColumnIndexOrThrow("codigo_produto"));
+                    String descricao_produto = cursor.getString(cursor.getColumnIndexOrThrow("descricao_produto"));
                     //list.add(codigo_produto + " " + descricao_produto);
                     list.add(descricao_produto);
                 }
@@ -523,10 +526,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<VendasDomain> getAllVendas() {
         ArrayList<VendasDomain> listaVendas = new ArrayList<>();
 
-        String query = "SELECT * FROM " + TABELA_VENDAS;
+        //String query = "SELECT * FROM " + TABELA_VENDAS;
+        String query = "SELECT ven.codigo_venda,ven.codigo_cliente,ven.unidade_venda,ven.produto_venda,ven.data_movimento,ven.quantidade_venda," +
+                "ven.preco_unitario,ven.valor_total,ven.vendedor_venda,ven.status_autorizacao_venda,ven.entrega_futura_venda,ven.entrega_futura_realizada," +
+                "ven.usuario_atual,ven.data_cadastro,ven.codigo_venda_app,ven.venda_finalizada_app,ven.chave_importacao  " +
+                "FROM " + TABELA_VENDAS + " ven " +
+                "INNER JOIN " + TABELA_FINANCEIRO + " fin ON fin.id_financeiro_app = ven.codigo_venda_app " +
+                "WHERE ven.venda_finalizada_app = '1'";
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -544,8 +553,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String query = "SELECT * FROM recebidos";
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -618,10 +627,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String[] id = {};
         try {
             id = new String[]{
-                    cursor.getString(cursor.getColumnIndex(CODIGO_VENDA)),
-                    cursor.getString(cursor.getColumnIndex(CODIGO_VENDA_APP)),
-                    cursor.getString(cursor.getColumnIndex(CODIGO_CLIENTE)),
-                    cursor.getString(cursor.getColumnIndex(NOME_CLIENTE))
+                    cursor.getString(cursor.getColumnIndexOrThrow(CODIGO_VENDA)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CODIGO_VENDA_APP)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(CODIGO_CLIENTE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(NOME_CLIENTE))
             };
         } catch (Exception e) {
 
@@ -642,9 +651,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String[] id = {};
         try {
             id = new String[]{
-                    cursor.getString(cursor.getColumnIndex("saldo")),
-                    cursor.getString(cursor.getColumnIndex("cpfcnpj")),
-                    cursor.getString(cursor.getColumnIndex("endereco"))
+                    cursor.getString(cursor.getColumnIndexOrThrow("saldo")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("cpfcnpj")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("endereco"))
             };
         } catch (Exception e) {
 
@@ -962,9 +971,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 /*VendasPedidosDomain vendas = cursorToVendasPedidos(cursor);
                 listaVendas.add(vendas);*/
 
-                formsP.append(cursor.getString(cursor.getColumnIndex("fpagamento_financeiro")));
+                formsP.append(cursor.getString(cursor.getColumnIndexOrThrow("fpagamento_financeiro")));
                 formsP.append(": ");
-                formsP.append(aux.maskMoney(aux.converterValores(cursor.getString(cursor.getColumnIndex("valor_financeiro")))));
+                formsP.append(aux.maskMoney(aux.converterValores(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro")))));
                 formsP.append("\n");
             } while (cursor.moveToNext());
         }
@@ -1009,22 +1018,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 dRelatorio = new RelatorioVendasClientesDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
-                dRelatorio.setCodigo_venda(cursor.getString(cursor.getColumnIndex("codigo_venda")));
-                dRelatorio.setCodigo_cliente(cursor.getString(cursor.getColumnIndex("codigo_cliente")));
-                dRelatorio.setUnidade_venda(cursor.getString(cursor.getColumnIndex("unidade_venda")));
-                dRelatorio.setProduto_venda(cursor.getString(cursor.getColumnIndex("produto_venda")));
-                dRelatorio.setData_movimento(cursor.getString(cursor.getColumnIndex("data_movimento")));
-                dRelatorio.setQuantidade_venda(cursor.getString(cursor.getColumnIndex("quantidade_venda")));
-                dRelatorio.setPreco_unitario(cursor.getString(cursor.getColumnIndex("preco_unitario")));
-                dRelatorio.setValor_total(cursor.getString(cursor.getColumnIndex("valor_total")));
-                dRelatorio.setVendedor_venda(cursor.getString(cursor.getColumnIndex("vendedor_venda")));
-                dRelatorio.setStatus_autorizacao_venda(cursor.getString(cursor.getColumnIndex("status_autorizacao_venda")));
-                dRelatorio.setEntrega_futura_venda(cursor.getString(cursor.getColumnIndex("entrega_futura_venda")));
-                dRelatorio.setEntrega_futura_realizada(cursor.getString(cursor.getColumnIndex("entrega_futura_realizada")));
-                dRelatorio.setUsuario_atual(cursor.getString(cursor.getColumnIndex("usuario_atual")));
-                dRelatorio.setData_cadastro(cursor.getString(cursor.getColumnIndex("data_cadastro")));
-                dRelatorio.setCodigo_venda_app(cursor.getString(cursor.getColumnIndex("codigo_venda_app")));
-                dRelatorio.setNome(cursor.getString(cursor.getColumnIndex("nome")));
+                dRelatorio.setCodigo_venda(cursor.getString(cursor.getColumnIndexOrThrow("codigo_venda")));
+                dRelatorio.setCodigo_cliente(cursor.getString(cursor.getColumnIndexOrThrow("codigo_cliente")));
+                dRelatorio.setUnidade_venda(cursor.getString(cursor.getColumnIndexOrThrow("unidade_venda")));
+                dRelatorio.setProduto_venda(cursor.getString(cursor.getColumnIndexOrThrow("produto_venda")));
+                dRelatorio.setData_movimento(cursor.getString(cursor.getColumnIndexOrThrow("data_movimento")));
+                dRelatorio.setQuantidade_venda(cursor.getString(cursor.getColumnIndexOrThrow("quantidade_venda")));
+                dRelatorio.setPreco_unitario(cursor.getString(cursor.getColumnIndexOrThrow("preco_unitario")));
+                dRelatorio.setValor_total(cursor.getString(cursor.getColumnIndexOrThrow("valor_total")));
+                dRelatorio.setVendedor_venda(cursor.getString(cursor.getColumnIndexOrThrow("vendedor_venda")));
+                dRelatorio.setStatus_autorizacao_venda(cursor.getString(cursor.getColumnIndexOrThrow("status_autorizacao_venda")));
+                dRelatorio.setEntrega_futura_venda(cursor.getString(cursor.getColumnIndexOrThrow("entrega_futura_venda")));
+                dRelatorio.setEntrega_futura_realizada(cursor.getString(cursor.getColumnIndexOrThrow("entrega_futura_realizada")));
+                dRelatorio.setUsuario_atual(cursor.getString(cursor.getColumnIndexOrThrow("usuario_atual")));
+                dRelatorio.setData_cadastro(cursor.getString(cursor.getColumnIndexOrThrow("data_cadastro")));
+                dRelatorio.setCodigo_venda_app(cursor.getString(cursor.getColumnIndexOrThrow("codigo_venda_app")));
+                dRelatorio.setNome(cursor.getString(cursor.getColumnIndexOrThrow("nome")));
 
                 listaVendasS.add(dRelatorio);
             } while (cursor.moveToNext());
@@ -1082,7 +1091,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     public FinanceiroVendasDomain getBaixaRecebida(String codigo_finan) {
-        FinanceiroVendasDomain listaVendas = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroVendasDomain listaVendas = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         String query = "SELECT " +
                 "codigo_financeiro, unidade_financeiro, data_financeiro, " +
@@ -1149,7 +1158,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    valor_financeiro = cursor.getString(cursor.getColumnIndex("valor_financeiro"));
+                    valor_financeiro = cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro"));
                 }
             }
             db.setTransactionSuccessful();
@@ -1173,7 +1182,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    valor_financeiro = cursor.getString(cursor.getColumnIndex("valor_financeiro"));
+                    valor_financeiro = cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro"));
                 }
             }
             db.setTransactionSuccessful();
@@ -1244,7 +1253,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    baixa_a_prazo = cursor.getString(cursor.getColumnIndex("baixa_a_prazo"));
+                    baixa_a_prazo = cursor.getString(cursor.getColumnIndexOrThrow("baixa_a_prazo"));
                 }
             }
             db.setTransactionSuccessful();
@@ -1328,14 +1337,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndex("codigo_pagamento_cliente"));
-                    String pagamento_cliente = cursor.getString(cursor.getColumnIndex("descricao_forma_pagamento"));
-                    String tipo_pagamento = cursor.getString(cursor.getColumnIndex("tipo_forma_pagamento"));
+                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento_cliente"));
+                    String pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("descricao_forma_pagamento"));
+                    String tipo_pagamento = cursor.getString(cursor.getColumnIndexOrThrow("tipo_forma_pagamento"));
                     list.add(
                             pagamento_cliente + " _ " +
                                     tipo_pagamento + " _ " +
-                                    cursor.getString(cursor.getColumnIndex("auto_num_pagamento")) + " _ " +
-                                    cursor.getString(cursor.getColumnIndex("baixa_forma_pagamento"))
+                                    cursor.getString(cursor.getColumnIndexOrThrow("auto_num_pagamento")) + " _ " +
+                                    cursor.getString(cursor.getColumnIndexOrThrow("baixa_forma_pagamento"))
                     );
                     //list.add(descricao_produto);
                 }
@@ -1356,8 +1365,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndex("codigo_pagamento_cliente"));
-                    String pagamento_cliente = cursor.getString(cursor.getColumnIndex("descricao_forma_pagamento"));
+                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento_cliente"));
+                    String pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("descricao_forma_pagamento"));
                     list.add(pagamento_cliente + " _ " + "A VISTA");
                     //list.add(descricao_produto);
                 }
@@ -1378,8 +1387,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursorFPC.getCount() > 0) {
                 while (cursorFPC.moveToNext()) {
-                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndex("codigo_pagamento_cliente"));
-                    String pagamento_cliente = cursorFPC.getString(cursorFPC.getColumnIndex("pagamento_cliente"));
+                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento_cliente"));
+                    String pagamento_cliente = cursorFPC.getString(cursorFPC.getColumnIndexOrThrow("pagamento_cliente"));
                     list.add(pagamento_cliente + " _ " + "A PRAZO");
                     //list.add(descricao_produto);
                 }
@@ -1438,14 +1447,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndex("codigo_pagamento_cliente"));
-                    String pagamento_cliente = cursor.getString(cursor.getColumnIndex("descricao_forma_pagamento"));
-                    String tipo_pagamento = cursor.getString(cursor.getColumnIndex("tipo_forma_pagamento"));
+                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento_cliente"));
+                    String pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("descricao_forma_pagamento"));
+                    String tipo_pagamento = cursor.getString(cursor.getColumnIndexOrThrow("tipo_forma_pagamento"));
                     list.add(
                             pagamento_cliente + " _ " +
                                     tipo_pagamento + " _ " +
-                                    cursor.getString(cursor.getColumnIndex("auto_num_pagamento")) + " _ " +
-                                    cursor.getString(cursor.getColumnIndex("baixa_forma_pagamento"))
+                                    cursor.getString(cursor.getColumnIndexOrThrow("auto_num_pagamento")) + " _ " +
+                                    cursor.getString(cursor.getColumnIndexOrThrow("baixa_forma_pagamento"))
                     );
                     //list.add(descricao_produto);
                 }
@@ -1466,8 +1475,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndex("codigo_pagamento_cliente"));
-                    String pagamento_cliente = cursor.getString(cursor.getColumnIndex("descricao_forma_pagamento"));
+                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento_cliente"));
+                    String pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("descricao_forma_pagamento"));
                     list.add(pagamento_cliente + " _ " + "A VISTA");
                     //list.add(descricao_produto);
                 }
@@ -1488,8 +1497,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursorFPC.getCount() > 0) {
                 while (cursorFPC.moveToNext()) {
-                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndex("codigo_pagamento_cliente"));
-                    String pagamento_cliente = cursorFPC.getString(cursorFPC.getColumnIndex("pagamento_cliente"));
+                    //String codigo_pagamento_cliente = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento_cliente"));
+                    String pagamento_cliente = cursorFPC.getString(cursorFPC.getColumnIndexOrThrow("pagamento_cliente"));
                     list.add(pagamento_cliente + " _ " + "A PRAZO");
                     //list.add(descricao_produto);
                 }
@@ -1527,6 +1536,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String ID_VENDEDOR_FINANCEIRO = "id_vendedor_financeiro";
     private static final String ID_FINANCEIRO_APP = "id_financeiro_app";
     private static final String NOTA_FISCAL = "nota_fiscal";
+    private static final String CODIGO_ALIQUOTA = "codigo_aliquota";
 
     private static final String[] COLUNAS_FINANCEIRO = {
             CODIGO_FINANCEIRO,
@@ -1549,7 +1559,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     private FinanceiroVendasDomain cursorToFinanceiroVendasDomain(Cursor cursor) {
-        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         financeiroVendasDomain.setCodigo_financeiro(cursor.getString(0));
         financeiroVendasDomain.setUnidade_financeiro(cursor.getString(1));
@@ -1568,6 +1578,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         financeiroVendasDomain.setId_vendedor_financeiro(cursor.getString(14));
         financeiroVendasDomain.setId_financeiro_app(cursor.getString(15));
         financeiroVendasDomain.setNota_fiscal(cursor.getString(16));
+        financeiroVendasDomain.setCodigo_aliquota(cursor.getString(17));
 
         return financeiroVendasDomain;
     }
@@ -1610,7 +1621,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //
     public void addFinanceiro(FinanceiroVendasDomain financeiroVendasDomain) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        myDataBase = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(CODIGO_FINANCEIRO, financeiroVendasDomain.getCodigo_financeiro());
@@ -1630,8 +1641,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(ID_VENDEDOR_FINANCEIRO, financeiroVendasDomain.getId_vendedor_financeiro());
         values.put(ID_FINANCEIRO_APP, financeiroVendasDomain.getId_financeiro_app());
         values.put(NOTA_FISCAL, financeiroVendasDomain.getNota_fiscal());
-        db.insert(TABELA_FINANCEIRO, null, values);
-        db.close();
+        values.put(CODIGO_ALIQUOTA, financeiroVendasDomain.getCodigo_aliquota());
+        myDataBase.insert(TABELA_FINANCEIRO, null, values);
+        myDataBase.close();
     }
 
     //
@@ -2311,8 +2323,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor.moveToFirst()) {
                 do {
 
-                    preco_unidade = cursor.getString(cursor.getColumnIndex("preco_unidade"));
-                    margem_cliente = cursor.getString(cursor.getColumnIndex("margem_cliente"));
+                    preco_unidade = cursor.getString(cursor.getColumnIndexOrThrow("preco_unidade"));
+                    margem_cliente = cursor.getString(cursor.getColumnIndexOrThrow("margem_cliente"));
 
                 } while (cursor.moveToNext());
             }
@@ -2349,7 +2361,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                str.append(cursor.getString(cursor.getColumnIndex("codigo_produto")));
+                str.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_produto")));
             } while (cursor.moveToNext());
         }
 
@@ -2371,7 +2383,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                str.append(cursor.getString(cursor.getColumnIndex("codigo_pagamento")));
+                str.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento")));
             } while (cursor.moveToNext());
         }
 
@@ -2405,37 +2417,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 // **
                 VENDAS.append(",");
-                VENDAS.append(cursor.getString(cursor.getColumnIndex("codigo_venda")));
+                VENDAS.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_venda")));
 
                 // **
                 CLIENTES.append(",");
-                CLIENTES.append(cursor.getString(cursor.getColumnIndex("codigo_cliente")));
+                CLIENTES.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_cliente")));
 
                 // **
                 PRODUTOS.append(",");
-                PRODUTOS.append(IdProduto(cursor.getString(cursor.getColumnIndex("produto_venda"))));
+                PRODUTOS.append(IdProduto(cursor.getString(cursor.getColumnIndexOrThrow("produto_venda"))));
 
                 // **
                 QUANTIDADES.append(",");
-                QUANTIDADES.append(cursor.getString(cursor.getColumnIndex("quantidade_venda")));
+                QUANTIDADES.append(cursor.getString(cursor.getColumnIndexOrThrow("quantidade_venda")));
 
-                // ** aux.exibirData(cursor.getString(cursor.getColumnIndex("data_movimento")))
+                // ** aux.exibirData(cursor.getString(cursor.getColumnIndexOrThrow("data_movimento")))
                 DATAS.append(",");
                 DATAS.append(dataMovimento);
 
                 // **
                 VALORES.append(",");
                 /*String pre_unit = "";
-                //aux.soNumeros(cursor.getString(cursor.getColumnIndex("preco_unitario")));
-                String[] valMlt = {aux.soNumeros(cursor.getString(cursor.getColumnIndex("preco_unitario"))), "100"};
+                //aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("preco_unitario")));
+                String[] valMlt = {aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("preco_unitario"))), "100"};
                 String valUnit = String.valueOf(aux.multiplicar(valMlt));*/
                 /*if (valUnit.length() < 4) {
-                    pre_unit = aux.soNumeros(cursor.getString(cursor.getColumnIndex("preco_unitario"))) + "00";
+                    pre_unit = aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("preco_unitario"))) + "00";
                 } else {
-                    pre_unit = aux.soNumeros(cursor.getString(cursor.getColumnIndex("preco_unitario")));
+                    pre_unit = aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("preco_unitario")));
                 }*/
-                VALORES.append(cursor.getString(cursor.getColumnIndex("valPreVen")));
-                Log.i(TAG, " Peço unit." + cursor.getString(cursor.getColumnIndex("valPreVen")));
+                VALORES.append(cursor.getString(cursor.getColumnIndexOrThrow("valPreVen")));
+                Log.i(TAG, " Peço unit." + cursor.getString(cursor.getColumnIndexOrThrow("valPreVen")));
             } while (cursor.moveToNext());
         }
 
@@ -2470,6 +2482,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder FPAGAMENTOS = new StringBuilder();
         StringBuilder DOCUMENTOS = new StringBuilder();
         StringBuilder NOTASFISCAIS = new StringBuilder();
+        StringBuilder CODALIQUOTAS = new StringBuilder();
 
         String query = "SELECT *, (fin.valor_financeiro * 100) as valFin " +
                 "FROM " + TABELA_VENDAS + " ven " +
@@ -2488,47 +2501,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 // **
                 FINANCEIROS.append(",");
-                FINANCEIROS.append(cursor.getString(cursor.getColumnIndex("codigo_financeiro")));
+                FINANCEIROS.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_financeiro")));
 
                 // **
                 FINVEN.append(",");
-                FINVEN.append(cursor.getString(cursor.getColumnIndex("codigo_venda")));
+                FINVEN.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_venda")));
 
                 // **
                 VENCIMENTOS.append(",");
-                VENCIMENTOS.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("vencimento_financeiro"))));
+                VENCIMENTOS.append(aux.exibirData(cursor.getString(cursor.getColumnIndexOrThrow("vencimento_financeiro"))));
 
                 // **
                 VALORESFIN.append(",");
                 /*String val_fin = "";
-                if (aux.soNumeros(cursor.getString(cursor.getColumnIndex("valor_financeiro"))).length() < 4) {
-                    val_fin = aux.soNumeros(cursor.getString(cursor.getColumnIndex("valor_financeiro"))) + "00";
+                if (aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro"))).length() < 4) {
+                    val_fin = aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro"))) + "00";
                 } else {
-                    val_fin = aux.soNumeros(cursor.getString(cursor.getColumnIndex("valor_financeiro")));
+                    val_fin = aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro")));
                 }*/
                 //{aux.soNumeros()
-                //String[] valMlt = {"100", cursor.getString(cursor.getColumnIndex("valor_financeiro"))};
+                //String[] valMlt = {"100", cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro"))};
                 //String val_fin = String.valueOf(aux.multiplicar(valMlt));
 
-                VALORESFIN.append(cursor.getString(cursor.getColumnIndex("valFin")));
-                Log.i(TAG, " Valor Fin." + cursor.getString(cursor.getColumnIndex("valFin")));
-                //VALORESFIN.append(aux.soNumeros(cursor.getString(cursor.getColumnIndex("valor_financeiro"))));
+                VALORESFIN.append(cursor.getString(cursor.getColumnIndexOrThrow("valFin")));
+                Log.i(TAG, " Valor Fin." + cursor.getString(cursor.getColumnIndexOrThrow("valFin")));
+                //VALORESFIN.append(aux.soNumeros(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro"))));
 
                 // **
                 FPAGAMENTOS.append(",");
-                FPAGAMENTOS.append(IdFormaPagamento(cursor.getString(cursor.getColumnIndex("fpagamento_financeiro"))));
+                FPAGAMENTOS.append(IdFormaPagamento(cursor.getString(cursor.getColumnIndexOrThrow("fpagamento_financeiro"))));
 
                 // **
                 DOCUMENTOS.append(",");
-                DOCUMENTOS.append(cursor.getString(cursor.getColumnIndex("documento_financeiro")));
+                DOCUMENTOS.append(cursor.getString(cursor.getColumnIndexOrThrow("documento_financeiro")));
 
                 // **
                 NOTASFISCAIS.append(",");
-                NOTASFISCAIS.append(cursor.getString(cursor.getColumnIndex("nota_fiscal")));
+                NOTASFISCAIS.append(cursor.getString(cursor.getColumnIndexOrThrow("nota_fiscal")));
+
+                // **
+                CODALIQUOTAS.append(",");
+                CODALIQUOTAS.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_aliquota")));
+
             } while (cursor.moveToNext());
         }
 
-        myDataBase.close();
+        //myDataBase.close();
 
         /*String[] ret = {
                 VENDAS.toString(),
@@ -2552,8 +2570,96 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 VALORESFIN.toString(),
                 FPAGAMENTOS.toString(),
                 DOCUMENTOS.toString(),
-                NOTASFISCAIS.toString()
+                NOTASFISCAIS.toString(),
+                CODALIQUOTAS.toString()
         };
+        for (String s : ret) {
+            Log.i("EnviarDadosFinanceiro", s);
+        }
+
+
+        return ret;
+    }
+
+    // ** Só para atualizar sem dar problemas, retiar rdepois pra não encher o código
+    public String[] EnviarDadosFinanceiroTemp() {
+
+        // **
+        StringBuilder FINANCEIROS = new StringBuilder();
+        StringBuilder FINVEN = new StringBuilder();
+        StringBuilder VENCIMENTOS = new StringBuilder();
+        StringBuilder VALORESFIN = new StringBuilder();
+        StringBuilder FPAGAMENTOS = new StringBuilder();
+        StringBuilder DOCUMENTOS = new StringBuilder();
+        StringBuilder NOTASFISCAIS = new StringBuilder();
+        StringBuilder CODALIQUOTAS = new StringBuilder();
+
+        String query = "SELECT *, (fin.valor_financeiro * 100) as valFin " +
+                "FROM " + TABELA_VENDAS + " ven " +
+                "INNER JOIN " + TABELA_FINANCEIRO + " fin ON fin.id_financeiro_app = ven.codigo_venda_app " +
+                "WHERE ven.venda_finalizada_app = '1'";
+
+        //Log.e("SQL = ", query);
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+
+                // ---------------------------------- ** FINANCEIRO
+
+                // **
+                FINANCEIROS.append(",");
+                FINANCEIROS.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_financeiro")));
+
+                // **
+                FINVEN.append(",");
+                FINVEN.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_venda")));
+
+                // **
+                VENCIMENTOS.append(",");
+                VENCIMENTOS.append(aux.exibirData(cursor.getString(cursor.getColumnIndexOrThrow("vencimento_financeiro"))));
+
+                // **
+                VALORESFIN.append(",");
+
+                VALORESFIN.append(cursor.getString(cursor.getColumnIndexOrThrow("valFin")));
+                Log.i(TAG, " Valor Fin." + cursor.getString(cursor.getColumnIndexOrThrow("valFin")));
+
+                // **
+                FPAGAMENTOS.append(",");
+                FPAGAMENTOS.append(IdFormaPagamento(cursor.getString(cursor.getColumnIndexOrThrow("fpagamento_financeiro"))));
+
+                // **
+                DOCUMENTOS.append(",");
+                DOCUMENTOS.append(cursor.getString(cursor.getColumnIndexOrThrow("documento_financeiro")));
+
+                // **
+                NOTASFISCAIS.append(",");
+                NOTASFISCAIS.append(cursor.getString(cursor.getColumnIndexOrThrow("nota_fiscal")));
+
+                // **
+                CODALIQUOTAS.append(",");
+                CODALIQUOTAS.append("");
+
+            } while (cursor.moveToNext());
+        }
+
+        String[] ret = {
+                FINANCEIROS.toString(),
+                FINVEN.toString(),
+                VENCIMENTOS.toString(),
+                VALORESFIN.toString(),
+                FPAGAMENTOS.toString(),
+                DOCUMENTOS.toString(),
+                NOTASFISCAIS.toString(),
+                CODALIQUOTAS.toString()
+        };
+        for (String s : ret) {
+            Log.i("EnviarDadosFinanceiro", s);
+        }
+
 
         return ret;
     }
@@ -2588,52 +2694,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 // **
                 codigo_financeiro.append(",");
-                codigo_financeiro.append(cursor.getString(cursor.getColumnIndex("codigo_financeiro")));
+                codigo_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_financeiro")));
                 // **
                 unidade_financeiro.append(",");
-                unidade_financeiro.append(cursor.getString(cursor.getColumnIndex("unidade_financeiro")));
+                unidade_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("unidade_financeiro")));
                 // **
                 data_financeiro.append(",");
-                data_financeiro.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("data_financeiro"))));
+                data_financeiro.append(aux.exibirData(cursor.getString(cursor.getColumnIndexOrThrow("data_financeiro"))));
                 // **
                 codigo_cliente_financeiro.append(",");
-                codigo_cliente_financeiro.append(cursor.getString(cursor.getColumnIndex("codigo_cliente_financeiro")));
+                codigo_cliente_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_cliente_financeiro")));
                 // **
                 fpagamento_financeiro.append(",");
-                fpagamento_financeiro.append(cursor.getString(cursor.getColumnIndex("fpagamento_financeiro")));
+                fpagamento_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("fpagamento_financeiro")));
                 // **
                 documento_financeiro.append(",");
-                documento_financeiro.append(cursor.getString(cursor.getColumnIndex("documento_financeiro")));
+                documento_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("documento_financeiro")));
                 // **
                 vencimento_financeiro.append(",");
-                vencimento_financeiro.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("vencimento_financeiro"))));
+                vencimento_financeiro.append(aux.exibirData(cursor.getString(cursor.getColumnIndexOrThrow("vencimento_financeiro"))));
                 // **
                 valor_financeiro.append(",");
-                valor_financeiro.append(cursor.getString(cursor.getColumnIndex("valor_financeiro")));
+                valor_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro")));
                 // **
                 status_autorizacao.append(",");
-                status_autorizacao.append(cursor.getString(cursor.getColumnIndex("status_autorizacao")));
+                status_autorizacao.append(cursor.getString(cursor.getColumnIndexOrThrow("status_autorizacao")));
                 // **
                 pago.append(",");
-                pago.append(cursor.getString(cursor.getColumnIndex("valPago")));
+                pago.append(cursor.getString(cursor.getColumnIndexOrThrow("valPago")));
                 // **
                 vasilhame_ref.append(",");
-                vasilhame_ref.append(cursor.getString(cursor.getColumnIndex("vasilhame_ref")));
+                vasilhame_ref.append(cursor.getString(cursor.getColumnIndexOrThrow("vasilhame_ref")));
                 // **
                 usuario_atual.append(",");
-                usuario_atual.append(cursor.getString(cursor.getColumnIndex("usuario_atual")));
+                usuario_atual.append(cursor.getString(cursor.getColumnIndexOrThrow("usuario_atual")));
                 // **
                 data_inclusao.append(",");
-                data_inclusao.append(aux.exibirData(cursor.getString(cursor.getColumnIndex("data_inclusao"))));
+                data_inclusao.append(aux.exibirData(cursor.getString(cursor.getColumnIndexOrThrow("data_inclusao"))));
                 // **
                 nosso_numero_financeiro.append(",");
-                nosso_numero_financeiro.append(cursor.getString(cursor.getColumnIndex("nosso_numero_financeiro")));
+                nosso_numero_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("nosso_numero_financeiro")));
                 // **
                 id_vendedor_financeiro.append(",");
-                id_vendedor_financeiro.append(cursor.getString(cursor.getColumnIndex("id_vendedor_financeiro")));
+                id_vendedor_financeiro.append(cursor.getString(cursor.getColumnIndexOrThrow("id_vendedor_financeiro")));
 
 
-                //Log.i(TAG + " Peço unit.", cursor.getString(cursor.getColumnIndex("valPreVen")));
+                //Log.i(TAG + " Peço unit.", cursor.getString(cursor.getColumnIndexOrThrow("valPreVen")));
             } while (cursor.moveToNext());
         }
 
@@ -2682,15 +2788,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 // **
                 CODVALES.append(",");
-                CODVALES.append(cursor.getString(cursor.getColumnIndex("codigo_vale")));
+                CODVALES.append(cursor.getString(cursor.getColumnIndexOrThrow("codigo_vale")));
 
                 // **
                 UNIDADES.append(",");
-                UNIDADES.append(cursor.getString(cursor.getColumnIndex("unidade_vale")));
+                UNIDADES.append(cursor.getString(cursor.getColumnIndexOrThrow("unidade_vale")));
 
                 // **
                 NUMEROS.append(",");
-                NUMEROS.append(cursor.getString(cursor.getColumnIndex("numero_vale")));
+                NUMEROS.append(cursor.getString(cursor.getColumnIndexOrThrow("numero_vale")));
 
                 // **
                 DATAMOV.append(",");
@@ -2719,7 +2825,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = myDataBase.rawQuery(query, null);
         if (cursor.moveToFirst()) {
             do {
-                result = Integer.parseInt(cursor.getString(cursor.getColumnIndex("pagamento_prazo_cliente")));
+                result = Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow("pagamento_prazo_cliente")));
             } while (cursor.moveToNext());
         }
 
@@ -2990,6 +3096,120 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         }
         return a;
+    }
+
+    public String getIdFPG(String fpg) {
+        String id = "";
+        myDataBase = this.getReadableDatabase();
+
+        //
+        String selectQuery = "SELECT fpg.codigo_pagamento " +
+                "FROM formas_pagamento fpg " +
+                "WHERE fpg.descricao_forma_pagamento = '" + fpg + "' " +
+                "LIMIT 1";
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    id = cursor.getString(cursor.getColumnIndexOrThrow("codigo_pagamento"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    public ArrayList<String> getBandeiraFPg(String fpg) {
+        ArrayList<String> list = new ArrayList<>();
+        String codFPG = this.getIdFPG(fpg);
+        myDataBase = this.getReadableDatabase();
+        String selectQuery = "SELECT caa.bandeira " +
+                "FROM cartoes_aliquotas caa " +
+                "WHERE caa.codigo_forma_pagamento = '" + codFPG + "' " +
+                "GROUP BY caa.bandeira";
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    String bandeira = aux.getBandeira(cursor.getString(cursor.getColumnIndexOrThrow("bandeira")));
+                    list.add(bandeira);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public ArrayList<String> getPrazoFPg(String bandeira, String fpg) {
+        ArrayList<String> list = new ArrayList<>();
+        String codFPG = this.getIdFPG(fpg);
+        String codband = aux.getIdBandeira(bandeira); // this.getIdPrazoFPG(fpg);
+        myDataBase = this.getReadableDatabase();
+        String selectQuery = "SELECT caa.parcela " +
+                "FROM cartoes_aliquotas caa " +
+                "WHERE caa.bandeira = '" + codband + "' AND caa.codigo_forma_pagamento = '" + codFPG + "'";
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    String prazo = cursor.getString(cursor.getColumnIndexOrThrow("parcela"));
+                    list.add(prazo);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public String getIdAliquota(String bandeira, String parcela) {
+        String id = "";
+        myDataBase = this.getReadableDatabase();
+
+        //
+        String selectQuery = "SELECT caa.codigo " +
+                "FROM cartoes_aliquotas caa " +
+                "WHERE caa.bandeira = '" + bandeira + "' and caa.parcela = '" + parcela + "' LIMIT 1";
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+        try {
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    id = cursor.getString(cursor.getColumnIndexOrThrow("codigo"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    public String getCartaoTrue(String fpg) {
+        String id = "";
+        myDataBase = this.getReadableDatabase();
+        try {
+        //
+        String selectQuery = "SELECT fpg.cartao " +
+                "FROM formas_pagamento fpg " +
+                "WHERE fpg.descricao_forma_pagamento = '" + fpg + "' LIMIT 1";
+        Cursor cursor = myDataBase.rawQuery(selectQuery, null);
+
+            if (cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    id = cursor.getString(cursor.getColumnIndexOrThrow("cartao"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e("Financeiro", Objects.requireNonNull(e.getMessage()));
+            Intent i = new Intent(context, AtualizacaoApp.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(i);
+            //context.startActivity(new Intent(context, AtualizacaoApp.class));
+        }
+        return id;
     }
 
     //

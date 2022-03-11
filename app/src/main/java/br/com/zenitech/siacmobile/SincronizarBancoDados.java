@@ -458,7 +458,8 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         //
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
-        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "192");
+        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "197");
+        //final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "196");
         call.enqueue(new Callback<Sincronizador>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
@@ -655,17 +656,17 @@ public class SincronizarBancoDados extends AppCompatActivity {
             c.moveToFirst();
 
             Log.d(getClass().getName(), "COLUMN_ID: " +
-                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID)));
+                    c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_ID)));
             Log.d(getClass().getName(), "COLUMN_BYTES_DOWNLOADED_SO_FAR: " +
-                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)));
+                    c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)));
             Log.d(getClass().getName(), "COLUMN_LAST_MODIFIED_TIMESTAMP: " +
-                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)));
+                    c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)));
             Log.d(getClass().getName(), "COLUMN_LOCAL_URI: " +
-                    c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+                    c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI)));
             Log.d(getClass().getName(), "COLUMN_STATUS: " +
-                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
+                    c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)));
             Log.d(getClass().getName(), "COLUMN_REASON: " +
-                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+                    c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON)));
 
             Toast.makeText(this, statusMessage(c), Toast.LENGTH_LONG).show();
         }
@@ -678,7 +679,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
     private String statusMessage(Cursor c) {
         String msg;
 
-        switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+        switch (c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
             case DownloadManager.STATUS_FAILED:
                 msg = "Download failed!";
                 break;

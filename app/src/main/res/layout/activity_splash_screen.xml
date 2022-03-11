@@ -23,6 +23,17 @@
         app:srcCompat="@drawable/logosiac" />
 
     <TextView
+        android:id="@+id/txtSerial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:visibility="gone"
+        android:text="SERIAL\n005000004"
+        android:textSize="30sp" />
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"

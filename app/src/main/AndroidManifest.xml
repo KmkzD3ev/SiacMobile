@@ -25,7 +25,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- GPS -->
-    <!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <supports-screens
@@ -46,8 +46,12 @@
         tools:replace="allowBackup"
         tools:targetApi="q">
         <activity
+            android:name=".AtualizacaoApp"
+            android:exported="false" />
+        <activity
             android:name=".SplashScreen"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:hardwareAccelerated="true"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">
@@ -137,6 +141,7 @@
         <activity
             android:name=".VendasConsultarClientes"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:label="@string/title_activity_vendas_consultar_clientes"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

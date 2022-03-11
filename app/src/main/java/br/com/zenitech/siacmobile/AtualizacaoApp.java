@@ -1,18 +1,17 @@
 package br.com.zenitech.siacmobile;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.Toolbar;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,14 +22,13 @@ import java.util.Objects;
 
 import br.com.zenitech.siacmobile.domains.EnviarDados;
 import br.com.zenitech.siacmobile.domains.Sincronizador;
-import br.com.zenitech.siacmobile.domains.VendasDomain;
 import br.com.zenitech.siacmobile.interfaces.IEnviarDados;
 import br.com.zenitech.siacmobile.interfaces.ISincronizar;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class EnviarDadosServidor extends AppCompatActivity {
+public class AtualizacaoApp extends AppCompatActivity {
 
     //
     private SharedPreferences prefs;
@@ -41,14 +39,17 @@ public class EnviarDadosServidor extends AppCompatActivity {
     private ProgressDialog pd;
     String[] dados, dadosFin, dadosContasReceber, dadosVales;
     private int quant = 0;
+    AppCompatButton btnAtualizarBanco, btnEnviarDados;
+
+    private AlertDialog alerta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_enviar_dados_servidor);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_atualizacao_app);
+        /*Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);*/
 
         //
         context = this;
@@ -56,23 +57,28 @@ public class EnviarDadosServidor extends AppCompatActivity {
         classAuxiliar = new ClassAuxiliar();
         bd = new DatabaseHelper(context);
 
-        //
-        dados = bd.EnviarDados(classAuxiliar.exibirData(prefs.getString("data_movimento_atual", "")));
-        /*Log.i(TAG + " Venda", dados[0]);
-        Log.i(TAG + " Venda", dados[1]);
-        Log.i(TAG + " Venda", dados[2]);
-        Log.i(TAG + " Venda", dados[3]);
-        Log.i(TAG + " Venda", dados[4]);
-        Log.i(TAG + " Venda", dados[5]);*/
-        //
-        dadosFin = bd.EnviarDadosFinanceiro();
+        btnAtualizarBanco = findViewById(R.id.btnAtualizarBanco);
+        btnEnviarDados = findViewById(R.id.btnEnviarDados);
 
         //
-        dadosContasReceber = bd.EnviarDadosContasReceber();
+        try {
+            //
+            if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0 || bd.getAllVales().size() > 0) {
+                dados = bd.EnviarDados(classAuxiliar.exibirData(prefs.getString("data_movimento_atual", "")));
+                dadosFin = bd.EnviarDadosFinanceiroTemp();
+                dadosContasReceber = bd.EnviarDadosContasReceber();
+                dadosVales = bd.EnviarDadosVales(prefs.getString("data_movimento_atual", ""));
+                btnEnviarDados.setVisibility(View.VISIBLE);
+                btnAtualizarBanco.setVisibility(View.GONE);
+            } else {
+                btnEnviarDados.setVisibility(View.GONE);
+                btnAtualizarBanco.setVisibility(View.VISIBLE);
+            }
+        } catch (Exception e) {
+            Log.e("Enviar Dados", Objects.requireNonNull(e.getMessage()));
+        }
 
-        dadosVales = bd.EnviarDadosVales(prefs.getString("data_movimento_atual", ""));
-
-        findViewById(R.id.cv_enviar_dados).setOnClickListener(v -> {
+        btnEnviarDados.setOnClickListener(v -> {
             //MOSTRA A MENSAGEM DE SINCRONIZAÇÃO
             pd = ProgressDialog.show(context, "Enviando dados...", "Aguarde...",
                     true, false);
@@ -81,6 +87,41 @@ public class EnviarDadosServidor extends AppCompatActivity {
             enviarDadosContasReceber();
             enviarDadosVales();
         });
+
+        btnAtualizarBanco.setOnClickListener(v -> mostrarMsgFinalizarPOS());
+    }
+
+    private void mostrarMsgFinalizarPOS() {
+
+        //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+        bd.FecharConexao();
+        context.deleteDatabase("siacmobileDB");
+        Intent i = new Intent(context, SincronizarBancoDados.class);
+        i.putExtra("atualizarbd", "sim");
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+
+        /*//Cria o gerador do AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setIcon(R.drawable.logosiac);
+        //define o titulo
+        builder.setTitle("Atenção");
+        //define a mensagem
+        builder.setMessage("Para continuar é preciso atualizar seu banco de dados");
+        //define um botão como positivo
+        builder.setPositiveButton("Atualizar Agora", (arg0, arg1) -> {
+            //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+            context.deleteDatabase("siacmobileDB");
+            Intent i = new Intent(context, SincronizarBancoDados.class);
+            i.putExtra("atualizarbd", "sim");
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+        builder.setCancelable(false);
+        //cria o AlertDialog
+        alerta = builder.create();
+        //Exibe alerta
+        alerta.show();*/
     }
 
     void enviarDados() {
@@ -255,13 +296,17 @@ public class EnviarDadosServidor extends AppCompatActivity {
         Toast.makeText(context, "POS Finalizado!", Toast.LENGTH_SHORT).show();
 
 
-        //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
+        /*//APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
         bd.FecharConexao();
         context.deleteDatabase("siacmobileDB");
         Intent i = new Intent(context, SincronizarBancoDados.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
-        finish();
+        finish();*/
+
+
+        btnEnviarDados.setVisibility(View.GONE);
+        btnAtualizarBanco.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -272,5 +317,13 @@ public class EnviarDadosServidor extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(context, Principal2.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
     }
 }

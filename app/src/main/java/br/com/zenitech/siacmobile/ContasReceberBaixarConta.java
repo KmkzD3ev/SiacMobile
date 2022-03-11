@@ -271,6 +271,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
                                             "",
                                             "" + prefs.getInt("id_vendedor", 1),
                                             "" + codigo_cliente,
+                                            "",
                                             ""
                                     ));
                                 }
@@ -499,6 +500,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
                                     "",
                                     "" + prefs.getInt("id_vendedor", 1),
                                     "" + codigo_cliente,
+                                    "",
                                     ""
                             ));
                         }

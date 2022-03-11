@@ -1,5 +1,6 @@
 package br.com.zenitech.siacmobile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
@@ -8,6 +9,8 @@ import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -17,14 +20,17 @@ public class SplashScreen extends AppCompatActivity {
     private SharedPreferences prefs;
     private SharedPreferences.Editor ed;
     private DatabaseHelper bd;
+    private TextView txtSerial;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-
+        context = this;
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
+        txtSerial = findViewById(R.id.txtSerial);
 
         if (prefs.getBoolean("reset", false)) {
             Intent i = new Intent(this, ResetApp.class);
@@ -32,6 +38,11 @@ public class SplashScreen extends AppCompatActivity {
             startActivity(i);
             finish();
             return;
+        }
+
+        if(!prefs.getString("serial_app", "").equalsIgnoreCase("")){
+            txtSerial.setVisibility(View.VISIBLE);
+            txtSerial.setText(String.format("SERIAL\n%s", prefs.getString("serial_app", "")));
         }
 
         //
@@ -75,7 +86,7 @@ public class SplashScreen extends AppCompatActivity {
             }
 
             finish();
-        }, 2300);
+        }, 4000);
 
     }
 

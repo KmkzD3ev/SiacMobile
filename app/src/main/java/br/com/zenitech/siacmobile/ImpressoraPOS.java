@@ -201,7 +201,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         String txtEndereco = "Endereco: " + endereco;
 
         // ASSINATURA
-        String txtLinAss = "-----------------------------------------------";
+        String txtLinAss = "--------------------------------";
         String txtAss = "Ass. Emitente";
 
         //
@@ -210,21 +210,21 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         String txtVal = "VALOR: R$ " + valor;
 
         //
-        String txtLinAss1 = "-----------------------------------------------";
+        String txtLinAss1 = "--------------------------------";
         String txtAss1 = unidade.getRazao_social();
 
         // IMPRESSÃO PROMISSÓRIA CLIENTE ********
 
         // PARTE 1
-        pppPromissoria.addLine(new CentralizedBigText("***  NOTA PROMISSORIA  ***"));
+        pppPromissoria.addLine("***  NOTA PROMISSORIA  ***");
         pppPromissoria.addLine("");
-        pppPromissoria.addLine(new CentralizedBigText("***  VIA CLIENTE ***"));
+        pppPromissoria.addLine("***  VIA CLIENTE ***");
         pppPromissoria.addLine("");
 
         // PARTE 2
-        pppPromissoria.addLine(new CentralizedBigText(txtTel));
-        pppPromissoria.addLine(new CentralizedBigText(txtNumVen));
-        pppPromissoria.addLine(new CentralizedBigText(txtValor));
+        pppPromissoria.addLine(txtTel);
+        pppPromissoria.addLine(txtNumVen);
+        pppPromissoria.addLine(txtValor);
         pppPromissoria.addLine("");
 
         // PARTE 3
@@ -233,47 +233,47 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 " ou a sua ordem, " +
                 "a quantidade de: " + getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))) + " em moeda corrente deste pais.";
 */
-        pppPromissoria.addLine(new CentralizedBigText("Ao(s) " + getDataPorExtenso(vencimento)));
-        pppPromissoria.addLine(new CentralizedBigText("pagarei por esta unica via de NOTA PROMISSORIA a "));
-        pppPromissoria.addLine(new CentralizedBigText(unidade.getRazao_social()));
-        pppPromissoria.addLine(new CentralizedBigText("ou a sua ordem, a quantidade de: "));
-        pppPromissoria.addLine(new CentralizedBigText(getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor)))))));
-        pppPromissoria.addLine(new CentralizedBigText("em moeda corrente deste pais."));
+        pppPromissoria.addLine("Ao(s) " + getDataPorExtenso(vencimento));
+        pppPromissoria.addLine("pagarei por esta unica via de NOTA PROMISSORIA a ");
+        pppPromissoria.addLine(unidade.getRazao_social());
+        pppPromissoria.addLine("ou a sua ordem, a quantidade de: ");
+        pppPromissoria.addLine(getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))));
+        pppPromissoria.addLine("em moeda corrente deste pais.");
         pppPromissoria.addLine("");
 
         // PARTE 4
-        pppPromissoria.addLine(new CentralizedBigText(txtPagavel));
+        pppPromissoria.addLine(txtPagavel);
         pppPromissoria.addLine("");
 
         // PARTE 5
-        pppPromissoria.addLine(new CentralizedBigText("Emitente:"));
-        pppPromissoria.addLine(new CentralizedBigText(cliente));
-        pppPromissoria.addLine(new CentralizedBigText("CNPJ/CPF: " + cpfcnpj));
-        pppPromissoria.addLine(new CentralizedBigText("Endereco:"));
-        pppPromissoria.addLine(new CentralizedBigText(endereco));
+        pppPromissoria.addLine("Emitente:");
+        pppPromissoria.addLine(cliente);
+        pppPromissoria.addLine("CNPJ/CPF: " + cpfcnpj);
+        pppPromissoria.addLine("Endereco:");
+        pppPromissoria.addLine(endereco);
         pppPromissoria.addLine("");
 
         // PARTE 6
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
-        pppPromissoria.addLine(new CentralizedBigText(txtAss));
+        pppPromissoria.addLine(txtLinAss);
+        pppPromissoria.addLine(txtAss);
         pppPromissoria.addLine("");
 
         // PARTE 7
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
+        pppPromissoria.addLine(txtLinAss);
 
         // PARTE 8
-        pppPromissoria.addLine(new CentralizedBigText(txtNum));
-        pppPromissoria.addLine(new CentralizedBigText("CLIENTE: " + id_cliente));
-        pppPromissoria.addLine(new CentralizedBigText(cliente));
-        pppPromissoria.addLine(new CentralizedBigText(txtVal));
+        pppPromissoria.addLine(txtNum);
+        pppPromissoria.addLine("CLIENTE: " + id_cliente);
+        pppPromissoria.addLine(cliente);
+        pppPromissoria.addLine(txtVal);
 
         // PARTE 9
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss1));
-        pppPromissoria.addLine(new CentralizedBigText(txtAss1));
+        pppPromissoria.addLine(txtLinAss1);
+        pppPromissoria.addLine(txtAss1);
 
         pppPromissoria.addLine("");
         pppPromissoria.addLine("");
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
+        pppPromissoria.addLine(txtLinAss);
         pppPromissoria.addLine("");
         pppPromissoria.addLine("");
 
@@ -281,15 +281,15 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
 
         // PARTE 1
-        pppPromissoria.addLine(new CentralizedBigText("***  NOTA PROMISSORIA  ***"));
+        pppPromissoria.addLine("***  NOTA PROMISSORIA  ***");
         pppPromissoria.addLine("");
-        pppPromissoria.addLine(new CentralizedBigText("***  VIA ESTABELECIMENTO ***"));
+        pppPromissoria.addLine("***  VIA ESTABELECIMENTO ***");
         pppPromissoria.addLine("");
 
         // PARTE 2
-        pppPromissoria.addLine(new CentralizedBigText(txtTel));
-        pppPromissoria.addLine(new CentralizedBigText(txtNumVen));
-        pppPromissoria.addLine(new CentralizedBigText(txtValor));
+        pppPromissoria.addLine(txtTel);
+        pppPromissoria.addLine(txtNumVen);
+        pppPromissoria.addLine(txtValor);
         pppPromissoria.addLine("");
 
         // PARTE 3
@@ -298,43 +298,43 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 " ou a sua ordem, " +
                 "a quantidade de: " + getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))) + " em moeda corrente deste pais.";
 */
-        pppPromissoria.addLine(new CentralizedBigText("Ao(s) " + getDataPorExtenso(vencimento)));
-        pppPromissoria.addLine(new CentralizedBigText("pagarei por esta unica via de NOTA PROMISSORIA a "));
-        pppPromissoria.addLine(new CentralizedBigText(unidade.getRazao_social()));
-        pppPromissoria.addLine(new CentralizedBigText("ou a sua ordem, a quantidade de: "));
-        pppPromissoria.addLine(new CentralizedBigText(getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor)))))));
-        pppPromissoria.addLine(new CentralizedBigText("em moeda corrente deste pais."));
+        pppPromissoria.addLine("Ao(s) " + getDataPorExtenso(vencimento));
+        pppPromissoria.addLine("pagarei por esta unica via de NOTA PROMISSORIA a ");
+        pppPromissoria.addLine(unidade.getRazao_social());
+        pppPromissoria.addLine("ou a sua ordem, a quantidade de: ");
+        pppPromissoria.addLine(getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))));
+        pppPromissoria.addLine("em moeda corrente deste pais.");
         pppPromissoria.addLine("");
 
         // PARTE 4
-        pppPromissoria.addLine(new CentralizedBigText(txtPagavel));
+        pppPromissoria.addLine(txtPagavel);
         pppPromissoria.addLine("");
 
         // PARTE 5
-        pppPromissoria.addLine(new CentralizedBigText("Emitente:"));
-        pppPromissoria.addLine(new CentralizedBigText(cliente));
-        pppPromissoria.addLine(new CentralizedBigText("CNPJ/CPF: " + cpfcnpj));
-        pppPromissoria.addLine(new CentralizedBigText("Endereco:"));
-        pppPromissoria.addLine(new CentralizedBigText(endereco));
+        pppPromissoria.addLine("Emitente:");
+        pppPromissoria.addLine(cliente);
+        pppPromissoria.addLine("CNPJ/CPF: " + cpfcnpj);
+        pppPromissoria.addLine("Endereco:");
+        pppPromissoria.addLine(endereco);
         pppPromissoria.addLine("");
 
         // PARTE 6
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
-        pppPromissoria.addLine(new CentralizedBigText(txtAss));
+        pppPromissoria.addLine(txtLinAss);
+        pppPromissoria.addLine(txtAss);
         pppPromissoria.addLine("");
 
         // PARTE 7
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss));
+        pppPromissoria.addLine(txtLinAss);
 
         // PARTE 8
-        pppPromissoria.addLine(new CentralizedBigText(txtNum));
-        pppPromissoria.addLine(new CentralizedBigText("CLIENTE: " + id_cliente));
-        pppPromissoria.addLine(new CentralizedBigText(cliente));
-        pppPromissoria.addLine(new CentralizedBigText(txtVal));
+        pppPromissoria.addLine(txtNum);
+        pppPromissoria.addLine("CLIENTE: " + id_cliente);
+        pppPromissoria.addLine(cliente);
+        pppPromissoria.addLine(txtVal);
 
         // PARTE 9
-        pppPromissoria.addLine(new CentralizedBigText(txtLinAss1));
-        pppPromissoria.addLine(new CentralizedBigText(txtAss1));
+        pppPromissoria.addLine(txtLinAss1);
+        pppPromissoria.addLine(txtAss1);
         pppPromissoria.addLine("");
 
         pppPromissoria.setConnectionCallback(new StoneCallbackInterface() {
@@ -373,16 +373,16 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         int posicaoNota;
 
         //IMPRIMIR CABEÇALHO
-        ppp.addLine(new CentralizedBigText("***  RELATORIO PEDIDOS  ***"));
+        ppp.addLine("***  RELATORIO PEDIDOS  ***");
         ppp.addLine("");
 
-        ppp.addLine(new CentralizedBigText("Unidade: " + unidade.getDescricao_unidade()));
-        ppp.addLine(new CentralizedBigText("Serial: " + prefs.getString("serial", "")));
-        ppp.addLine(new CentralizedBigText("Data Movimento: " + cAux.exibirData(prefs.getString("data_movimento_atual", ""))));
+        ppp.addLine("Unidade: " + unidade.getDescricao_unidade());
+        ppp.addLine("Serial: " + prefs.getString("serial", ""));
+        ppp.addLine("Data Movimento: " + cAux.exibirData(prefs.getString("data_movimento_atual", "")));
 
         ppp.addLine("");
-        ppp.addLine(new CentralizedBigText("*** ITENS ***"));
-        ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+        ppp.addLine("*** ITENS ***");
+        ppp.addLine("--------------------------------");
 
         // TOTAL DE PRODUTOS
         int totalProdutos = 0;
@@ -404,15 +404,15 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 valTotalPed = String.valueOf(cAux.somar(somarValTot));
 
                 //IMPRIMIR TEXTO
-                ppp.addLine(new CentralizedBigText("PRODUTO: " + pedidos.getProduto_venda()));
-                ppp.addLine(new CentralizedBigText("QTDE.:  | VL.UNIT:  | VL.TOTAL: "));
-                ppp.addLine(new CentralizedBigText(pedidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(pedidos.getValor_total()))));
+                ppp.addLine("PRODUTO: " + pedidos.getProduto_venda());
+                ppp.addLine("QTDE.:  | VL.UNIT:  | VL.TOTAL: ");
+                ppp.addLine(pedidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(pedidos.getValor_total())));
 
-                ppp.addLine(new CentralizedBigText("FORMA(S) PAGAMENTO: "));
-                ppp.addLine(new CentralizedBigText(pedidos.getFormas_pagamento()));
+                ppp.addLine("FORMA(S) PAGAMENTO: ");
+                ppp.addLine(pedidos.getFormas_pagamento());
 
-                ppp.addLine(new CentralizedBigText("CLIENTE: " + pedidos.getCodigo_cliente()));
-                ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+                ppp.addLine("CLIENTE: " + pedidos.getCodigo_cliente());
+                ppp.addLine("--------------------------------");
 
                 try {
                     String[] sum = {String.valueOf(n), "1"};
@@ -424,16 +424,16 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             }
         }
 
-        ppp.addLine(new CentralizedBigText("*** TOTAIS ***"));
+        ppp.addLine("*** TOTAIS ***");
         ppp.addLine("");
 
         Double s = Double.parseDouble(quantItens);
 
-        ppp.addLine(new CentralizedBigText("TOTAL DE VENDAS: " + elementosPedidos.size()));
-        ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: " + s.intValue()));
-        ppp.addLine(new CentralizedBigText("FORMAS PAGAMENTO: "));
-        ppp.addLine(new CentralizedBigText(strFormPags));
-        ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed))));
+        ppp.addLine("TOTAL DE VENDAS: " + elementosPedidos.size());
+        ppp.addLine("TOTAL DE ITENS: " + s.intValue());
+        ppp.addLine("FORMAS PAGAMENTO: ");
+        ppp.addLine(strFormPags);
+        ppp.addLine("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed)));
 
         ppp.addLine("");
         ppp.addLine("");
@@ -471,15 +471,15 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         int posicaoNota;
 
         //IMPRIMIR CABEÇALHO
-        ppp.addLine(new CentralizedBigText("***  RELATORIO BAIXAS  ***"));
+        ppp.addLine("***  RELATORIO BAIXAS  ***");
         ppp.addLine("");
 
-        ppp.addLine(new CentralizedBigText("Unidade: " + unidade.getDescricao_unidade()));
-        ppp.addLine(new CentralizedBigText("Serial: " + prefs.getString("serial", "")));
+        ppp.addLine("Unidade: " + unidade.getDescricao_unidade());
+        ppp.addLine("Serial: " + prefs.getString("serial", ""));
 
         ppp.addLine("");
-        ppp.addLine(new CentralizedBigText("*** ITENS ***"));
-        ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+        ppp.addLine("*** ITENS ***");
+        ppp.addLine("--------------------------------");
 
         // TOTAL DE PRODUTOS
         int totalProdutos = 0;
@@ -501,11 +501,11 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 valTotalPed = String.valueOf(cAux.somar(somarValTot));
 
                 //IMPRIMIR TEXTO
-                ppp.addLine(new CentralizedBigText(recebidos.getFpagamento_financeiro().replace(" _ ", "") + "  " + cAux.maskMoney(new BigDecimal(recebidos.getPago()))));
-                //ppp.addLine(new CentralizedBigText("QTDE.:  | VL.UNIT:  | VL.TOTAL: "));
-                //ppp.addLine(new CentralizedBigText(recebidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(recebidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(recebidos.getValor_total()))));
-                //ppp.addLine(new CentralizedBigText("CLIENTE: " + pedidos.getCodigo_cliente()));
-                ppp.addLine(new CentralizedBigText("-----------------------------------------------"));
+                ppp.addLine(recebidos.getFpagamento_financeiro().replace(" _ ", "") + "  " + cAux.maskMoney(new BigDecimal(recebidos.getPago())));
+                //ppp.addLine("QTDE.:  | VL.UNIT:  | VL.TOTAL: "));
+                //ppp.addLine(recebidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(recebidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(recebidos.getValor_total()))));
+                //ppp.addLine("CLIENTE: " + pedidos.getCodigo_cliente()));
+                ppp.addLine("--------------------------------");
 
                 try {
                     String[] sum = {String.valueOf(n), "1"};
@@ -517,14 +517,14 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             }
         }
 
-        ppp.addLine(new CentralizedBigText("*** TOTAIS ***"));
+        ppp.addLine("*** TOTAIS ***");
         ppp.addLine("");
 
         Double s = Double.parseDouble(quantItens);
 
-        ppp.addLine(new CentralizedBigText("FORMAS DE PAGAMENTO: " + elementosRecebidos.size()));
-        //ppp.addLine(new CentralizedBigText("TOTAL DE ITENS: " + s.intValue()));
-        ppp.addLine(new CentralizedBigText("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed))));
+        ppp.addLine("FORMAS DE PAGAMENTO: " + elementosRecebidos.size());
+        //ppp.addLine("TOTAL DE ITENS: " + s.intValue()));
+        ppp.addLine("VALOR TOTAL: R$ " + cAux.maskMoney(new BigDecimal(valTotalPed)));
 
         ppp.addLine("");
         ppp.addLine("");
@@ -554,9 +554,9 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         String numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarraBB);
 
         // PARTE 1
-        /*pppPromissoria.addLine(new CentralizedBigText("***  BOLETO  ***"));
+        /*pppPromissoria.addLine("***  BOLETO  ***"));
         pppPromissoria.addLine("");
-        pppPromissoria.addLine(new CentralizedBigText("***  TESTE ***"));*/
+        pppPromissoria.addLine("***  TESTE ***"));*/
         //pppPromissoria.addLine("");
 
         // IDS TEXT CANHOTO BOLETO

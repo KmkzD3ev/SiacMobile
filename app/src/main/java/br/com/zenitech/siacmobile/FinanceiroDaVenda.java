@@ -18,6 +18,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -93,11 +94,12 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     private SharedPreferences.Editor ed;
 
     public static String totalFinanceiro;
+    private LinearLayoutCompat bandPrazo;
     public static TextView txtTotalFinanceiro;
     public static TextView txtTotalItemFinanceiro;
-    private ArrayList<String> listaFormasPagamentoCliente;
+    private ArrayList<String> listaFormasPagamentoCliente, listaBandeiras, listaParcelas;
     private DatabaseHelper bd;
-    private Spinner spFormasPagamentoCliente;
+    private Spinner spFormasPagamentoCliente, spBandeira, spParcela;
     public static String codigo_cliente = "";
     public static String nomeCliente = "";
     public static String cpfcnpjCliente = "";
@@ -154,6 +156,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     PosApp posApp;
     String nDoc = "";
 
+    //
+    ArrayAdapter adapterSpBandeira, adapterSpParcela;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -193,6 +198,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         bgTotal = findViewById(R.id.bgTotal);
 
         //
+        bandPrazo = findViewById(R.id.bandPrazo);
         rvFinanceiro = findViewById(R.id.rvFinanceiro);
         rvFinanceiro.setLayoutManager(new LinearLayoutManager(this));
 
@@ -228,7 +234,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                     txtValorFormaPagamento.getText().toString().equals("R$0,00") ||
                     txtValorFormaPagamento.getText().toString().equals("R$0,00")
             ) {*/
-            if(val.equalsIgnoreCase("") || val.equalsIgnoreCase("000")){
+            if (val.equalsIgnoreCase("") || val.equalsIgnoreCase("000")) {
                 //
                 Toast.makeText(FinanceiroDaVenda.this, "Adicione uma valor para esta forma de pagamento.", Toast.LENGTH_LONG).show();
             } else {
@@ -324,14 +330,60 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         }
 
         //
+        spFormasPagamentoCliente = findViewById(R.id.spFormasPagamentoCliente);
+        spBandeira = findViewById(R.id.spBandeira);
+        spParcela = findViewById(R.id.spParcela);
+
         listaFormasPagamentoCliente = bd.getFormasPagamentoCliente(codigo_cliente);
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaFormasPagamentoCliente);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spFormasPagamentoCliente = findViewById(R.id.spFormasPagamentoCliente);
         spFormasPagamentoCliente.setAdapter(adapter);
 
-        spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
+        //try {
+        spFormasPagamentoCliente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
+                if (bd.getCartaoTrue(fPag[0]).equalsIgnoreCase("1")) {
+                    bandPrazo.setVisibility(View.VISIBLE);
 
+                    //
+                    listaBandeiras = bd.getBandeiraFPg(fPag[0]);
+                    adapterSpBandeira = new ArrayAdapter(context, android.R.layout.simple_spinner_item, listaBandeiras);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spBandeira.setAdapter(adapterSpBandeira);
+                    //spBandeira.setOnItemSelectedListener(FinanceiroDaVenda.this);
+                    spBandeira.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            //Toast.makeText(context, spBandeira.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                            //
+                            listaParcelas = bd.getPrazoFPg(spBandeira.getSelectedItem().toString(), fPag[0]);
+                            adapterSpParcela = new ArrayAdapter(context, android.R.layout.simple_spinner_item, listaParcelas);
+                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spParcela.setAdapter(adapterSpParcela);
+                            spParcela.setOnItemSelectedListener(FinanceiroDaVenda.this);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+
+                        }
+                    });
+                } else {
+                    listaBandeiras = null;
+                    listaParcelas = null;
+                    bandPrazo.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        /*} catch (Exception e) {
+        }*/
         atualizarValFin();
 
         // Verificar se o GPS foi aceito pelo entregador
@@ -368,7 +420,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         que recebe como parâmetro uma String referente ao nome da sua aplicação.*/
         Stone.setAppName(getApplicationName(context));
         //Ambiente de Sandbox "Teste"
-        Stone.setEnvironment(new Configuracoes().Ambiente());
+        //Stone.setEnvironment(new Configuracoes().Ambiente());
         //Ambiente de Produção
         //Stone.setEnvironment((Environment.PRODUCTION));
 
@@ -678,6 +730,15 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //SETAR O SQL NO LOG PARA CONSULTA
         Log.e("SQL", sql);
 
+        String sBandeira = "", sPrazo = "";
+        if (bd.getCartaoTrue(fPag[0]).equalsIgnoreCase("1")) {
+            try {
+                sBandeira = classAuxiliar.getIdBandeira(spBandeira.getSelectedItem().toString());
+                sPrazo = spParcela.getSelectedItem().toString();
+            } catch (Exception e) {
+
+            }
+        }
         //INSERIR FINANCEIRO
         bd.addFinanceiro(new FinanceiroVendasDomain(
                 String.valueOf(id),//CODIGO_FINANCEIRO
@@ -696,8 +757,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 "",//NOSSO_NUMERO_FINANCEIRO
                 "" + prefs.getInt("id_vendedor", 1),//ID_VENDEDOR_FINANCEIRO
                 "" + prefs.getInt("id_venda_app", 1),
-                txtNotaFiscal.getText().toString()
-        ));//sdsdfd
+                txtNotaFiscal.getText().toString(),
+                bd.getIdAliquota(sBandeira, sPrazo)
+        ));
 
         //if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
         if (fPag[0].contains("PROMISSORIA")) {

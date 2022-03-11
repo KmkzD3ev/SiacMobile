@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -698,5 +699,59 @@ public class ClassAuxiliar {
 
         //retorna o digito verificador
         return String.valueOf(dv);
+    }
+
+    public String removerAcentos(String str) {
+        return Normalizer.normalize(str, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+    }
+
+    public String getIdBandeira(String s) {
+        /*$bandeiras[1] = 'ELO';
+        $bandeiras[2] = 'VISA';
+        $bandeiras[3] = 'MASTER';
+        $bandeiras[4] = 'AMEX';
+        $bandeiras[5] = 'HIPER';
+        $bandeiras[6] = 'DINERS';*/
+        s = this.removerAcentos(s);
+        String idFormaPagamento = "";
+        if (Objects.requireNonNull(s).equalsIgnoreCase("ELO")) {
+            idFormaPagamento = "1";
+
+        } else if (s.equalsIgnoreCase("VISA")) {
+            idFormaPagamento = "2";
+
+        } else if (s.equalsIgnoreCase("MASTER")) {
+            idFormaPagamento = "3";
+
+        } else if (s.equalsIgnoreCase("AMEX")) {
+            idFormaPagamento = "4";
+
+        } else if (s.equalsIgnoreCase("HIPER")) {
+            idFormaPagamento = "5";
+
+        } else if (s.equalsIgnoreCase("DINERS")) {
+            idFormaPagamento = "6";
+
+        }
+
+        return idFormaPagamento;
+    }
+
+    public String getBandeira(String s) {
+        String bandeira = "";
+        if (s.equalsIgnoreCase("1"))
+            bandeira = "ELO";
+        else if (s.equalsIgnoreCase("2"))
+            bandeira = "VISA";
+        else if (s.equalsIgnoreCase("3"))
+            bandeira = "MASTER";
+        else if (s.equalsIgnoreCase("4"))
+            bandeira = "AMEX";
+        else if (s.equalsIgnoreCase("5"))
+            bandeira = "HIPER";
+        else if (s.equalsIgnoreCase("6"))
+            bandeira = "DINERS";
+
+        return bandeira;
     }
 }

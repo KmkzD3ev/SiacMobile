@@ -80,15 +80,20 @@ public class NotificationsFragment extends Fragment {
             startActivity(i);
         });
 
-        //
-        if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0 || bd.getAllVales().size() > 0) {
-            cv_enviar_dados.setVisibility(View.VISIBLE);
-            //cv_btn_resetar_app.setVisibility(View.GONE);
-            cv_btn_finalizar_app.setVisibility(View.GONE);
-        } else {
+        try {
+            //
+            if (bd.getAllVendas().size() > 0 || bd.getAllRecebidos().size() > 0 || bd.getAllVales().size() > 0) {
+                cv_enviar_dados.setVisibility(View.VISIBLE);
+                //cv_btn_resetar_app.setVisibility(View.GONE);
+                cv_btn_finalizar_app.setVisibility(View.GONE);
+            } else {
+                cv_enviar_dados.setVisibility(View.GONE);
+                //cv_btn_resetar_app.setVisibility(View.VISIBLE);
+                cv_btn_finalizar_app.setVisibility(View.VISIBLE);
+            }
+        } catch (Exception e) {
             cv_enviar_dados.setVisibility(View.GONE);
-            //cv_btn_resetar_app.setVisibility(View.VISIBLE);
-            cv_btn_finalizar_app.setVisibility(View.VISIBLE);
+            Log.e("Enviar Dados", Objects.requireNonNull(e.getMessage()));
         }
 
         //cv_enviar_dados.setVisibility(View.VISIBLE);
@@ -204,7 +209,7 @@ public class NotificationsFragment extends Fragment {
                 //
                 final Sincronizador sincronizacao = response.body();
                 if (sincronizacao != null) {
-                    if(sincronizacao.getErro().equalsIgnoreCase("0")){
+                    if (sincronizacao.getErro().equalsIgnoreCase("0")) {
                         prefs.edit().putBoolean("sincronizado", false).apply();
                         prefs.edit().putString("unidade_vendedor", "").apply();
                         prefs.edit().putString("unidade_usuario", "").apply();

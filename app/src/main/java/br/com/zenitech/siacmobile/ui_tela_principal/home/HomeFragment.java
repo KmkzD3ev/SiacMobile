@@ -192,7 +192,7 @@ public class HomeFragment extends Fragment {
         textView = view.findViewById(R.id.text_home);
         txtVersao = view.findViewById(R.id.txtVersao);
         txtDataUltimoSinc = view.findViewById(R.id.txtDataUltimoSinc);
-        txtEmpresa.setText(unidades.getRazao_social());
+        txtEmpresa.setText(unidades.getDescricao_unidade());
         txtCodUnidade.setText(posApp.getUnidade());
         //
         textView.setText(String.format("%s | %s", prefs.getString("serial_app", ""), posApp.getSerie()));

@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/drawable/bg_btn_green.xml" value="0.1645" />
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/layout/activity_atualizacao_app.xml" value="0.25" />
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/layout/activity_enviar_dados_servidor.xml" value="0.135258358662614" />
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/layout/activity_splash_screen.xml" value="0.1" />
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/layout/content_enviar_dados_servidor.xml" value="0.135258358662614" />
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/layout/content_financeiro_da_venda.xml" value="0.22" />
+        <entry key="..\:/Users/kma_s/Documents/PROJETOS ANDROID/ZENITECH/SIAC_MOBILE_VERSIONADO/app/src/main/res/layout/content_vendas.xml" value="0.1" />
+      </map>
+    </option>
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
     <option name="myDefaultNotNull" value="androidx.annotation.NonNull" />
