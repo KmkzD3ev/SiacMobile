@@ -20,8 +20,8 @@ public class SplashScreen extends AppCompatActivity {
     private SharedPreferences prefs;
     private SharedPreferences.Editor ed;
     private DatabaseHelper bd;
-    private TextView txtSerial;
-    private Context context;
+     TextView txtSerial;
+     Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +73,11 @@ public class SplashScreen extends AppCompatActivity {
                     if (bd.checkDataBase()) {
                         //SE O BANCO ESXISTIR VAI PARA O LOGIN
                         //Toast.makeText(SplashScreen.this, "Login!", Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(SplashScreen.this, Login.class));
+                        //startActivity(new Intent(SplashScreen.this, Login.class));
+                        Intent i = new Intent(SplashScreen.this, Principal2.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(i);
+                        finish();
                     } else {
                         //SE O BANCO NÃO EXISTIR VAI PARA SINCRONIZAÇÃO
                         //Toast.makeText(SplashScreen.this, "Sincronizar!", Toast.LENGTH_LONG).show();

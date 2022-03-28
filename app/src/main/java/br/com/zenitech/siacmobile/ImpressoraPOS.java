@@ -182,6 +182,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         PosPrintProvider pppPromissoria = new PosPrintProvider(this);
 
         //
+        String txtDataVenda = "Data/Hora Emissão: " + cAux.exibirDataAtual() + " - " + cAux.horaAtual();
         String txtTel = "TEL. CONTATO: " + unidade.getTelefone();
         String txtNumVen = "N: " + numero + " / VENCIMENTO: " + vencimento;
         String txtValor = "VALOR: R$ " + valor;
@@ -222,6 +223,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         pppPromissoria.addLine("");
 
         // PARTE 2
+        pppPromissoria.addLine(txtDataVenda);
         pppPromissoria.addLine(txtTel);
         pppPromissoria.addLine(txtNumVen);
         pppPromissoria.addLine(txtValor);
@@ -287,6 +289,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         pppPromissoria.addLine("");
 
         // PARTE 2
+        pppPromissoria.addLine(txtDataVenda);
         pppPromissoria.addLine(txtTel);
         pppPromissoria.addLine(txtNumVen);
         pppPromissoria.addLine(txtValor);

@@ -5,11 +5,10 @@
     android:id="@+id/content_contas_receber_baixar_conta"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="br.com.zenitech.siacmobile.ContasReceberBaixarConta"
-    tools:showIn="@layout/activity_contas_receber_baixar_conta"
-    android:orientation="vertical">
-
+    tools:showIn="@layout/activity_contas_receber_baixar_conta">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -20,6 +19,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textCodDoc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="Cód.: 0000"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.8dp"
+                android:layout_marginTop="1dp"
+                android:background="#d2d2d2" />
 
             <LinearLayout
                 android:id="@+id/bgTotalReceber"
@@ -107,11 +122,11 @@
                 android:id="@+id/spFormasPagamentoCliente"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
-                android:layout_marginBottom="1dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
+                android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginStart="10dp" />
+                android:layout_marginBottom="1dp" />
 
             <View
                 android:layout_width="match_parent"

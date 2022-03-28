@@ -22,6 +22,7 @@ import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 
 import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
 //import static br.com.zenitech.siacmobile.ContasReceberCliente.id_baixa_app;
+import static br.com.zenitech.siacmobile.ContasReceberCliente.tvCodsDocs;
 import static br.com.zenitech.siacmobile.ContasReceberCliente.tvTotalPagarContasReceberCliente;
 
 public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasReceberClientesAdapter.ViewHolder> {
@@ -122,7 +123,8 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
 
                 //
                 bd.updateFinanceiroReceber(financeiroVendasDomain.getCodigo_financeiro(), "0", Integer.parseInt(financeiroVendasDomain.getCodigo_cliente()));
-
+                tvCodsDocs += "Cód. Fin.: " + financeiroVendasDomain.getCodigo_financeiro() + " | Doc." +
+                        " Fin.: " + financeiroVendasDomain.getDocumento_financeiro() + "\n";
             } else {
                 //
                 String[] sv = {

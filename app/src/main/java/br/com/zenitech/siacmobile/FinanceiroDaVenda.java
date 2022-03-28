@@ -338,8 +338,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaFormasPagamentoCliente);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spFormasPagamentoCliente.setAdapter(adapter);
+        spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
 
-        //try {
+        /*
         spFormasPagamentoCliente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -382,8 +383,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
             }
         });
-        /*} catch (Exception e) {
-        }*/
+
+        */
         atualizarValFin();
 
         // Verificar se o GPS foi aceito pelo entregador
@@ -863,12 +864,15 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                     txtDocumentoFormaPagamento.setText(nDoc);
                     txtDocumentoFormaPagamento.setEnabled(false);
                     tilNotaFiscal.setVisibility(View.VISIBLE);
+                } else {
+                    txtDocumentoFormaPagamento.setEnabled(true);
                 }
 
                 //int n = (serieBoleto * 100000000) + 1;
 
                 //atualizarDataVencimento(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
                 txtVencimentoFormaPagamento.setText(classAuxiliar.dataFutura(bd.DiasPrazoCliente(fPag[0], codigo_cliente)));
+
             });
 
             if (fPag[3].equals("1")) {
@@ -880,6 +884,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             runOnUiThread(() -> {
                 tilDocumento.setVisibility(View.VISIBLE);
                 tilVencimento.setVisibility(View.GONE);
+                txtDocumentoFormaPagamento.setEnabled(true);
                 //
                 tilNotaFiscal.setVisibility(View.GONE);
                 txtNotaFiscal.setText("");
@@ -889,6 +894,40 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 Log.i("Fin", classAuxiliar.formatarData(classAuxiliar.soNumeros(txtVencimentoFormaPagamento.getText().toString())));
             });
         }
+
+        runOnUiThread(() -> {
+            if (bd.getCartaoTrue(fPag[0]).equalsIgnoreCase("1")) {
+                bandPrazo.setVisibility(View.VISIBLE);
+
+                //
+                listaBandeiras = bd.getBandeiraFPg(fPag[0]);
+                adapterSpBandeira = new ArrayAdapter(context, android.R.layout.simple_spinner_item, listaBandeiras);
+                adapterSpBandeira.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spBandeira.setAdapter(adapterSpBandeira);
+                //spBandeira.setOnItemSelectedListener(FinanceiroDaVenda.this);
+                spBandeira.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        //Toast.makeText(context, spBandeira.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                        //
+                        listaParcelas = bd.getPrazoFPg(spBandeira.getSelectedItem().toString(), fPag[0]);
+                        adapterSpParcela = new ArrayAdapter(context, android.R.layout.simple_spinner_item, listaParcelas);
+                        adapterSpParcela.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spParcela.setAdapter(adapterSpParcela);
+                        //spParcela.setOnItemSelectedListener(FinanceiroDaVenda.this);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+            } else {
+                listaBandeiras = null;
+                listaParcelas = null;
+                bandPrazo.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override

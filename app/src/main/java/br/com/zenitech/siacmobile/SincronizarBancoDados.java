@@ -894,12 +894,18 @@ public class SincronizarBancoDados extends AppCompatActivity {
             prefs.edit().putBoolean("cod_instalacao", true).apply();
             ClassAuxiliar cAux = new ClassAuxiliar();
             prefs.edit().putString("data_sincronizado", String.format("%s %s", cAux.exibirDataAtual(), cAux.horaAtual())).apply();
+            prefs.edit().putString("data_movimento", cAux.inserirDataAtual()).apply();
 
             //ABRI A TELA PRINCIPAL
             //Intent i = new Intent(context, Principal2.class);
-            Intent i = new Intent(context, Login.class);
+            /*Intent i = new Intent(context, Login.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);*/
+
+            Intent i = new Intent(context, Principal2.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
+            finish();
 
             finish();
 

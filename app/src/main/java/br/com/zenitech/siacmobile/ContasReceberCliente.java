@@ -43,6 +43,7 @@ public class ContasReceberCliente extends AppCompatActivity {
     //
     //public static int id_baixa_app = 1;
     public static TextView tvTotalPagarContasReceberCliente;
+    public static String tvCodsDocs;
     public static ArrayList<String> IdsCR;
 
     ClassAuxiliar classAuxiliar;
@@ -63,6 +64,7 @@ public class ContasReceberCliente extends AppCompatActivity {
 
         //
         id = prefs.getInt("id_venda", 1);
+        tvCodsDocs = "";
 
 
         bd = new DatabaseHelper(this);
@@ -117,6 +119,7 @@ public class ContasReceberCliente extends AppCompatActivity {
                 i.putExtra("codigo_cliente", codigo_cliente);
                 i.putExtra("nome_cliente", nome_cliente);
                 i.putExtra("valorVenda", tvTotalPagarContasReceberCliente.getText().toString());
+                i.putExtra("CodsDocs", tvCodsDocs);
                 startActivity(i);
             }
         });

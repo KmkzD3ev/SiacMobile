@@ -143,11 +143,16 @@ public class HomeFragment extends Fragment {
 
         //CONSULTAR CLIENTE CONTAS RECEBER
         view.findViewById(R.id.cv_contas_receber).setOnClickListener(view13 -> {
-            if (prefs.getString("mostrar_contas_receber", "0").equalsIgnoreCase("0")) {
-                alertaContaReceber();
-                return;
+            if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
+
+                if (prefs.getString("mostrar_contas_receber", "0").equalsIgnoreCase("0")) {
+                    alertaContaReceber();
+                    return;
+                }
+                startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class));
+            } else {
+                alerta();
             }
-            startActivity(new Intent(getContext(), ContasReceberConsultarCliente.class));
         });
 
         //CONSULTAR CLIENTE CONTAS RECEBER
@@ -162,7 +167,7 @@ public class HomeFragment extends Fragment {
         });
 
         //CONSULTAR VALE PRODUTO
-        if(prefs.getString("baixar_vale", "0").equalsIgnoreCase("1")) {
+        if (prefs.getString("baixar_vale", "0").equalsIgnoreCase("1")) {
 
             cardv_vales = view.findViewById(R.id.cardv_vales);
             cardv_vales.setVisibility(View.VISIBLE);

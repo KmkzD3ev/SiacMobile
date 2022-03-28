@@ -60,6 +60,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
     private Spinner spFormasPagamentoCliente;
     private String codigo_cliente = "";
     private EditText txtDocumentoFormaPagamento;
+    private TextView textCodDoc;
 
     //LISTAR VENDAS
     private ArrayList<FormasPagamentoReceberTemp> listaFinanceiroCliente;
@@ -116,6 +117,8 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         tilDocumento = findViewById(R.id.tilDocumento);
         tilVencimento = findViewById(R.id.tilVencimento);
 
+        textCodDoc = findViewById(R.id.textCodDoc);
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
@@ -160,6 +163,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
                 codigo_cliente = params.getString("codigo_cliente");
                 txtTotalFinanceiroReceber.setText(params.getString("valorVenda"));
                 txtValorFormaPagamento.setText(params.getString("valorVenda"));
+                textCodDoc.setText(params.getString("CodsDocs"));
 
                 //
                 ValorABaixar = params.getString("valorVenda");
