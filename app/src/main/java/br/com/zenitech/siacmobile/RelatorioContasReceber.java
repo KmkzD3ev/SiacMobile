@@ -87,12 +87,12 @@ public class RelatorioContasReceber extends AppCompatActivity {
         configuracoes = new Configuracoes();
         findViewById(R.id.btnPrintRelPed).setOnClickListener(v -> {
             Intent i;
-            i = new Intent(context, ImpressoraPOS.class);
-            /*if (configuracoes.GetDevice()) {
+            //i = new Intent(context, ImpressoraPOS.class);
+            if (configuracoes.GetDevice()) {
                 i = new Intent(context, ImpressoraPOS.class);
             } else {
                 i = new Intent(context, Impressora.class);
-            }*/
+            }
 
             //
             i.putExtra("imprimir", "relatorioBaixa");

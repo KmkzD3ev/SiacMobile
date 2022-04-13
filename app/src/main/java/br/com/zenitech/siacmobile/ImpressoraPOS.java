@@ -151,11 +151,12 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         if (tipoImpressao.equals("relatorio")) {
             Log.e("IMPRESSORA", "Imprimir relatorio");
             printRelatorioNFCE58mm();
-        }if (tipoImpressao.equals("relatorioBaixa")) {
+        }
+        if (tipoImpressao.equals("relatorioBaixa")) {
             printRelatorioBaixas58mm();
         } else if (tipoImpressao.equals("Promissoria")) {
             printPromissoria();
-        }  else if (tipoImpressao.equals("Boleto")) {
+        } else if (tipoImpressao.equals("Boleto")) {
             printBoleto();
         }
 
@@ -479,6 +480,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         ppp.addLine("Unidade: " + unidade.getDescricao_unidade());
         ppp.addLine("Serial: " + prefs.getString("serial", ""));
+        ppp.addLine("Data Movimento: " + cAux.exibirData(prefs.getString("data_movimento_atual", "")));
 
         ppp.addLine("");
         ppp.addLine("*** ITENS ***");

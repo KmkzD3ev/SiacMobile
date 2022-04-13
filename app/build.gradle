@@ -17,8 +17,8 @@ android {
         applicationId "br.com.zenitech.siacmobile"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 42
-        versionName '1.9.9'
+        versionCode 44
+        versionName '1.2.2'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config
@@ -102,10 +102,10 @@ dependencies {
     //implementation 'com.journeyapps:zxing-android-embedded:3.6.0@aar'
 
     // Stone **
-    implementation 'br.com.stone:stone-sdk:4.0.2'
-    implementation 'br.com.stone:stone-sdk-posandroid:4.0.2'
-    implementation 'br.com.stone:stone-sdk-posandroid-ingenico:4.0.2'
-    //implementation 'br.com.stone:stone-sdk-posandroid-sunmi:4.0.2'
+    implementation 'br.com.stone:stone-sdk:4.0.7'
+    implementation 'br.com.stone:stone-sdk-posandroid:4.0.7'
+    implementation 'br.com.stone:stone-sdk-posandroid-ingenico:4.0.7'
+    //implementation 'br.com.stone:stone-sdk-posandroid-sunmi:4.0.7'
     //implementation 'br.com.stone:stone-sdk-posandroid-gertec:3.14.13'
 
     /*// Stone ** 3.4.3.2

@@ -73,6 +73,7 @@ import br.com.stone.posandroid.providers.PosPrintProvider;
 import br.com.zenitech.siacmobile.controller.PrintViewHelper;
 import br.com.zenitech.siacmobile.domains.Clientes;
 import br.com.zenitech.siacmobile.domains.ContasBancarias;
+import br.com.zenitech.siacmobile.domains.FinanceiroReceberDomain;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import br.com.zenitech.siacmobile.network.PrinterServer;
@@ -134,6 +135,9 @@ public class Impressora extends AppCompatActivity {
     //
     ArrayList<VendasPedidosDomain> elementosPedidos;
     VendasPedidosDomain pedidos;
+
+    ArrayList<FinanceiroReceberDomain> elementosRecebidos;
+    FinanceiroReceberDomain recebidos;
 
     /*ArrayList<ItensPedidos> elementosItens;
     ItensPedidos itensPedidos;
@@ -375,6 +379,8 @@ public class Impressora extends AppCompatActivity {
                     //printPage();
                 } else if (tipoImpressao.equals("relatorio")) {
                     printRelatorioNFCE58mm();
+                } else if (tipoImpressao.equals("relatorioBaixa")) {
+                    printRelatorioBaixas58mm();
                 } else if (tipoImpressao.equals("Boleto")) {
                     printBoleto();
                 }
@@ -1298,7 +1304,6 @@ public class Impressora extends AppCompatActivity {
     // ** RELATÓRIO 58mm
 
     private void printRelatorioNFCE58mm() {
-
         runTask((dialog, printer) -> {
             Log.d(LOG_TAG, "Print Relatório NFC-e");
             //printer.reset();
@@ -1401,6 +1406,65 @@ public class Impressora extends AppCompatActivity {
             i.putExtra("nomeImpressoraBlt", enderecoBlt);
             i.putExtra("enderecoBlt", enderecoBlt);
             startActivity(i);*/
+            finish();
+
+        }, R.string.msg_printing_relatorio);
+    }
+
+    private void printRelatorioBaixas58mm() {
+        runTask((dialog, printer) -> {
+            Log.d(LOG_TAG, "Print Relatório Baixa");
+            elementosRecebidos = bd.getRelatorioContasReceber();
+            unidade = bd.getUnidade();
+
+            String quantItens = "0";
+            String valTotalPed = "0";
+
+            StringBuilder textBuffer = new StringBuilder();
+
+            //IMPRIMIR CABEÇALHO
+            textBuffer.append(" {br}");
+            textBuffer.append(tamFont).append("  ***  RELATORIO BAIXAS  ***").append("{br}");
+            textBuffer.append(tamFont).append("{br}");
+            textBuffer.append(tamFont).append("Unidade: ").append(unidade.getDescricao_unidade()).append("{br}");
+            textBuffer.append(tamFont).append("Serial: ").append(prefs.getString("serial", "")).append("{br}");
+            textBuffer.append(tamFont).append("Data Movimento: ").append(cAux.exibirData(prefs.getString("data_movimento_atual", ""))).append("{br}");
+
+            textBuffer.append(tamFont).append("{br}");
+            textBuffer.append(tamFont).append("{br}").append("         *** ITENS ***").append("{br}");
+            textBuffer.append(tamFont).append("-------------------------------{br}");
+
+            //DADOS DAS NOTAS NFC-e
+            if (elementosRecebidos.size() > 0) {
+                for (int n = 0; n < elementosRecebidos.size(); n++) {
+
+                    //DADOS DOS PEDIDO
+                    recebidos = elementosRecebidos.get(n);
+
+                    // SOMA O VALOR TOTAL DOS PEDIDOS
+                    String[] somarValTot = {valTotalPed, recebidos.getPago()};
+                    valTotalPed = String.valueOf(cAux.somar(somarValTot));
+
+                    //IMPRIMIR TEXTO
+                    //textBuffer.append(tamFont).append("PRODUTO | QTDE. | VL.UNIT | VL.TOTAL{br}");
+                    textBuffer.append(tamFont).append(recebidos.getFpagamento_financeiro().replace(" _ ", "")).append("  ").append(cAux.maskMoney(new BigDecimal(recebidos.getPago()))).append("{br}");
+                    textBuffer.append(tamFont).append("--------------------------------").append("{br}");
+                }
+            }
+
+            textBuffer.append(tamFont).append("{br}").append("         *** TOTAIS ***").append("{br}{br}");
+            textBuffer.append(tamFont).append("FORMAS DE PAGAMENTO: ").append(elementosRecebidos.size()).append("{br}");
+            textBuffer.append(tamFont).append("VALOR TOTAL: R$ ").append(cAux.maskMoney(new BigDecimal(valTotalPed))).append("{br}");
+
+            textBuffer.append("{br}{br}");
+
+            //printer.reset();
+            printer.selectPageMode();
+            printer.setPageXY(0, 0);
+            printer.setAlign(0);
+            printer.printTaggedText(textBuffer.toString());
+            printer.feedPaper(100);
+            printer.flush();
             finish();
 
         }, R.string.msg_printing_relatorio);

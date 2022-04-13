@@ -45,11 +45,19 @@ public interface ISincronizar {
     @POST("ativar_desativa_pos_app.php")
     Call<Sincronizador> resetApp(@Field("opcao") String opcao, @Field("serial") String serial, @Field("codigo") String codigo);
 
-    OkHttpClient okHttpClient = new OkHttpClient.Builder ()
-            .connectTimeout (2, TimeUnit.MINUTES)
-            .readTimeout (2, TimeUnit.MINUTES)
-            .writeTimeout (2, TimeUnit.MINUTES)
-            .build ();
+    //RESETAR APP
+    @FormUrlEncoded
+    @POST("ativar_desativa_pos_app.php")
+    Call<Sincronizador> forcarResetApp(
+            @Field("opcao") String opcao,
+            @Field("serial") String serial
+    );
+
+    OkHttpClient okHttpClient = new OkHttpClient.Builder()
+            .connectTimeout(2, TimeUnit.MINUTES)
+            .readTimeout(2, TimeUnit.MINUTES)
+            .writeTimeout(2, TimeUnit.MINUTES)
+            .build();
 
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl(String.format("%s%s", new Configuracoes().GetUrlServer(), "/POSSIAC/"))

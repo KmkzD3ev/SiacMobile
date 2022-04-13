@@ -834,9 +834,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 posApp = bd.getPos();
                 //if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
                 if (fPag[0].contains("PROMISSORIA")) {
-                    if (posApp.getUltpromissoria().equalsIgnoreCase("0")) {
+                    int uprom = Integer.parseInt(posApp.getUltpromissoria());
+                    //if (posApp.getUltpromissoria().equalsIgnoreCase("0")) {
+                    if (uprom == 0) {
                         //nDoc = posApp.getSerie() + "00000001";
-                        int n = (Integer.parseInt(posApp.getSerie()) * 100000000) + 1;
+                        int n = (Integer.parseInt(posApp.getSerie()) * 1000000) + 1;
                         nDoc = String.valueOf(n);
                     } else {
                         /*String[] soma = {posApp.getUltpromissoria(), "1"};
@@ -850,9 +852,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 } else if (!bd.getContaBancariaFormaPagamento(fPag[0]).equalsIgnoreCase("0") &&
                         !bd.getContaBancariaFormaPagamento(fPag[0]).equalsIgnoreCase("")) {
                     //else if (fPag[0].equalsIgnoreCase("BOLETO")) {
-                    if (posApp.getUltboleto().equalsIgnoreCase("0")) {
+                    int ubol = Integer.parseInt(posApp.getUltboleto());
+                    //if (posApp.getUltboleto().equalsIgnoreCase("0")) {
+                    if (ubol == 0) {
                         //nDoc = posApp.getSerie() + "00000001";
-                        int n = (Integer.parseInt(posApp.getSerie_boleto()) * 100000000) + 1;
+                        int n = (Integer.parseInt(posApp.getSerie_boleto()) * 1000000) + 1;
                         nDoc = String.valueOf(n);
                     } else {
                         nDoc = String.valueOf(Integer.parseInt(posApp.getUltboleto()) + 1);
