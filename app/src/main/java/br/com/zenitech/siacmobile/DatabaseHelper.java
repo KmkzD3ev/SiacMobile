@@ -905,7 +905,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ") formas_pagamento " +
                 "FROM " + TABELA_VENDAS + " " +
                 "INNER JOIN clientes ON clientes.codigo_cliente = vendas_app.codigo_cliente " +
-                "WHERE venda_finalizada_app = '1' ORDER BY produto_venda";// GROUP BY " + PRODUTO_VENDA
+                "WHERE venda_finalizada_app = '1'" +
+                "UNION\n" +
+                "SELECT val.codigo_vale AS codigo_venda," +
+                "       cli.nome_cliente AS codigo_cliente," +
+                "       '' AS unidade_venda," +
+                "       val.produto_vale AS produto_venda," +
+                "       '' AS data_movimento," +
+                "       '1' AS quantidade_venda," +
+                "       (val.valor_vale / 100) AS preco_unitario," +
+                "       (val.valor_vale / 100) AS valor_total," +
+                "       '' AS vendedor_venda," +
+                "       '' AS status_autorizacao_venda," +
+                "       '' AS entrega_futura_venda," +
+                "       '' AS entrega_futura_realizada," +
+                "       '' AS usuario_atual," +
+                "       '' AS data_cadastro," +
+                "       '' AS codigo_venda_app," +
+                "       '' AS chave_importacao," +
+                "       'VALE-PRODUTO' || ':  ' || [REPLACE]('R$ ' || printf('%.2f', val.valor_vale / 100), '.', ',') AS formas_pagamento" +
+                "  FROM vale val" +
+                "       INNER JOIN" +
+                "       clientes cli ON cli.codigo_cliente = val.codigo_cliente_vale" +
+                " WHERE val.situacao_vale = 'UTILIZADO'" +
+                "ORDER BY produto_venda";
+                //" ORDER BY produto_venda";// GROUP BY " + PRODUTO_VENDA
 
         /*String query = "SELECT vapp.codigo_venda, " +
                 "       cli.nome_cliente AS codigo_cliente, " +
@@ -954,13 +978,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder formsP = new StringBuilder();
         String query = "SELECT fin.fpagamento_financeiro, " +
                 "       (sum(fin.valor_financeiro) * 100) valor_financeiro " +
-                "  FROM financeiro fin " +
+                "FROM financeiro fin " +
                 "       INNER JOIN " +
                 "       vendas_app vapp ON vapp.codigo_venda_app = fin.id_financeiro_app " +
-                " WHERE vapp.venda_finalizada_app = '1' " +
-                " GROUP BY fin.fpagamento_financeiro;";
+                "WHERE vapp.venda_finalizada_app = '1' " +
+                "GROUP BY fpagamento_financeiro " +
+                "UNION " +
+                "SELECT 'VALE-PRODUTO' AS fpagamento_financeiro, sum(val.valor_vale) AS valor_financeiro " +
+                "  FROM vale val " +
+                " WHERE val.situacao_vale = 'UTILIZADO'";
 
-        Log.e("SQL = ", query);
+        Log.e("SQLvale", query);
 
 
         myDataBase = this.getReadableDatabase();
@@ -971,7 +999,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 /*VendasPedidosDomain vendas = cursorToVendasPedidos(cursor);
                 listaVendas.add(vendas);*/
 
-                formsP.append(cursor.getString(cursor.getColumnIndexOrThrow("fpagamento_financeiro")));
+                formsP.append(cursor.getString(0));//cursor.getColumnIndexOrThrow("fpagamento_financeiro")
                 formsP.append(": ");
                 formsP.append(aux.maskMoney(aux.converterValores(cursor.getString(cursor.getColumnIndexOrThrow("valor_financeiro")))));
                 formsP.append("\n");
