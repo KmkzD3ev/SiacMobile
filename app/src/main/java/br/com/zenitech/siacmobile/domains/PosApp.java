@@ -17,8 +17,9 @@ public class PosApp {
     private String modulo_pedidos;
     private String baixa_a_prazo;
     private String serie_boleto;
+    private String escolher_cliente_vale;
 
-    public PosApp(String codigo, String serial, String unidade, String serie, String ultnfce, String ultboleto, String nota_remessa, String serie_remessa, String limite_credito, String ultpromissoria, String autovencimento, String modulo_pedidos, String baixa_a_prazo, String serie_boleto) {
+    public PosApp(String codigo, String serial, String unidade, String serie, String ultnfce, String ultboleto, String nota_remessa, String serie_remessa, String limite_credito, String ultpromissoria, String autovencimento, String modulo_pedidos, String baixa_a_prazo, String serie_boleto, String escolher_cliente_vale) {
         this.codigo = codigo;
         this.serial = serial;
         this.unidade = unidade;
@@ -33,6 +34,7 @@ public class PosApp {
         this.modulo_pedidos = modulo_pedidos;
         this.baixa_a_prazo = baixa_a_prazo;
         this.serie_boleto = serie_boleto;
+        this.escolher_cliente_vale = escolher_cliente_vale;
     }
 
     public String getCodigo() {
@@ -145,5 +147,13 @@ public class PosApp {
 
     public void setSerie_boleto(String serie_boleto) {
         this.serie_boleto = serie_boleto;
+    }
+
+    public String getEscolher_cliente_vale() {
+        return escolher_cliente_vale;
+    }
+
+    public void setEscolher_cliente_vale(String escolher_cliente_vale) {
+        this.escolher_cliente_vale = escolher_cliente_vale;
     }
 }

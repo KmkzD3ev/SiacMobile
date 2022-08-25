@@ -23,20 +23,27 @@ import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
 //import static br.com.zenitech.siacmobile.ContasReceberCliente.id_baixa_app;
 import static br.com.zenitech.siacmobile.ContasReceberCliente.tvCodsDocs;
-import static br.com.zenitech.siacmobile.ContasReceberCliente.tvTotalPagarContasReceberCliente;
+//import static br.com.zenitech.siacmobile.ContasReceberCliente.tvTotalPagarContasReceberCliente;
 
 public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasReceberClientesAdapter.ViewHolder> {
 
 
-    private Context context;
-    private ArrayList<FinanceiroReceberClientes> elementos;
-    private ClassAuxiliar classAuxiliar;
+    private final Context context;
+    private final ArrayList<FinanceiroReceberClientes> elementos;
+    private final ClassAuxiliar classAuxiliar;
     private DatabaseHelper bd;
+    private final TextView tvTotalPagarContasReceberCliente;
 
-    public ContasReceberClientesAdapter(Context context, ArrayList<FinanceiroReceberClientes> elementos, ClassAuxiliar classAuxiliar) {
+    public ContasReceberClientesAdapter(
+            Context context,
+            ArrayList<FinanceiroReceberClientes> elementos,
+            ClassAuxiliar classAuxiliar,
+            TextView tvTotalPagarContasReceberCliente
+    ) {
         this.context = context;
         this.elementos = elementos;
         this.classAuxiliar = classAuxiliar;
+        this.tvTotalPagarContasReceberCliente = tvTotalPagarContasReceberCliente;
     }
 
     // Easy access to the context object in the recyclerview
@@ -56,8 +63,7 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
         View view = inflater.inflate(R.layout.item_contas_receber_cliente, parent, false);
 
         //
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -71,7 +77,10 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
         fpgItemContaReceberCliente.setText(financeiroVendasDomain.getFpagamento_financeiro());
 
         TextView fpgItemContaReceberVencimento = holder.fpgItemContaReceberVencimento;
-        fpgItemContaReceberVencimento.setText(String.format("Venc. %s", classAuxiliar.exibirData(financeiroVendasDomain.getVencimento_financeiro())));
+        fpgItemContaReceberVencimento.setText(String.format("Vencimento: %s", classAuxiliar.exibirData(financeiroVendasDomain.getVencimento_financeiro())));
+
+        TextView fpgItemContaReceberDocumento = holder.fpgItemContaReceberDocumento;
+        fpgItemContaReceberDocumento.setText(String.format("Doc: %s", financeiroVendasDomain.getDocumento_financeiro()));
 
         TextView vfpgItemContaReceberCliente = holder.vfpgItemContaReceberCliente;
         //
@@ -181,7 +190,8 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         CheckBox cbItemContaReceberCliente;
-        TextView fpgItemContaReceberCliente, vfpgItemContaReceberCliente, fpgItemContaReceberVencimento;
+        TextView fpgItemContaReceberCliente, vfpgItemContaReceberCliente, fpgItemContaReceberVencimento,
+                fpgItemContaReceberDocumento;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -189,6 +199,7 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
             fpgItemContaReceberCliente = itemView.findViewById(R.id.fpgItemContaReceberCliente);
             vfpgItemContaReceberCliente = itemView.findViewById(R.id.vfpgItemContaReceberCliente);
             fpgItemContaReceberVencimento = itemView.findViewById(R.id.fpgItemContaReceberVencimento);
+            fpgItemContaReceberDocumento = itemView.findViewById(R.id.fpgItemContaReceberDocumento);
         }
     }
 }

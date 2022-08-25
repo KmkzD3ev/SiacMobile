@@ -12,6 +12,9 @@ public class Configuracoes {
     // VERSÃO DO BANCO DE DADOS
     public static int VERSAO_BD = 13;
 
+    // VERSÃO DO APP PARA GERAR NOVOS CAMPOS NO BANCO DE DADOS ONLINE
+    public static String VERSAO_APP = "205";
+
     // FALSE PARA DEFINIR PRODUÇÃO
     final boolean ambinteTeste = false;
 

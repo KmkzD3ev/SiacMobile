@@ -25,6 +25,7 @@ import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.EnviarDadosServidor;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.SincronizarBancoDados;
+import br.com.zenitech.siacmobile.ValeListClientes;
 import br.com.zenitech.siacmobile.Vales;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
@@ -157,13 +158,23 @@ public class HomeFragment extends Fragment {
 
         //CONSULTAR CLIENTE CONTAS RECEBER
         view.findViewById(R.id.cv_emissor_notas).setOnClickListener(view12 -> {
-            PackageManager packageManager = requireActivity().getPackageManager();
-            String packageName = "com.lvrenyang.sample1";
+            /*PackageManager packageManager = requireActivity().getPackageManager();
+            String packageName = "br.com.zenitech.emissorweb";
             Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-            Objects.requireNonNull(intent).putExtra("teste", "Olha, kkk");
-            intent.putExtra("teste1", "O negocio");
-            intent.putExtra("teste2", "vai dá certo");
-            startActivity(intent);
+            if (intent != null) {
+                intent.putExtra("teste", "Olha, kkk");
+                intent.putExtra("teste1", "O negocio");
+                intent.putExtra("teste2", "vai dá certo");
+                startActivity(intent);
+            }*/
+
+            Intent i = new Intent();
+            i.setClassName("br.com.zenitech.siacmobile.Vale", "br.com.zenitech.zcallmobile.NovaEntrega");
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra("id_pedido", "111");
+            i.putExtra("cliente", "111");
+            i.putExtra("localidade", "111");
+            context.startActivity(i);
         });
 
         //CONSULTAR VALE PRODUTO
@@ -173,7 +184,29 @@ public class HomeFragment extends Fragment {
             cardv_vales.setVisibility(View.VISIBLE);
             view.findViewById(R.id.cv_vales).setOnClickListener(view1 -> {
                 if (Objects.requireNonNull(prefs.getString("data_movimento_atual", "")).equalsIgnoreCase(aux.inserirDataAtual())) {
-                    startActivity(new Intent(getContext(), Vales.class));
+
+                    boolean escolher_cliente = false;
+
+                    try {
+                        if (posApp.getEscolher_cliente_vale().equalsIgnoreCase("1"))
+                            escolher_cliente = true;
+
+                    } catch (Exception ignored) {
+                    }
+
+                    if (escolher_cliente)
+                        startActivity(new Intent(getContext(), ValeListClientes.class));
+                    else
+                        startActivity(new Intent(getContext(), Vales.class));
+
+                    /*
+                    Intent i = new Intent();
+                    i.setClassName("br.com.zenitech.siacmobile", "br.com.zenitech.zcallmobile.NovaEntrega");
+                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    i.putExtra("id_pedido", "111");
+                    i.putExtra("cliente", "111");
+                    i.putExtra("localidade", "111");
+                    context.startActivity(i);*/
                 } else {
                     alerta();
                 }

@@ -77,7 +77,8 @@ public interface IEnviarDados {
             @Field("SERIAL") String SERIAL,
             @Field("CODIGOS") String CODIGOS,
             @Field("VALES") String VALES,
-            @Field("DATAS") String DATAS
+            @Field("DATAS") String DATAS,
+            @Field("CLIENTES") String CLIENTES
     );
 
     Retrofit retrofit = new Retrofit.Builder()

@@ -11,8 +11,8 @@ import androidx.fragment.app.DialogFragment;
 
 import java.util.Calendar;
 
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtVencimentoFormaPagamentoReceber;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtVencimentoFormaPagamento;
+//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtVencimentoFormaPagamentoReceber;
+//import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtVencimentoFormaPagamento;
 
 
 public class DatePickerFragment extends DialogFragment
@@ -44,7 +44,7 @@ public class DatePickerFragment extends DialogFragment
         String data = "" + (day < 10 ? "0" + day : day) + (month < 10 ? "0" + (month + 1) : (month + 1)) + year;
         String dataFormatada = "" + (day < 10 ? "0" + day : day) + "/" + (month < 10 ? "0" + (month + 1) : (month + 1)) + "/" + year;
 
-        try {
+        /*try {
             txtVencimentoFormaPagamento.setText(dataFormatada);
 
         } catch (Exception e) {
@@ -56,6 +56,6 @@ public class DatePickerFragment extends DialogFragment
 
         } catch (Exception e) {
 
-        }
+        }*/
     }
 }

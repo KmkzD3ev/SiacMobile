@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/SIAC_MOBILE_VERSIONADO.iml" filepath="$PROJECT_DIR$/.idea/modules/SIAC_MOBILE_VERSIONADO.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SIAC_MOBILE_VERSIONADO.app.unitTest.iml" />
     </modules>
   </component>
 </project>

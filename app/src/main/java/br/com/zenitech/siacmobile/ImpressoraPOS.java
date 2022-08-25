@@ -151,8 +151,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         if (tipoImpressao.equals("relatorio")) {
             Log.e("IMPRESSORA", "Imprimir relatorio");
             printRelatorioNFCE58mm();
-        }
-        if (tipoImpressao.equals("relatorioBaixa")) {
+        } else if (tipoImpressao.equals("relatorioBaixa")) {
             printRelatorioBaixas58mm();
         } else if (tipoImpressao.equals("Promissoria")) {
             printPromissoria();
@@ -410,7 +409,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 //IMPRIMIR TEXTO
                 ppp.addLine("PRODUTO: " + pedidos.getProduto_venda());
                 ppp.addLine("QTDE.:  | VL.UNIT:  | VL.TOTAL: ");
-                ppp.addLine(pedidos.getQuantidade_venda() + "       | " + cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario())) + "    | " + cAux.maskMoney(new BigDecimal(pedidos.getValor_total())));
+                ppp.addLine(pedidos.getQuantidade_venda() + "     | " + cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario())) + "  | " + cAux.maskMoney(new BigDecimal(pedidos.getValor_total())));
 
                 ppp.addLine("FORMA(S) PAGAMENTO: ");
                 ppp.addLine(pedidos.getFormas_pagamento());

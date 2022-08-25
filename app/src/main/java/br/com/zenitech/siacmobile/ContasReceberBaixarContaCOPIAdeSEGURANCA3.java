@@ -1,16 +1,11 @@
 package br.com.zenitech.siacmobile;
 
+import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,8 +20,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.lang.ref.WeakReference;
@@ -40,9 +39,7 @@ import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.FormasPagamentoReceberTemp;
 import br.com.zenitech.siacmobile.repositories.FinanceiroReceberRepositorio;
 
-import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
-
-public class ContasReceberBaixarConta extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class ContasReceberBaixarContaCOPIAdeSEGURANCA3 extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     // CONTEXT
     private Context context;
     View view;
@@ -175,7 +172,7 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         adapterForMPagCli = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaFormasPagamentoCliente);
         adapterForMPagCli.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spFormasPagamentoCliente.setAdapter(adapterForMPagCli);
-        spFormasPagamentoCliente.setOnItemSelectedListener(ContasReceberBaixarConta.this);
+        spFormasPagamentoCliente.setOnItemSelectedListener(ContasReceberBaixarContaCOPIAdeSEGURANCA3.this);
     }
 
     private void showMSG(String msg) {
@@ -311,190 +308,146 @@ public class ContasReceberBaixarConta extends AppCompatActivity implements Adapt
         }
     }
 
-    // VALIDACAO DAS INFORMACOES PARA FINALIZAR A BAIXA
-    boolean validarDadosBaixa() {
+    // FINALIZAR A BAIXA DE CONTAS A RECEBER ESCOLHIDAS
+    private void _finalizarBaixaContaReceber() {
         // VARIAVEIS DE COMPARACAO
         int totalItemFin = Integer.parseInt(cAux.soNumeros(txtTotalItemFinanceiroReceber.getText().toString()));
         int totalFin = Integer.parseInt(cAux.soNumeros(txtTotalFinanceiroReceber.getText().toString()));
 
         if (totalItemFin == 0) {
             showMSG("Adicione pelo menos uma forma de pagamento ao financeiro.");
-            return false;
         } else if (totalItemFin > totalFin) {
             showMSG("O valor ultrapassa o total.");
-            return false;
-        }
-        return true;
-    }
+        } else {
 
-    void salvarRecebido(String formaPagamento, String idContaReceber, String valFinanceiro, String valPago) {
-        // SE O VALOR PARA SALVAR FOR MAIOR QUE ZERO ELE SALVA
+            /*
+             * REGRA DO FINANCEIRO A RECEBER *
+             * PEGA O DOCUMENTO A RECEBER E COMPARA A PRIMEIRA FORMA DE PAGAMENTO
+             * - SE O VALOR FOR IGUAL FINALIZAR A BAIXA DO DOCUMENTO
+             * - SE O VALOR DO DOCUMENTO FOR MENOR OU MAIOR, SETA O VALOR REFERENTE AO DOCUMENTO E PASSA PARA O PROXIMO
+             * -
+             */
 
-        String unidade = prefs.getString("unidade", "UNIDADE TESTE");
-        String dataAtual = cAux.inserirDataAtual();
-        //String formaPagamento = _formasPgFinanceiro.get(i).getId_forma_pagamento();
-        String numDocumento = txtDocumentoFormaPagamento.getText().toString();
-        String venDocumento = cAux.inserirData(cAux.formatarData(cAux.soNumeros(txtVencimentoFormaPagamentoReceber.getText().toString())));
-        String idVendedor = String.valueOf(prefs.getInt("id_vendedor", 1));
+            try {
 
-        //
-        FinanceiroVendasDomain finParaAdd = new FinanceiroVendasDomain(
-                "" + idContaReceber,
-                "" + unidade,
-                "" + dataAtual,
-                "" + codigo_cliente,
-                "" + formaPagamento,
-                "" + numDocumento,
-                "" + venDocumento,
-                "" + valFinanceiro,//cAux.converterValores(txtValorFormaPagamento.getText().toString()),
-                "0",
-                "" + valPago,
-                "0",
-                "0",
-                "" + dataAtual,
-                "",
-                "" + idVendedor,
-                "" + codigo_cliente,
-                "",
-                ""
-        );
-        showLOG("ErrorCR", "*************************************************************");
-        showLOG("ErrorCR", "addFinanceiroRecebidos: " + finParaAdd);
-        showLOG("ErrorCR", "*************************************************************");
+                // RECEBE OS VALORES INSERIDOS PARA O FINANCEIRO A RECEBER SELECIONADOS
+                ArrayList<FormasPagamentoReceberTemp> _formasPgFinanceiro = getFinRecRepo.getFinanceiroClienteRecebidos(codigo_cliente);
 
-        //
-        setFinRecRepo.addFinanceiroRecebidos(finParaAdd);
+                Log.e("ErrorCR", "QUATIDADE DE FORMAS DE PAGAMENTO INSERIDAS: " + _formasPgFinanceiro.size());
 
-    }
+                // LOOP DOS VALORES COM FORMAS DE PAGAMENTOS DIFERENTES
+                for (int i = 0; i < _formasPgFinanceiro.size(); i++) {
 
-    // FINALIZAR A BAIXA DE CONTAS A RECEBER ESCOLHIDAS
-    private void _finalizarBaixaContaReceber() {
+                    // * RECEBE O VALOR DE CADA FORMA DE PAGAMENTO
+                    String valorFormPg = _formasPgFinanceiro.get(i).getValor();
+                    Log.e("ErrorCR", "VALOR DO FINANCEIRO: " + valorFormPg);
 
-        // CASO NAO PASSE NA VALIDACAO NAO AVANCA
-        validarDadosBaixa();
+                    // * CONVERTE PARA INTEIRO PARA COMPARAÇÃO
+                    int valInt = Integer.parseInt(cAux.soNumeros(valorFormPg));
+                    Log.e("ErrorCR", "VALOR DO FINANCEIRO (VAL INTEIRO PARA COMPARAR): " + valInt);
 
-        try {
+                    // * SE O VALOR DO FINANCEIRO CONVERTIDO EM INT FOR MAIOR QUE 0, AVANCA
+                    if (valInt > 0) {
 
-            // FAZ UM LOOP COM OS IDS DAS BAIXAS SELECIONADAS
-            for (int a = 0; a < IdsCR.size(); a++) {
+                        // FAZ UM LOOP COM OS IDS DAS BAIXAS SELECIONADAS
+                        for (int a = 0; a < IdsCR.size(); a++) {
 
-                //
-                String idContaReceber = IdsCR.get(a);
-                Log.e("ErrorCR", "IDS DAS CONTAS SELECIONADAS: " + idContaReceber);
+                            //
+                            String idContaReceber = IdsCR.get(a);
+                            Log.e("ErrorCR", "IDS DAS CONTAS SELECIONADAS: " + idContaReceber);
 
-                // PEGA O VALOR TOTAL DO FINANCEIRO REFERENTE AO ID INFORMADO
-                String _totalFinanceiro = getFinRecRepo.getValorFinReceberCli(idContaReceber);
-                //Log.e("ErrorCR", "TOTAL DO FINANCEIRO DOS IDS SELECIONADAS: " + _totalFinanceiro);
+                            // PEGA O VALOR TOTAL DO FINANCEIRO REFERENTE AO ID INFORMADO
+                            String TotValFinRecCli = getFinRecRepo.getValorFinReceberCli(idContaReceber);
 
-                // PEGA O TOTAL RECEBIDO DO  FINANCEIRO REFERENTE AO ID INFORMADO
-                String totRecebido = getFinRecRepo.getTotalRecebido(idContaReceber);
-                //Log.e("ErrorCR", "VALOR DO FINANCEIRO QUE JA FOI RECEBIDO: " + totRecebido);
+                            /*
+                             * ENQUANTO O VALOR DA FORMA DE PAGAMENTO FOR DIFERENTE DO VALOR DO FINANCEIRO (TotValFinRecCli)
+                             * TEM QUE CONTINUAR CONSULTANDO AS FORMAS DE PAGAMENTO INSERIDAS.
+                             */
 
-                //
-                if (cAux.soNumerosInt(totRecebido) < cAux.soNumerosInt(_totalFinanceiro)) {
+                            // PEGA O TOTAL RECEBIDO DO  FINANCEIRO REFERENTE AO ID INFORMADO
+                            String TtotRecebido = getFinRecRepo.getTotalRecebido(idContaReceber);
 
-                    /*
-                     ***************************** FORMAS DE PAGAMENTO INSERIDAS AO FINANCEIRO ************************
-                     */
+                            // SUBTRAI O VALOR DO FINANCEIRO COM O VALOR RECEBIDO
+                            String[] v = {String.valueOf(TotValFinRecCli), String.valueOf(TtotRecebido)};
+                            // VALOR RESTANTE É IGUAL AO VALOR DO FINANCEIRO MENOS O TOTAL JÁ ADICIONADO A TABELA RECEBIDOS
+                            int valorRestante = Integer.parseInt(cAux.soNumeros(String.valueOf(cAux.subitrair(v))));
+                            String TvalorRestante = String.valueOf(cAux.subitrair(v));
+                            //
+                            showLOG("ContasReceber", "valTemp = " + valInt + " | ID " + idContaReceber);
+                            showLOG("ContasReceber", "valorRestante = " + valorRestante);
 
-                    // RECEBE OS VALORES INSERIDOS PARA O FINANCEIRO A RECEBER SELECIONADOS
-                    ArrayList<FormasPagamentoReceberTemp> _formasPgFinanceiro = getFinRecRepo.getFinanceiroClienteRecebidos(codigo_cliente);
+                            // SE O VALOR RESTANTE FOR MAIOR QUE ZERO
+                            if (valorRestante > 0) {
 
-                    //Log.e("ErrorCR", "QUATIDADE DE FORMAS DE PAGAMENTO INSERIDAS: " + _formasPgFinanceiro.size());
+                                //
+                                int valSalvar;
+                                String TvalorSalvar;
 
-                    // LOOP DOS VALORES COM FORMAS DE PAGAMENTOS DIFERENTES
-                    for (int i = 0; i < _formasPgFinanceiro.size(); i++) {
-
-                        // * RECEBE O VALOR DE CADA FORMA DE PAGAMENTO
-                        String _valorFormPg = _formasPgFinanceiro.get(i).getValor();
-
-                        if (cAux.soNumerosInt(_valorFormPg) > 0) {
-
-                            totRecebido = getFinRecRepo.getTotalRecebido(idContaReceber);
-
-                            //String[] vSubtrair = {String.valueOf(_totalFinanceiro), String.valueOf(totRecebido)};
-                            //String rSub = String.valueOf(cAux.subitrair(vSubtrair));
-
-                            // SE O VALOR DA FORMA DE PAGAMENTO FOR MAIOR OU IGUAL QUE O DO FINANCEIRO
-                            // SUBTRAI O VALO DA FORMA DE PAGAMENTO POR O DO FINANCEIRO E ADICIONA O RECEBIDO
-                            if (cAux.soNumerosInt(_valorFormPg) > cAux.soNumerosInt(_totalFinanceiro) &&
-                                    cAux.soNumerosInt(totRecebido) < cAux.soNumerosInt(_totalFinanceiro)
-                            ) {
-                                // VALOR RESTANTE É IGUAL AO VALOR DO FINANCEIRO MENOS O TOTAL JÁ ADICIONADO A TABELA RECEBIDOS
-                                //int valorRestante = Integer.parseInt(cAux.soNumeros(String.valueOf(cAux.subitrair(v))));
-
-                                salvarRecebido(_formasPgFinanceiro.get(i).getId_forma_pagamento(), idContaReceber, _totalFinanceiro, _totalFinanceiro);
-
-                                if (cAux.soNumerosInt(_valorFormPg) > cAux.soNumerosInt(_totalFinanceiro)) {
-                                    // SUBTRAI O VALOR DO FINANCEIRO COM O VALOR RECEBIDO
-                                    String[] valoresSubtrair = {String.valueOf(_valorFormPg), String.valueOf(_totalFinanceiro)};
-                                    String resultadoSub = String.valueOf(cAux.subitrair(valoresSubtrair));
-
-                                    setFinRecRepo.updateFinRecTemp(_formasPgFinanceiro.get(i).getId(), resultadoSub);
+                                // SE O VALOR TEMPORARIO DA FORMA DE PAGAMENTO FOR MAIOR OU IGUAL AO VALOR RESTANTE
+                                if (valInt >= valorRestante) {
+                                    valSalvar = valorRestante;
+                                    //
+                                    String[] sub = {String.valueOf(valInt), String.valueOf(valorRestante)};
+                                    valInt = Integer.parseInt(String.valueOf(cAux.subitrair(sub)));
+                                    TvalorSalvar = TvalorRestante;
                                 } else {
-                                    setFinRecRepo.updateFinRecTemp(_formasPgFinanceiro.get(i).getId(), "0");
+                                    valSalvar = valInt;
+                                    TvalorSalvar = valorFormPg;
+                                    //
+                                    valInt = 0;
                                 }
-                            }
-                            // SE NAO
-                            else {
 
-                                //totRecebido = getFinRecRepo.getTotalRecebido(idContaReceber);
-                                String resultadoSub;
+                                // SE O VALOR PARA SALVAR FOR MAIOR QUE ZERO ELE SALVA
+                                if (valSalvar > 0) {
 
-                                if (cAux.soNumerosInt(totRecebido) < cAux.soNumerosInt(_totalFinanceiro)) {
+                                    String unidade = prefs.getString("unidade", "UNIDADE TESTE");
+                                    String dataAtual = cAux.inserirDataAtual();
+                                    String formaPagamento = _formasPgFinanceiro.get(i).getId_forma_pagamento();
+                                    String numDocumento = txtDocumentoFormaPagamento.getText().toString();
+                                    String venDocumento = cAux.inserirData(cAux.formatarData(cAux.soNumeros(txtVencimentoFormaPagamentoReceber.getText().toString())));
+                                    String idVendedor = String.valueOf(prefs.getInt("id_vendedor", 1));
 
-                                    // SUBTRAI O VALOR DO FINANCEIRO COM O VALOR RECEBIDO
-                                    String[] valFinanSubtrair = {String.valueOf(_totalFinanceiro), String.valueOf(totRecebido)};
-                                    String valorRestante = String.valueOf(cAux.subitrair(valFinanSubtrair));
+                                    //
+                                    FinanceiroVendasDomain finParaAdd = new FinanceiroVendasDomain(
+                                            "" + idContaReceber,
+                                            "" + unidade,
+                                            "" + dataAtual,
+                                            "" + codigo_cliente,
+                                            "" + formaPagamento,
+                                            "" + numDocumento,
+                                            "" + venDocumento,
+                                            "" + TotValFinRecCli,//cAux.converterValores(txtValorFormaPagamento.getText().toString()),
+                                            "0",
+                                            "" + TvalorSalvar,
+                                            "0",
+                                            "0",
+                                            "" + dataAtual,
+                                            "",
+                                            "" + idVendedor,
+                                            "" + codigo_cliente,
+                                            "",
+                                            ""
+                                    );
+                                    showLOG("ErrorCR", "*************************************************************");
+                                    showLOG("ErrorCR", "addFinanceiroRecebidos: " + finParaAdd);
+                                    showLOG("ErrorCR", "*************************************************************");
 
-                                    //Log.e("ErrorCR", "VALOR RESTANTE ID " + idContaReceber + ": " + valorRestante);
-
-                                    String[] valoresSubtrair;
-                                    if (cAux.soNumerosInt(valorRestante) >= cAux.soNumerosInt(_valorFormPg)) {
-
-
-                                        Log.e("ErrorCR", "VALOR RESTANTE " + valorRestante + " É MAIOR QUE A FORMA DE PAGAMENTO " + _formasPgFinanceiro.get(i).getId_forma_pagamento() + " " + _valorFormPg);
-
-                                        if (cAux.soNumerosInt(valorRestante) == cAux.soNumerosInt(_valorFormPg)) {
-                                            resultadoSub = "0";
-                                            salvarRecebido(_formasPgFinanceiro.get(i).getId_forma_pagamento(), idContaReceber, _totalFinanceiro, _totalFinanceiro);
-                                            _valorFormPg = resultadoSub;
-
-                                        } else {
-                                            // SUBTRAI O VALOR DO FINANCEIRO COM O VALOR RECEBIDO
-                                            valoresSubtrair = new String[]{valorRestante, _valorFormPg};
-                                            resultadoSub = String.valueOf(cAux.subitrair(valoresSubtrair));
-
-                                            salvarRecebido(_formasPgFinanceiro.get(i).getId_forma_pagamento(), idContaReceber, _totalFinanceiro, _valorFormPg);
-                                            _valorFormPg = "0";
-                                        }
-                                    } else {
-                                        valoresSubtrair = new String[]{_valorFormPg, valorRestante};
-                                        resultadoSub = String.valueOf(cAux.subitrair(valoresSubtrair));
-
-                                        salvarRecebido(_formasPgFinanceiro.get(i).getId_forma_pagamento(), idContaReceber, _totalFinanceiro, valorRestante);
-                                        _valorFormPg = resultadoSub;
-
-                                        Log.e("ErrorCR", "VALOR RESTANTE " + valorRestante + " É MENOR QUE A FORMA DE PAGAMENTO " + _formasPgFinanceiro.get(i).getId_forma_pagamento() + " " + _valorFormPg);
-                                    }
-
-                                    setFinRecRepo.updateFinRecTemp(_formasPgFinanceiro.get(i).getId(), _valorFormPg);
-
-                                } else {
-                                /*Log.e("ErrorCR", "O ID " + idContaReceber + ": NAO TEM O RECEBIDO MENOR " +
-                                        "QUE O TOTAL DO FINANCEIRO");*/
+                                    //
+                                    setFinRecRepo.addFinanceiroRecebidos(finParaAdd);
                                 }
                             }
                         }
                     }
+
+                    //
+                    finalizarFechar();
                 }
+            } catch (Exception e) {
+                showLOG("ContasReceber", "erro = " + e.getMessage());
+                Toast.makeText(getBaseContext(), "erro = " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
-            //
-            finalizarFechar();
-        } catch (Exception e) {
-            showLOG("ContasReceber", "erro = " + e.getMessage());
-            Toast.makeText(getBaseContext(), "erro = " + e.getMessage(), Toast.LENGTH_LONG).show();
+
         }
     }
 

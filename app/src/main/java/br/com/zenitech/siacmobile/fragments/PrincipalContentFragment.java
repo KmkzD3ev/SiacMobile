@@ -18,6 +18,8 @@ import br.com.zenitech.siacmobile.VendasConsultarClientes;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import java.util.Objects;
+
 
 public class PrincipalContentFragment extends Fragment {
     private DatabaseHelper bd;
@@ -74,15 +76,13 @@ public class PrincipalContentFragment extends Fragment {
 
         //CONSULTAR CLIENTE CONTAS RECEBER
         view.findViewById(R.id.cv_emissor_notas).setOnClickListener(view12 -> {
-            PackageManager packageManager = getActivity().getPackageManager();
-            String packageName = "com.lvrenyang.sample1";
+            PackageManager packageManager = requireActivity().getPackageManager();
+            String packageName = "br.com.zenitech.emissorweb";
             Intent intent = packageManager.getLaunchIntentForPackage(packageName);
             intent.putExtra("teste", "Olha, kkk");
             intent.putExtra("teste1", "O negocio");
             intent.putExtra("teste2", "vai dá certo");
-            if (null != intent) {
-                startActivity(intent);
-            }
+            startActivity(intent);/**/
         });
 
 

@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
@@ -19,20 +21,31 @@ import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.bgTotalReceber;
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalFinanceiroReceber;
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalItemFinanceiroReceber;
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtValorFormaPagamento;
 
 public class FinanceiroContasReceberAdapter extends RecyclerView.Adapter<FinanceiroContasReceberAdapter.ViewHolder> {
 
     private ClassAuxiliar classAuxiliar;
     private Context context;
     private ArrayList<FinanceiroVendasDomain> elementos;
+    private LinearLayout bgTotalReceber;
+    private final TextView txtTotalFinanceiroReceber;
+    private final TextView txtTotalItemFinanceiroReceber;
+    private final EditText txtValorFormaPagamento;
 
-    public FinanceiroContasReceberAdapter(Context context, ArrayList<FinanceiroVendasDomain> elementos) {
+    public FinanceiroContasReceberAdapter(
+            Context context,
+            ArrayList<FinanceiroVendasDomain> elementos,
+            LinearLayout bgTotalReceber,
+            TextView txtTotalFinanceiroReceber,
+            TextView txtTotalItemFinanceiroReceber,
+            EditText txtValorFormaPagamento
+    ) {
         this.context = context;
         this.elementos = elementos;
+        this.bgTotalReceber = bgTotalReceber;
+        this.txtTotalFinanceiroReceber = txtTotalFinanceiroReceber;
+        this.txtTotalItemFinanceiroReceber = txtTotalItemFinanceiroReceber;
+        this.txtValorFormaPagamento = txtValorFormaPagamento;
     }
 
     // Easy access to the context object in the recyclerview
@@ -107,7 +120,7 @@ public class FinanceiroContasReceberAdapter extends RecyclerView.Adapter<Finance
     }
 
     public void excluirItem(String codigo, String codigo_financeiro_app, double totalVenda, int position) {
-        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo,  null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         DatabaseHelper bd;
         bd = new DatabaseHelper(context);
         bd.deleteItemFinanceiroReceber(financeiroVendasDomain);

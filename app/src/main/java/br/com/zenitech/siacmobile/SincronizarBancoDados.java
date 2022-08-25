@@ -1,5 +1,7 @@
 package br.com.zenitech.siacmobile;
 
+import static br.com.zenitech.siacmobile.Configuracoes.VERSAO_APP;
+
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -458,7 +460,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         //
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
-        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "197");
+        final Call<Sincronizador> call = iSincronizar.sincronizar(serial, VERSAO_APP);
         //final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "196");
         call.enqueue(new Callback<Sincronizador>() {
             @Override

@@ -1,9 +1,14 @@
 package br.com.zenitech.siacmobile;
 
+import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -143,7 +148,7 @@ public class ClassAuxiliar {
         BigDecimal valor = new BigDecimal(args[0]).divide(new BigDecimal(args[1]), 3, RoundingMode.UP);
 
         //
-        Log.e("TOTAL", "DIVIDIR" + String.valueOf(valor));
+        Log.e("TOTAL", "DIVIDIR" + valor);
         return valor;
     }
 
@@ -162,7 +167,7 @@ public class ClassAuxiliar {
             //String cleanString = value.replaceAll("[R,$,.]", "");
             parsed = new BigDecimal(this.soNumeros(value)).setScale(2, BigDecimal.ROUND_FLOOR).divide(new BigDecimal(100), BigDecimal.ROUND_FLOOR);
 
-            Log.e("TOTAL", "FORAMATAR NUMERO: " + String.valueOf(parsed));
+            Log.e("TOTAL", "FORAMATAR NUMERO: " + parsed);
         } catch (Exception e) {
             Log.e("sua_tag", e.getMessage(), e);
         }
@@ -176,6 +181,13 @@ public class ClassAuxiliar {
         numero = numero.replaceAll("[^0-9]*", "");
 
         return numero;
+    }
+
+    //SO NUMEROS (INTEIRO)
+    public double soNumerosInt(String txt) {
+        //return Integer.parseInt(this.soNumeros(txt));
+        //return Double.parseDouble(txt);
+        return Float.parseFloat(txt);
     }
 
     //
@@ -753,5 +765,17 @@ public class ClassAuxiliar {
             bandeira = "DINERS";
 
         return bandeira;
+    }
+
+    public void ShowMsgSnackbar(View view, String msg) {
+        Snackbar.make(view, msg, Snackbar.LENGTH_LONG).setAction("Action", null).show();
+    }
+
+    public void ShowMsgToast(Context context, String msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+    }
+
+    public void ShowMsgLog(String tag, String msg) {
+        Log.e(tag, msg);
     }
 }

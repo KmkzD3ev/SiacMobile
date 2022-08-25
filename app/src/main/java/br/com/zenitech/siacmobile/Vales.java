@@ -3,6 +3,7 @@ package br.com.zenitech.siacmobile;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -49,11 +50,25 @@ public class Vales extends AppCompatActivity {
 
         findViewById(R.id.btn_cons_vale).setOnClickListener(v -> ConsultarVale(txtCodVale.getText().toString()));
         btn_uti_vale = findViewById(R.id.btn_uti_vale);
-        btn_uti_vale.setOnClickListener(v -> UsarVale(txtCodVale.getText().toString()));
+        btn_uti_vale.setOnClickListener(v -> UsarVale(txtCodVale.getText().toString(), codigo_cliente_vale.getText().toString()));
+
+        //
+        Intent intent = getIntent();
+
+        if (intent != null) {
+            Bundle params = intent.getExtras();
+
+            if (params != null) {
+                codigo_cliente_vale.setText(params.getString("codigo"));
+                //
+                String nomeCliente = cAux.maiuscula1(Objects.requireNonNull(params.getString("nome")).toLowerCase());
+                getSupportActionBar().setSubtitle(nomeCliente);
+            }
+        }
     }
 
-    private void UsarVale(String nVale) {
-        if (bd.UsarVale(nVale) == 1) {
+    private void UsarVale(String nVale, String codCli) {
+        if (bd.UsarVale(nVale, codCli) == 1) {
             Toast.makeText(this, "Vale utilizado!", Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -83,7 +98,9 @@ public class Vales extends AppCompatActivity {
 
             codigo_vale.setText(valesDomain.getCodigo_vale());
             unidade_vale.setText(valesDomain.getUnidade_vale());
-            codigo_cliente_vale.setText(valesDomain.getCodigo_cliente_vale());
+            if (codigo_cliente_vale.getText().toString().equalsIgnoreCase("")) {
+                codigo_cliente_vale.setText(valesDomain.getCodigo_cliente_vale());
+            }
             numero_vale.setText(valesDomain.getNumero_vale());
             valor_vale.setText(cAux.maskMoney(cAux.converterValores(valesDomain.getValor_vale())));
             produto_vale.setText(valesDomain.getProduto_vale());

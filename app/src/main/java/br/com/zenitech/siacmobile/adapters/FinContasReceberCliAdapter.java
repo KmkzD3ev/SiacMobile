@@ -4,7 +4,9 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -18,20 +20,35 @@ import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FormasPagamentoReceberTemp;
 
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.bgTotalReceber;
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalFinanceiroReceber;
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalItemFinanceiroReceber;
-import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtValorFormaPagamento;
+//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.bgTotalReceber;
+//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalFinanceiroReceber;
+//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalItemFinanceiroReceber;
+//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtValorFormaPagamento;
 
 public class FinContasReceberCliAdapter extends RecyclerView.Adapter<FinContasReceberCliAdapter.ViewHolder> {
 
     private ClassAuxiliar classAuxiliar;
-    private Context context;
-    private ArrayList<FormasPagamentoReceberTemp> elementos;
+    private final Context context;
+    private final ArrayList<FormasPagamentoReceberTemp> elementos;
+    private final LinearLayout bgTotalReceber;
+    private final TextView txtTotalFinanceiroReceber;
+    private final TextView txtTotalItemFinanceiroReceber;
+    private final EditText txtValorFormaPagamento;
 
-    public FinContasReceberCliAdapter(Context context, ArrayList<FormasPagamentoReceberTemp> elementos) {
+    public FinContasReceberCliAdapter(
+            Context context,
+            ArrayList<FormasPagamentoReceberTemp> elementos,
+            LinearLayout bgTotalReceber,
+            TextView txtTotalFinanceiroReceber,
+            TextView txtTotalItemFinanceiroReceber,
+            EditText txtValorFormaPagamento
+    ) {
         this.context = context;
         this.elementos = elementos;
+        this.bgTotalReceber = bgTotalReceber;
+        this.txtTotalFinanceiroReceber = txtTotalFinanceiroReceber;
+        this.txtTotalItemFinanceiroReceber = txtTotalItemFinanceiroReceber;
+        this.txtValorFormaPagamento = txtValorFormaPagamento;
     }
 
     // Easy access to the context object in the recyclerview

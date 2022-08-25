@@ -100,16 +100,6 @@ public class ContasReceberConsultarCliente extends AppCompatActivity implements 
             if (codigo.contains(newText)) {
                 newlist.add(clientes);
             }
-            /*String codigo = clientes.getCodigo_cliente().toLowerCase() + " - " + clientes.getNome_cliente().toLowerCase() +
-                    " - " + clientes.getApelido_cliente().toLowerCase();
-            if (codigo.contains(newText)) {
-                newlist.add(clientes);
-            }*/
-            //
-            /*String nome = clientes.getNome().toLowerCase();
-            if (nome.contains(newText)) {
-                newlist.add(clientes);
-            }*/
         }
 
         adapter.setFilter(newlist);

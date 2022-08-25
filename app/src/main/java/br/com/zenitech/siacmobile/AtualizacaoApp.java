@@ -218,7 +218,8 @@ public class AtualizacaoApp extends AppCompatActivity {
                 prefs.getString("serial", ""),
                 "" + dadosVales[0],
                 "" + dadosVales[2],
-                "" + dadosVales[3]
+                "" + dadosVales[3],
+                "" + dadosVales[4]
         );
 
         call.enqueue(new Callback<ArrayList<EnviarDados>>() {

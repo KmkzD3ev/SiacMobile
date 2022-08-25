@@ -173,7 +173,7 @@ class GPStracker {
                     //temporizador(60000);
 
                     tempo = true;
-                }, (long) 60000);
+                }, 60000);
 
             } catch (Exception ignored) {
 

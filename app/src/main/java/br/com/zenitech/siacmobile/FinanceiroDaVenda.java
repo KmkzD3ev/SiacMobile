@@ -247,7 +247,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                     //SE O NÚMERO DO DOCUMENTO ESTIVER VÁSIO MOSTRA A MENSAGEM
                     if (txtDocumentoFormaPagamento.getText().toString().equals("") && fPag[2].equals("1")) {
                         //
-                        Toast.makeText(FinanceiroDaVenda.this, "Para essa forma de pagamento o úmero do documento é obrigatório.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(FinanceiroDaVenda.this, "Para essa forma de pagamento o número do documento é obrigatório.", Toast.LENGTH_LONG).show();
                     }
                     //SE A BAIXA FOR MANUAL VERIFICA O CAMPO VENCIMENTO
                     else if (fPag[3].equals("1")) {
@@ -338,10 +338,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, listaFormasPagamentoCliente);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spFormasPagamentoCliente.setAdapter(adapter);
-        spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
 
-        /*
-        spFormasPagamentoCliente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        /*spFormasPagamentoCliente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
@@ -382,9 +380,9 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             public void onNothingSelected(AdapterView<?> adapterView) {
 
             }
-        });
+        });*/
 
-        */
+        spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
         atualizarValFin();
 
         // Verificar se o GPS foi aceito pelo entregador
@@ -734,9 +732,24 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         String sBandeira = "", sPrazo = "";
         if (bd.getCartaoTrue(fPag[0]).equalsIgnoreCase("1")) {
             try {
+                /*PackageManager packageManager = getPackageManager();
+                String packageName = "br.com.zenitech.emissorweb";
+                //Intent i = new Intent(packageName);
+                //i.setPackage(packageName);
+                Intent i = packageManager.getLaunchIntentForPackage(packageName);
+                //DADOS EMISSOR WEB
+                i.putExtra("siac", "1");
+                i.putExtra("cpfCnpj_cliente", "000.000.000-00");
+                i.putExtra("formaPagamento", "CARTÃO DE DÉBITO");//CRÉDITO
+                i.putExtra("produto", "P 13");
+                i.putExtra("qnt", "1");
+                i.putExtra("vlt", txtValorFormaPagamento.getText().toString());
+
+                startActivityForResult(i, 2);*/
+
                 sBandeira = classAuxiliar.getIdBandeira(spBandeira.getSelectedItem().toString());
                 sPrazo = spParcela.getSelectedItem().toString();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
         }
@@ -1109,14 +1122,16 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
      * P4: CALCULAR O RAIO DA CASA DO CLIENTE COM A POSIÇÃO DO ENTREGADOR
      */
 
+    int verificacaoLocalidade = 0;
+
     // PEGAR AS CORDENADAS DO ENTREGADOR
     private void verifCordenadas() {
-        //barra de progresso pontos
-        dialog.show();
 
         //msg(String.valueOf(coord_latitude_pedido));
         // VERIFICA SE A ACTIVITY ESTÁ VISÍVEL
         if (VerificarActivityAtiva.isActivityVisible()) {
+            //barra de progresso pontos
+            dialog.show();
 
 
             String[] c = coord.getLatLon().split(",");
@@ -1134,6 +1149,16 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             }
 
             new Handler().postDelayed(() -> {
+
+                // SE O TOTAL DE VERIFICAÇÃO FOR MAIR QUE 2 PARA DE CONSULTAR
+                verificacaoLocalidade++;
+                if (verificacaoLocalidade > 2) {
+                    verificacaoLocalidade = 0;
+                    Toast.makeText(context, "Não foi possível verificar suas cordenadas!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    return;
+                }
+
                 // VERIFICA SE AS CORDENADAS DO ENTREGADOR FORAM RECONHECIDAS
                 if (coord_latitude == 0.0) {
                     verifCordenadas();
@@ -1300,6 +1325,14 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                     default:
                         break;
                 }
+                break;
+            case 2:
+                if (resultCode == Activity.RESULT_OK) {
+                    Toast.makeText(context, "Siac: " + data.getStringExtra("authorizationCode"), Toast.LENGTH_LONG).show();
+                }
+                //Toast.makeText(context, Objects.requireNonNull(data).getStringExtra("authorizationCode"), Toast.LENGTH_LONG).show();
+                break;
+            default:
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
