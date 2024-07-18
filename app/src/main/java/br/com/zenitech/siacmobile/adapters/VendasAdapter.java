@@ -2,6 +2,7 @@ package br.com.zenitech.siacmobile.adapters;
 
 import android.content.Context;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,8 +113,7 @@ public class VendasAdapter extends RecyclerView.Adapter<VendasAdapter.ViewHolder
 
     public void excluirItem(String codigo, String codigo_venda_app, double totalVenda, int position) {
         VendasDomain vendasDomain = new VendasDomain(codigo, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-        DatabaseHelper bd;
-        bd = new DatabaseHelper(context);
+        DatabaseHelper bd = new DatabaseHelper(context);
         bd.deleteItemVenda(vendasDomain);
 
 

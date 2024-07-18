@@ -63,15 +63,15 @@ public class ClientesContasReceberAdapter extends RecyclerView.Adapter<ClientesC
         TextView apelido = holder.tvApelido;
         apelido.setText(clientes.apelido_cliente);
 
-        holder.LlList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent in = new Intent(context, ContasReceberCliente.class);
-                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                in.putExtra("codigo", clientes.codigo_cliente);
-                in.putExtra("nome", clientes.nome_cliente);
-                context.startActivity(in);
-            }
+        //
+        holder.enderecoCliente.setText(clientes.endereco);
+
+        holder.LlList.setOnClickListener(v -> {
+            Intent in = new Intent(context, ContasReceberCliente.class);
+            in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            in.putExtra("codigo", clientes.codigo_cliente);
+            in.putExtra("nome", clientes.nome_cliente);
+            context.startActivity(in);
         });
     }
 
@@ -83,7 +83,7 @@ public class ClientesContasReceberAdapter extends RecyclerView.Adapter<ClientesC
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout LlList;
-        TextView tvCodigo, tvNome, tvApelido;
+        TextView tvCodigo, tvNome, tvApelido, enderecoCliente;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -93,6 +93,7 @@ public class ClientesContasReceberAdapter extends RecyclerView.Adapter<ClientesC
             tvCodigo = itemView.findViewById(R.id.codCliente);
             tvNome = itemView.findViewById(R.id.nomeCliente);
             tvApelido =  itemView.findViewById(R.id.apelidoCliente);
+            enderecoCliente = itemView.findViewById(R.id.enderecoCliente);
         }
     }
 

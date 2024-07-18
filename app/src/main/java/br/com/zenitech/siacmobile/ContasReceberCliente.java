@@ -2,6 +2,7 @@ package br.com.zenitech.siacmobile;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,7 +60,6 @@ public class ContasReceberCliente extends AppCompatActivity {
         //
         id = prefs.getInt("id_venda", 1);
         tvCodsDocs = "";
-
 
         bd = new DatabaseHelper(this);
 

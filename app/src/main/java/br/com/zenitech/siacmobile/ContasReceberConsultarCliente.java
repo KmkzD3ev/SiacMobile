@@ -1,6 +1,7 @@
 package br.com.zenitech.siacmobile;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.core.view.MenuItemCompat;
@@ -88,16 +89,24 @@ public class ContasReceberConsultarCliente extends AppCompatActivity implements 
         newText = newText.toLowerCase();
         ArrayList<ClientesContasReceber> newlist = new ArrayList<>();
         for (ClientesContasReceber clientes : listaClientes) {
-            //
-            String codigo;
-            //
-            if (clientes.apelido_cliente != null) {
-                codigo = clientes.codigo_cliente.toLowerCase() + " - " + clientes.nome_cliente.toLowerCase() +
-                        " - " + clientes.apelido_cliente.toLowerCase();
-            } else {
-                codigo = clientes.codigo_cliente.toLowerCase() + " - " + clientes.nome_cliente.toLowerCase();
+            StringBuilder str = new StringBuilder();
+            // CÓDIGO
+            if (clientes.codigo_cliente != null && !clientes.codigo_cliente.equals("")) {
+                str.append(clientes.codigo_cliente.toLowerCase());
             }
-            if (codigo.contains(newText)) {
+            // NOME
+            if (clientes.nome_cliente != null && !clientes.nome_cliente.equals("")) {
+                str.append(clientes.nome_cliente.toLowerCase());
+            }
+            // APELIDO
+            if (clientes.apelido_cliente != null && !clientes.apelido_cliente.equals("")) {
+                str.append(clientes.apelido_cliente.toLowerCase());
+            }
+            // ENDEREÇO
+            if (clientes.endereco != null && !clientes.endereco.equals("")) {
+                str.append(clientes.endereco.toLowerCase());
+            }
+            if (str.toString().contains(newText)) {
                 newlist.add(clientes);
             }
         }

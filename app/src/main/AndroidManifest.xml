@@ -19,12 +19,21 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- GPS -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
+    <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS" />
+    <!-- GPS -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -45,7 +54,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="allowBackup"
-        tools:targetApi="q">
+        tools:targetApi="UPSIDE_DOWN_CAKE">
         <activity
             android:name=".ContasPagar"
             android:exported="false" />
@@ -87,6 +96,10 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SincronizarBancoDados"
+            android:label="@string/title_activity_sincronizar_banco_dados"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".BaixarDados"
             android:label="@string/title_activity_sincronizar_banco_dados"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -194,6 +207,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label=""
             android:theme="@android:style/Theme.Holo.Dialog.NoActionBar" />
+        <activity
+            android:name=".Pix"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="PIX"
+            android:screenOrientation="fullSensor" />
     </application>
 
 </manifest>

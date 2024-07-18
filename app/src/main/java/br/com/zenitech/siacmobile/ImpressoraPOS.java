@@ -3,10 +3,10 @@ package br.com.zenitech.siacmobile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,11 +24,9 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.oned.Code128Writer;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -38,19 +36,15 @@ import java.util.ArrayList;
 
 import br.com.stone.posandroid.providers.PosPrintProvider;
 import br.com.zenitech.siacmobile.controller.PrintViewHelper;
-/*import br.com.zenitech.siacmobile.domains.AutorizacoesPinpad;
-import br.com.zenitech.siacmobile.domains.ItensPedidos;
-import br.com.zenitech.siacmobile.domains.Pedidos;
-import br.com.zenitech.siacmobile.domains.PedidosNFE;*/
+import br.com.zenitech.siacmobile.domains.Clientes;
+import br.com.zenitech.siacmobile.domains.ContasBancarias;
 import br.com.zenitech.siacmobile.domains.FinanceiroReceberDomain;
-import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import stone.application.enums.Action;
 import stone.application.interfaces.StoneActionCallback;
 import stone.application.interfaces.StoneCallbackInterface;
 
-import static br.com.zenitech.siacmobile.ClassAuxiliar.getSha1Hex;
 import static br.com.zenitech.siacmobile.DataPorExtenso.dataPorExtenso;
 import static br.com.zenitech.siacmobile.NumeroPorExtenso.valorPorExtenso;
 
@@ -63,7 +57,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
     private ClassAuxiliar cAux;
 
     //DADOS PARA IMPRESSÃO
-    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, strFormPags;
+    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, nota_fiscal, strFormPags, nContaBanco;
 
     TextView total;
     public TextView imprimindo;
@@ -103,13 +97,13 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         setContentView(R.layout.activity_impressora);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        context = this;
 
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
 
         bd = new DatabaseHelper(this);
         //
         cAux = new ClassAuxiliar();
-        context = this;
 
         unidade = bd.getUnidade();
 
@@ -135,6 +129,8 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
                 tel_contato = params.getString("tel_contato");
                 cpfcnpj = params.getString("cpfcnpj");
                 endereco = params.getString("endereco");
+                nota_fiscal = params.getString("nota_fiscal");
+                nContaBanco = params.getString("nContaBanco");
 
                 // COMPROVANTE CANCELAMENTO CARTÃO
                 //dataHoraCan = params.getString("dataHoraCan");
@@ -554,8 +550,195 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
 
         PosPrintProvider pppPromissoria = new PosPrintProvider(this);
 
-        String numCodBarraBB = cAux.numCodBarraBB("R$ 240,59", vencimento, numero, bd);
-        String numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarraBB);
+
+        LinearLayout impressora1, impressora2;
+        Bitmap bitmap1, bitmap2;
+        Bitmap bp;
+        ImageView imgCodBarraBoleto;
+
+        // PEGA OS DADOS DA CONTA BANCARIA
+        ContasBancarias conta = bd.ContaBancaria(nContaBanco);
+
+        // PEGA OS DADOS DO CLIENTE
+        Clientes cliente = bd.cliente(id_cliente);
+
+        //String valFinanceiro;
+        String[] a = {String.valueOf(cAux.converterValores(valor)), conta.getTaxa_boleto()};
+        valor = cAux.maskMoney(cAux.somar(a));
+
+        // REFERENCIAS LOGO DO BANCO
+        ImageView logoBoleto1 = findViewById(R.id.logoBanco1);
+        ImageView logoBoleto2 = findViewById(R.id.logoBanco2);
+        // IDS TEXT BOLETO
+        TextView txtCodBancoMoedaBoleto = findViewById(R.id.txtCodBancoMoedaBoleto);
+        // IDS TEXT BOLETO - CANHOTO
+        TextView txtCodBancoMoedaCanhoto = findViewById(R.id.txtCodBancoMoedaCanhoto);
+
+        String numCodBarra = "";
+        //
+        String numlinhaDigitavel = "";
+
+        // BANCO DO BRASIL
+        if (conta.getBanco_conta().equalsIgnoreCase("001")) {
+            //
+            numCodBarra = cAux.numCodBarraBB(valor, cAux.exibirData(vencimento), numero, bd, conta);
+            //
+            numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarra);
+
+            // LOGO
+            Drawable logobb = getResources().getDrawable(R.drawable.logo_bb);
+            logoBoleto1.setImageDrawable(logobb);
+            logoBoleto2.setImageDrawable(logobb);
+            // SET BOLETO
+            txtCodBancoMoedaBoleto.setText("001-9");
+            // SET BOLETO - CANHOTO
+            txtCodBancoMoedaCanhoto.setText("001-9");
+        }
+        // BRADESCO
+        else if (conta.getBanco_conta().equalsIgnoreCase("237")) {
+
+            //carteira/nosso nu/ digito ver nosso numero
+            // $nnum = formata_numero($dadosboleto["carteira"],2,0).formata_numero($dadosboleto["nosso_numero"],11,0);
+            numCodBarra = cAux.numCodBarraBradesco(valor, cAux.exibirData(vencimento), numero, bd, conta);
+            //
+            numlinhaDigitavel = cAux.numlinhaDigitavelBradesco(numCodBarra);
+
+            // LOGO
+            Drawable logobb = getResources().getDrawable(R.drawable.logobradesco);
+            logoBoleto1.setImageDrawable(logobb);
+            logoBoleto2.setImageDrawable(logobb);
+            // SET BOLETO
+            txtCodBancoMoedaBoleto.setText("237-9");
+            // SET BOLETO - CANHOTO
+            txtCodBancoMoedaCanhoto.setText("237-9");
+        }
+
+        //
+        imgCodBarraBoleto = findViewById(R.id.imgCodBarraBoleto);
+
+
+        // IDS TEXT BOLETO
+        TextView txtValorBoleto = findViewById(R.id.txtValorBoleto);
+        TextView txtLinhaDigitavelBoleto = findViewById(R.id.txtLinhaDigitavelBoleto);
+        TextView txtLinhaDigitavelBoletoBaixo = findViewById(R.id.txtLinhaDigitavelBoletoBaixo);
+        TextView txtBeneficiarioBoleto = findViewById(R.id.txtBeneficiarioBoleto);
+        TextView txtVencimentoBoleto = findViewById(R.id.txtVencimentoBoleto);
+        TextView txtAgenciaBeneficiarioBoleto = findViewById(R.id.txtAgenciaBeneficiarioBoleto);
+        TextView txtNossoNumeroBoleto = findViewById(R.id.txtNossoNumeroBoleto);
+        TextView txtDataDocumentoBoleto = findViewById(R.id.txtDataDocumentoBoleto);
+        TextView txtInstrucoesBoleto = findViewById(R.id.txtInstrucoesBoleto);
+        TextView txtNumeroDocumentoBoleto = findViewById(R.id.txtNumeroDocumentoBoleto);
+        TextView txtCarteiraBoleto = findViewById(R.id.txtCarteiraBoleto);
+        TextView txtEspecieBoleto = findViewById(R.id.txtEspecieBoleto);
+        TextView txtQuantidadeBoleto = findViewById(R.id.txtQuantidadeBoleto);
+        TextView txtValorBoletoMeio = findViewById(R.id.txtValorBoletoMeio);
+        TextView txtPagadorBoleto = findViewById(R.id.txtPagadorBoleto);
+        TextView txtEnderecoPagadorBoleto = findViewById(R.id.txtEnderecoPagadorBoleto);
+        TextView txtSacadorBoleto = findViewById(R.id.txtSacadorBoleto);
+        TextView txtDataProcessamentoBoleto = findViewById(R.id.txtDataProcessamentoBoleto);
+        TextView txtValorCobradoBoleto = findViewById(R.id.txtValorCobradoBoleto);
+        // IDS TEXT BOLETO - CANHOTO
+        TextView txtLinhaDigitavelCanhoto = findViewById(R.id.txtLinhaDigitavelCanhoto);
+        TextView txtValorCanhotoBoleto = findViewById(R.id.txtValorCanhotoBoleto);
+        TextView txtBeneficiarioBoletoCanhoto = findViewById(R.id.txtBeneficiarioBoletoCanhoto);
+        TextView txtCpfCeiCnpjBoletoCanhoto = findViewById(R.id.txtCpfCeiCnpjBoletoCanhoto);
+        TextView txtContratoBoletoCanhoto = findViewById(R.id.txtContratoBoletoCanhoto);
+        TextView txtAgenciaBeneficiarioBoletoCanhoto = findViewById(R.id.txtAgenciaBeneficiarioBoletoCanhoto);
+        TextView txtNossoNumeroBoletoCanhoto = findViewById(R.id.txtNossoNumeroBoletoCanhoto);
+        TextView txtEspecieBoletoCanhoto = findViewById(R.id.txtEspecieBoletoCanhoto);
+        TextView txtQuantidadeBoletoCanhoto = findViewById(R.id.txtQuantidadeBoletoCanhoto);
+        TextView txtNumeroDocumentoBoletoCanhoto = findViewById(R.id.txtNumeroDocumentoBoletoCanhoto);
+        TextView txtVencimentoBoletoCanhoto = findViewById(R.id.txtVencimentoBoletoCanhoto);
+        TextView txtValorCobradoBoletoCanhoto = findViewById(R.id.txtValorCobradoBoletoCanhoto);
+        TextView txtPagadorBoletoCanhoto = findViewById(R.id.txtPagadorBoletoCanhoto);
+        TextView txtEnderecoPagadorBoletoCanhoto = findViewById(R.id.txtEnderecoPagadorBoletoCanhoto);
+
+        // SET BOLETO
+        txtValorBoleto.setText(valor);
+        txtLinhaDigitavelBoleto.setText(numlinhaDigitavel);
+        txtLinhaDigitavelBoletoBaixo.setText(cAux.soNumeros(numCodBarra));//numlinhaDigitavel
+        txtBeneficiarioBoleto.setText(conta.getCedente());
+        txtVencimentoBoleto.setText(cAux.exibirData(vencimento));
+        txtAgenciaBeneficiarioBoleto.setText(String.format("%s/%s-%s", conta.getAgencia(), conta.getConta(), conta.getDv_conta()));
+        txtNossoNumeroBoleto.setText(cAux.nossoNumero(conta.getConvenio(), numero));
+        txtDataDocumentoBoleto.setText(cAux.exibirDataAtual());
+        txtInstrucoesBoleto.setText(String.format("%s%s", conta.getInstrucoes(), !nota_fiscal.equalsIgnoreCase("") ? "\nREFERENTE A NOTA FISCAL: " + nota_fiscal : ""));
+        txtNumeroDocumentoBoleto.setText(numero);//cAux.nossoNumero(conta.getConvenio(), 2));
+        txtCarteiraBoleto.setText(conta.getCarteira());
+        txtEspecieBoleto.setText("9");
+        txtQuantidadeBoleto.setText("1");
+        txtValorBoletoMeio.setText(valor);
+        txtPagadorBoleto.setText(String.format("%s - %s", cliente.getNome_cliente(), cliente.getCpfcnpj()));
+        txtEnderecoPagadorBoleto.setText(cliente.getEndereco());
+        txtSacadorBoleto.setText("");
+        txtDataProcessamentoBoleto.setText(cAux.exibirDataAtual());
+        txtValorCobradoBoleto.setText(valor);
+
+        // SET BOLETO - CANHOTO
+        txtValorCanhotoBoleto.setText(valor);
+        txtLinhaDigitavelCanhoto.setText(numlinhaDigitavel);
+        txtBeneficiarioBoletoCanhoto.setText(conta.getCedente());
+        txtCpfCeiCnpjBoletoCanhoto.setText(conta.getCpf_cnpj());
+        txtContratoBoletoCanhoto.setText("");
+        txtAgenciaBeneficiarioBoletoCanhoto.setText(String.format("%s/%s-%s", conta.getAgencia(), conta.getConta(), conta.getDv_conta()));
+        txtNossoNumeroBoletoCanhoto.setText(cAux.nossoNumero(conta.getConvenio(), numero));
+        txtEspecieBoletoCanhoto.setText("9");
+        txtQuantidadeBoletoCanhoto.setText("1");
+        txtNumeroDocumentoBoletoCanhoto.setText(numero);//cAux.nossoNumero(conta.getConvenio(), 2));
+        txtVencimentoBoletoCanhoto.setText(cAux.exibirData(vencimento));
+        txtValorCobradoBoletoCanhoto.setText(valor);
+        txtPagadorBoletoCanhoto.setText(String.format("%s - %s", cliente.getNome_cliente(), cliente.getCpfcnpj()));
+        txtEnderecoPagadorBoletoCanhoto.setText(cliente.getEndereco());
+
+        //
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            BitMatrix bitMatrix = multiFormatWriter.encode(numCodBarra, BarcodeFormat.ITF, 0, 100);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            bp = barcodeEncoder.createBitmap(bitMatrix);
+            SaveImage(bp);
+
+            //ImageView imgCodBarraBoleto = findViewById(R.id.imgB);
+            imgCodBarraBoleto.setImageBitmap(bp);
+            //imgCodBarraBoleto.setScaleType(ImageView.ScaleType.FIT_START);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+
+        //
+        impressora1 = findViewById(R.id.printBoleto);
+        bitmap1 = new PrintViewHelper().createBitmapFromView90(impressora1, 576, 200); // height: 146
+        //
+        impressora2 = findViewById(R.id.printBoletoCanhoto);
+        bitmap2 = new PrintViewHelper().createBitmapFromView90(impressora2, 437, 200); // height: 146
+
+        pppPromissoria.setConnectionCallback(new StoneCallbackInterface() {
+            @Override
+            public void onSuccess() {
+                liberarImpressora();
+            }
+
+            @Override
+            public void onError() {
+                liberarImpressora();
+                Toast.makeText(context, "Erro ao imprimir: " + pppPromissoria.getListOfErrors(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        pppPromissoria.addBitmap(bitmap1);
+        pppPromissoria.addBitmap(bitmap2);
+        //Bitmap bitmap = printViewHelper.RotateBitmap(bitmap1, 90);
+        //pppPromissoria.addBitmap(bitmap);
+        //pppPromissoria.addLine("");
+        pppPromissoria.execute();
+    }
+
+    private void printBoleto_OLD() {
+
+        PosPrintProvider pppPromissoria = new PosPrintProvider(this);
+
+        String numCodBarraBB = "10101010101010101010101010101010101";// cAux.numCodBarraBB("R$ 240,59", "01/09/2022", "52000001", bd);
+        String numlinhaDigitavel = "10101010101010101010101010101010101";//cAux.numlinhaDigitavel(numCodBarraBB);
 
         // PARTE 1
         /*pppPromissoria.addLine("***  BOLETO  ***"));
@@ -607,7 +790,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
         MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
         Bitmap bp = null;
         try {
-            BitMatrix bitMatrix = multiFormatWriter.encode(numCodBarraBB, BarcodeFormat.ITF, 378, 37);
+            BitMatrix bitMatrix = multiFormatWriter.encode(numCodBarraBB, BarcodeFormat.CODE_128, 378, 37);
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
             bp = barcodeEncoder.createBitmap(bitMatrix);
             SaveImage(bp);
@@ -620,7 +803,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             e.printStackTrace();
         }
         // Retorna o caminho da imagem do qrcode
-        /*File sdcard = Environment.getExternalStorageDirectory().getAbsoluteFile();
+        File sdcard = Environment.getExternalStorageDirectory().getAbsoluteFile();
         File dir = new File(sdcard, "Emissor_Web/");
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -638,7 +821,7 @@ public class ImpressoraPOS extends AppCompatActivity implements StoneActionCallb
             imgCodBarraBoleto.setScaleType(ImageView.ScaleType.FIT_START);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }*/
+        }
         // *********************************************
 
         LinearLayout impressora1 = findViewById(R.id.printBoletoCanhoto); // 520 x 260

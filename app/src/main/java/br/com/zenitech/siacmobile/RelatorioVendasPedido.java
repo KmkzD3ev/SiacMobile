@@ -1,14 +1,11 @@
 package br.com.zenitech.siacmobile;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,20 +13,19 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-import br.com.zenitech.siacmobile.adapters.RelatorioVendasAdapter;
 import br.com.zenitech.siacmobile.adapters.RelatorioVendasPedidosAdapter;
-import br.com.zenitech.siacmobile.domains.VendasDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import stone.application.StoneStart;
-import stone.user.UserModel;
 import stone.utils.Stone;
-
-import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 public class RelatorioVendasPedido extends AppCompatActivity {
 
@@ -66,7 +62,6 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         //
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
-
         bd = new DatabaseHelper(this);
 
         //

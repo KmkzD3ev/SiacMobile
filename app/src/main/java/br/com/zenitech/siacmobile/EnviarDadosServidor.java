@@ -4,26 +4,21 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.domains.EnviarDados;
 import br.com.zenitech.siacmobile.domains.Sincronizador;
-import br.com.zenitech.siacmobile.domains.VendasDomain;
 import br.com.zenitech.siacmobile.interfaces.IEnviarDados;
 import br.com.zenitech.siacmobile.interfaces.ISincronizar;
 import retrofit2.Call;
@@ -58,12 +53,7 @@ public class EnviarDadosServidor extends AppCompatActivity {
 
         //
         dados = bd.EnviarDados(classAuxiliar.exibirData(prefs.getString("data_movimento_atual", "")));
-        /*Log.i(TAG + " Venda", dados[0]);
-        Log.i(TAG + " Venda", dados[1]);
-        Log.i(TAG + " Venda", dados[2]);
-        Log.i(TAG + " Venda", dados[3]);
-        Log.i(TAG + " Venda", dados[4]);
-        Log.i(TAG + " Venda", dados[5]);*/
+
         //
         dadosFin = bd.EnviarDadosFinanceiro();
 

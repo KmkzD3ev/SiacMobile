@@ -13,18 +13,19 @@ public class Configuracoes {
     public static int VERSAO_BD = 13;
 
     // VERSÃO DO APP PARA GERAR NOVOS CAMPOS NO BANCO DE DADOS ONLINE
-    public static String VERSAO_APP = "205";
+    public static String VERSAO_APP = "2054";
 
     // FALSE PARA DEFINIR PRODUÇÃO
     final boolean ambinteTeste = false;
 
     // INFORMA SE O APARELHO UTILIZADO É UM POS
-    // SEMPRE RETORNAR FALSE CONFORME FOR GERADO O BUILD PARA PLAYSTORE
+    // SEMPRE RETORNAR FALSE CONFORME FOR GERADO O BUILD PARA PLAY STORE
     public boolean GetDevice() {
-        return true;
+        //return true;
+        return false;
     }
 
-    // RETORNASE O AMBIENTE É DE PRODUÇÃO OU DE TESTE
+    // RETORNA SE O AMBIENTE É DE PRODUÇÃO OU DE TESTE
     public Environment Ambiente() {
         if (ambinteTeste)
             return SANDBOX;
@@ -39,7 +40,8 @@ public class Configuracoes {
     }
 
     public String GetUrlServer() {
-        return  "https://emissorweb.com.br";
+        return "http://191.243.197.5/";
+        //return  "https://emissorweb.com.br";
     }
 
     public String GetUFCeara(){

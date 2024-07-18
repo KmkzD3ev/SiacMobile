@@ -367,17 +367,25 @@ public class ClassAuxiliar {
         }
     }
 
-    public String zerosAEsquerda(String numero, String banco) {
+    public String zerosAEsquerda(String numero, int quant) {
         // RETIRA TUDO QUE NÃO FOR NÚMERO
         numero = this.soNumeros(numero);
         //Log.e("Numero", numero);
 
+        numero = String.format("%0" + quant + "d", Integer.parseInt(numero));
+
         // VERIFICA QUAL É O BANCO
-        if (banco.equalsIgnoreCase("BB")) {
+        /*if (banco.equalsIgnoreCase("BB")) {
             numero = String.format("%010d", Integer.parseInt(numero));
+        } else if (banco.equalsIgnoreCase("Bradesco")) {
+            numero = String.format("%010d", Integer.parseInt(numero));
+        } else if (banco.equalsIgnoreCase("Bradesco7")) {
+            numero = String.format("%07d", Integer.parseInt(numero));
+
+            Log.e("zerosAEsquerda", numero);
         } else {
             numero = String.format("%08d", Integer.parseInt(numero));
-        }
+        }*/
         //Log.e("Numero", numero);
         return numero;
     }
@@ -397,7 +405,7 @@ public class ClassAuxiliar {
     }
 
     // GERAR NÚMERO CÓDGIO BARRAS BOLETO
-    public String numCodBarraBB(String valor, String vencimento, String numeroDoc, DatabaseHelper bd) {
+    public String numCodBarraBB(String valor, String vencimento, String numeroDoc, DatabaseHelper bd, ContasBancarias conta) {
 
         /*
             FORMATO DO CÓDIGO DE BARRAS PARA CONVÊNIOS DA CARTEIRA SEM
@@ -415,7 +423,7 @@ public class ClassAuxiliar {
         */
 
         //
-        ContasBancarias conta = bd.contasBancarias();
+        //ContasBancarias conta = bd.contasBancarias();
         //PosApp
 
         // GERAR CÓDIGO BARRA BOLETO BANCO DO BRASIL
@@ -463,7 +471,7 @@ public class ClassAuxiliar {
         String fatorVencimento = dias;
         Log.e("BOLETO fatorVencimento", fatorVencimento);
         // Valor
-        String valorBoleto = this.zerosAEsquerda(valor, "BB");
+        String valorBoleto = this.zerosAEsquerda(valor, 10);
         Log.e("BOLETO valorBoleto", valorBoleto);
         // Zeros de Seis Posições
         String zeros = "000000";
@@ -500,6 +508,93 @@ public class ClassAuxiliar {
         return numCodBarra.toString();
     }
 
+    public String numCodBarraBradesco(String valor, String vencimento, String numeroDoc, DatabaseHelper bd, ContasBancarias conta) {
+
+        /*
+            FORMATO DO CÓDIGO DE BARRAS PARA CONVÊNIOS DA CARTEIRA SEM
+            REGISTRO – COM "NOSSO NÚMERO" LIVRE DE 17 POSIÇÕES.
+            ------------------------------------------------------------------------------------
+            Posição     Tamanho     Picture     Conteúdo
+            01 a 03     03          9(3)        Código do Banco na Câmara de Compensação = '237'
+            04 a 04     01          9(1)        Código da Moeda = '9'
+            05 a 05     01          9(1)        DV do Código de Barras (Anexo VI)
+            06 a 09     04          9(04)       Fator de Vencimento (Anexo IV)
+            10 a 19     10          9(08)       V(2) Valor
+            20 a 25     06          9(6)        Número do Convênio de Seis Posições
+            26 a 42     17          9(17)       Nosso Número Livre do cliente.
+            43 a 44     02          02          '21' Tipo de Modalidade de Cobrança.
+        */
+
+        //
+        //ContasBancarias conta = bd.contasBancarias();
+        //PosApp
+
+        /*long meses = 0;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            //define datas
+            LocalDateTime dataCadastro;
+            dataCadastro = LocalDateTime.of(1997, 10, 7, 0, 0, 0);
+
+            //LocalDateTime hoje = LocalDateTime.now();
+            LocalDateTime hoje = LocalDateTime.of(2000, 7, 4, 0, 0, 0);
+            meses = dataCadastro.until(hoje, ChronoUnit.DAYS);
+        } else {
+            //define datas
+            Calendar dataCadastro = Calendar.getInstance();
+            dataCadastro.set(1997, 10, 7);
+            Calendar hoje = Calendar.getInstance();
+            hoje.set(2000, 7, 4);
+
+            //calcula diferença
+            meses = (hoje.get(Calendar.YEAR) * 12 + hoje.get(Calendar.MONTH))
+                    - (dataCadastro.get(Calendar.YEAR) * 12 + dataCadastro.get(Calendar.MONTH));
+        }*/
+        Log.e("BOLETO vencimento", vencimento);
+        String dias = "";
+        try {
+            dias = this.DiffDias("07/10/1997", vencimento);//"04/07/2000" - "17/11/2010"
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //dias = String.valueOf(this.somar(new String[]{dias, "1"}));
+
+        // Código do Banco na Câmara de Compensação = "237"
+        String codBanco = "237";
+        Log.e("BOLETO codBanco", codBanco);
+        // Código da Moeda = "9"
+        String codMoeda = "9";
+        Log.e("BOLETO codMoeda", codMoeda);
+        // Fator de Vencimento (Anexo IV)
+        String fatorVencimento = dias;
+        Log.e("BOLETO fatorVencimento", fatorVencimento);
+        // Valor
+        String valorBoleto = this.zerosAEsquerda(valor, 10);
+        Log.e("BOLETO valorBoleto", valorBoleto);
+        // Nosso Número Livre do cliente.
+        numeroDoc = this.zerosAEsquerda(numeroDoc, 11);
+        String nossonumero = conta.getCarteira() + numeroDoc;
+        Log.e("BOLETO nossonumero", nossonumero);
+        // "21" Tipo de Modalidade de Cobrança.
+        String carteira = conta.getCarteira();
+        Log.e("BOLETO carteira", carteira);
+        // DV do Código de Barras (Anexo VI)
+        String nConta = this.zerosAEsquerda(conta.getConta(), 7);
+        Log.e("MODULO DE 11", codBanco + codMoeda + fatorVencimento + valorBoleto + conta.getAgencia() + nossonumero + nConta + "0");
+        String dvCodBarra = modulo11(codBanco + codMoeda + fatorVencimento + valorBoleto + conta.getAgencia() + nossonumero + nConta + "0");
+        Log.e("BOLETO dvCodBarra", dvCodBarra);
+
+        // Parte 1
+
+
+        // GERAR CÓDIGO BARRA BOLETO BANCO DO BRASIL
+        String numCodBarra = codBanco + codMoeda + dvCodBarra + fatorVencimento + valorBoleto + conta.getAgencia() + nossonumero + nConta + "0";
+        Log.e("BOLETO COD BARRA", numCodBarra);
+        return numCodBarra;
+    }
+
     // GERAR NÚMERO DA LINHA DIGITÁVEL DO BOLETO
     public String numlinhaDigitavel(String numCodBarraBB) {
         // CAMPO 1
@@ -533,10 +628,45 @@ public class ClassAuxiliar {
         return format;
     }
 
+    // GERAR NÚMERO DA LINHA DIGITÁVEL DO BOLETO BRADESCO
+    public String numlinhaDigitavelBradesco(String numCodBarraBB) {
+        // CAMPO 1
+        String c1p1 = numCodBarraBB.substring(0, 3);
+        String c1p2 = numCodBarraBB.substring(3, 4);
+        String c1p3 = numCodBarraBB.substring(19, 24);
+        String c1 = c1p1 + c1p2 + c1p3 + this.modulo10("" + c1p1 + c1p2 + c1p3);
+        StringBuilder sc1 = new StringBuilder(c1);
+        sc1.insert(c1.length() - 5, ".");
+
+        // CAMPO 2
+        String c2p1 = numCodBarraBB.substring(24, 34);
+        String c2 = c2p1 + this.modulo10(c2p1);
+        StringBuilder sc2 = new StringBuilder(c2);
+        sc2.insert(c2.length() - 6, ".");
+
+        // CAMPO 3
+        String c3p1 = numCodBarraBB.substring(34, 44);
+        String c3 = c3p1 + this.modulo10(c3p1);
+        StringBuilder sc3 = new StringBuilder(c3);
+        sc3.insert(c3.length() - 6, ".");
+
+        // CAMPO 4
+        String c4 = numCodBarraBB.substring(4, 5);
+
+        // CAMPO 5
+        String c5p1 = numCodBarraBB.substring(5, 9);
+        String c5p2 = numCodBarraBB.substring(9, 19);
+        String c5 = c5p1 + c5p2;
+
+        String format = String.format("%s      %s      %s      %s      %s", sc1, sc2, sc3, c4, c5);
+        Log.e("CODIGO BOLETO", format);
+        return format;
+    }
+
     // NOSSO NÚMERO BOLETO - CONVÊNIO + SERIE NA CASA DE MILHÃO, COM ZEROS A ESQUERDA
     public String nossoNumero(String convenio, String serieBoleto) {
         //int n = (serieBoleto * 100000000) + 1;
-        return String.format("%s%s", convenio, this.zerosAEsquerda(String.valueOf(serieBoleto), "BB"));
+        return String.format("%s%s", convenio, this.zerosAEsquerda(String.valueOf(serieBoleto), 10));
     }
 
     public String digitoVerificadorModulo11(String chave) {

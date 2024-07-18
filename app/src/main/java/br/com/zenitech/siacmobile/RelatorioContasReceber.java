@@ -1,9 +1,16 @@
 package br.com.zenitech.siacmobile;
 
+import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,21 +18,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-
 import java.util.ArrayList;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.RelatorioContasReceberAdapter;
 import br.com.zenitech.siacmobile.domains.FinanceiroReceberDomain;
-import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import stone.application.StoneStart;
 import stone.utils.Stone;
-
-import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 public class RelatorioContasReceber extends AppCompatActivity {
     //
@@ -61,7 +60,6 @@ public class RelatorioContasReceber extends AppCompatActivity {
         //
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
-
         bd = new DatabaseHelper(this);
 
         //

@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,6 +122,7 @@ public class FinanceiroContasReceberAdapter extends RecyclerView.Adapter<Finance
 
     public void excluirItem(String codigo, String codigo_financeiro_app, double totalVenda, int position) {
         FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
         DatabaseHelper bd;
         bd = new DatabaseHelper(context);
         bd.deleteItemFinanceiroReceber(financeiroVendasDomain);

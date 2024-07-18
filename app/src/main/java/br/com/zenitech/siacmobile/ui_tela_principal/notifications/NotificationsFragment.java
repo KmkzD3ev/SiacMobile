@@ -1,9 +1,13 @@
 package br.com.zenitech.siacmobile.ui_tela_principal.notifications;
 
+import static android.content.Context.MODE_PRIVATE;
+import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,32 +21,21 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-import br.com.zenitech.siacmobile.Configuracoes;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.EnviarDadosServidor;
-import br.com.zenitech.siacmobile.Impressora;
 import br.com.zenitech.siacmobile.ImpressoraPOS;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.SincronizarBancoDados;
 import br.com.zenitech.siacmobile.SplashScreen;
-import br.com.zenitech.siacmobile.domains.EnviarDados;
 import br.com.zenitech.siacmobile.domains.Sincronizador;
-import br.com.zenitech.siacmobile.domains.VendasDomain;
-import br.com.zenitech.siacmobile.interfaces.IEnviarDados;
 import br.com.zenitech.siacmobile.interfaces.ISincronizar;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import stone.application.StoneStart;
-import stone.user.UserModel;
 import stone.utils.Stone;
-
-import static android.content.Context.MODE_PRIVATE;
-import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 public class NotificationsFragment extends Fragment {
     private Context context = null;

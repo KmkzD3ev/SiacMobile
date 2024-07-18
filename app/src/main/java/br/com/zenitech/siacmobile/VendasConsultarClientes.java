@@ -1,5 +1,6 @@
 package br.com.zenitech.siacmobile;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.core.view.MenuItemCompat;
@@ -74,23 +75,27 @@ public class VendasConsultarClientes extends AppCompatActivity implements Search
         newText = newText.toLowerCase();
         ArrayList<Clientes> newlist = new ArrayList<>();
         for (Clientes clientes : listaClientes) {
-            String codigo;
-            //
-            if (clientes.getApelido_cliente() != null) {
-                codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase() +
-                        " - " + clientes.getApelido_cliente().toLowerCase();
-            } else {
-                codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase();
+            StringBuilder str = new StringBuilder();
+            // CÓDIGO
+            if (clientes.getCodigo_cliente() != null && !clientes.getCodigo_cliente().equals("")) {
+                str.append(clientes.getCodigo_cliente().toLowerCase());
             }
-            if (codigo.contains(newText)) {
-                newlist.add(clientes);
+            // NOME
+            if (clientes.getNome_cliente() != null && !clientes.getNome_cliente().equals("")) {
+                str.append(clientes.getNome_cliente().toLowerCase());
+            }
+            // APELIDO
+            if (clientes.getApelido_cliente() != null && !clientes.getApelido_cliente().equals("")) {
+                str.append(clientes.getApelido_cliente().toLowerCase());
+            }
+            // ENDEREÇO
+            if (clientes.getEndereco() != null && !clientes.getEndereco().equals("")) {
+                str.append(clientes.getEndereco().toLowerCase());
             }
 
-            //
-            /*String nome = clientes.getNome().toLowerCase();
-            if (nome.contains(newText)) {
+            if (str.toString().contains(newText)) {
                 newlist.add(clientes);
-            }*/
+            }
         }
 
         adapter.setFilter(newlist);

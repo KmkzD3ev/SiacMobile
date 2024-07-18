@@ -15,4 +15,5 @@ public class ClientesContasReceber {
     public String codigo_pagamento;
     public String status_app;
     public String baixa_finalizada_app;
+    public String endereco;
 }

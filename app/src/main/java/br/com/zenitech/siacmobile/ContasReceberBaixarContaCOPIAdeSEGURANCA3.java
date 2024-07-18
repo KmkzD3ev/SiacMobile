@@ -5,6 +5,7 @@ import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -100,6 +101,7 @@ public class ContasReceberBaixarContaCOPIAdeSEGURANCA3 extends AppCompatActivity
         view = findViewById(android.R.id.content).getRootView();
         cAux = new ClassAuxiliar();
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
+
         bd = new DatabaseHelper(this);
 
         // RECEBE O ID DO FINANCEIRO A RECEER

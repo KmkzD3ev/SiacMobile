@@ -378,7 +378,7 @@ public class Sincronizar extends AppCompatActivity {
     public void queryStatus(View v) {
         Cursor c = mgr.query(new DownloadManager.Query().setFilterById(lastDownload));
 
-        if (c == null) {
+        /*if (c == null) {
             Toast.makeText(this, "Download not found!", Toast.LENGTH_LONG).show();
         } else {
             c.moveToFirst();
@@ -397,7 +397,7 @@ public class Sincronizar extends AppCompatActivity {
                     c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
 
             Toast.makeText(this, statusMessage(c), Toast.LENGTH_LONG).show();
-        }
+        }*/
     }
 
     public void viewLog(View v) {
@@ -407,7 +407,7 @@ public class Sincronizar extends AppCompatActivity {
     private String statusMessage(Cursor c) {
         String msg = "???";
 
-        switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+        /*switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
             case DownloadManager.STATUS_FAILED:
                 msg = "Download failed!";
                 break;
@@ -432,7 +432,7 @@ public class Sincronizar extends AppCompatActivity {
                 msg = "Download is nowhere in sight";
                 break;
         }
-
+*/
         return (msg);
     }
 
@@ -496,7 +496,7 @@ public class Sincronizar extends AppCompatActivity {
 
             } else {
 
-                //CRIA UMA INSTANCIA DO BANCO
+               /* //CRIA UMA INSTANCIA DO BANCO
                 db = new DatabaseHelper(getBaseContext());
                 try {
                     db.createDataBase();
@@ -514,7 +514,7 @@ public class Sincronizar extends AppCompatActivity {
                     msgErro = "Não foi possível ler o banco de dados.";
                     msgErroTec = sqle.getMessage();
                     throw sqle;
-                }
+                }*/
 
                 Toast.makeText(Sincronizar.this, "Dados sincronizados com sucesso!", Toast.LENGTH_SHORT).show();
 

@@ -17,6 +17,14 @@ public interface ISincronizar {
 
     //SINCRONIZAR
     @FormUrlEncoded
+    @POST("baixar_dados_app_siac.php")
+    Call<Sincronizador> baixarDados(
+            @Field("SERIAL") String SERIAL,
+            @Field("OPCAO") String OPCAO
+    );
+
+    //SINCRONIZAR
+    @FormUrlEncoded
     @POST("sincronizar_banco_app_siac.php")
     Call<Sincronizador> sincronizar(@Field("SERIAL") String SERIAL, @Field("VPOS") String VPOS);
 

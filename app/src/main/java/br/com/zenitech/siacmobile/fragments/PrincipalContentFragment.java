@@ -1,8 +1,11 @@
 package br.com.zenitech.siacmobile.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +18,6 @@ import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.Vendas;
 import br.com.zenitech.siacmobile.VendasConsultarClientes;
-
-import static android.content.Context.MODE_PRIVATE;
-
-import java.util.Objects;
 
 
 public class PrincipalContentFragment extends Fragment {

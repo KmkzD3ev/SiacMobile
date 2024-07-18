@@ -1,35 +1,19 @@
 package br.com.zenitech.siacmobile;
 
+import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
+
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.LinearLayoutCompat;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
-import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -45,19 +29,25 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.maps.android.SphericalUtil;
 
@@ -65,17 +55,14 @@ import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.FinanceiroVendasAdapter;
 import br.com.zenitech.siacmobile.domains.Conta;
-import br.com.zenitech.siacmobile.domains.ContasBancarias;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.PosApp;
-import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.interfaces.ILogin;
 import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
@@ -84,8 +71,6 @@ import retrofit2.Response;
 import stone.application.StoneStart;
 import stone.user.UserModel;
 import stone.utils.Stone;
-
-import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     protected static final int REQUEST_CHECK_SETTINGS = 1;
@@ -438,7 +423,6 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     }
 
     private void _verificarFPgVenda() {
-        // VERIFICA SE É PARA IMPRIMIR A PROMISSORIA, CASO SEJA 0, NÃO AVANÇA.
         if (Objects.requireNonNull(prefs.getString("print_promissoria", "0")).equalsIgnoreCase("0")
                 && Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("0")) {
             finish();
@@ -514,44 +498,41 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             */
 
             // IMPRESSÃO DO BOLETO
-            if (!configuracoes.GetDevice()) {
-                if (Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("1")) {
+            if (Objects.requireNonNull(prefs.getString("print_boleto", "0")).equalsIgnoreCase("1")) {
 
-                    String contaBancFormPag = bd.getContaBancariaFormaPagamento(listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", ""));
-                    if (!contaBancFormPag.equalsIgnoreCase("0")) {
+                String contaBancFormPag = bd.getContaBancariaFormaPagamento(listaFinanceiroCliente.get(a).getFpagamento_financeiro().replace(" _ ", ""));
+                // VERIFICA SE É PARA IMPRIMIR A PROMISSORIA, CASO SEJA 0, NÃO AVANÇA.
 
-                        String CodContaBanc = bd.getCodContaBancaria(contaBancFormPag);
+                if (!contaBancFormPag.equalsIgnoreCase("0")) {
 
-                        // SE FOR IGUAL A 1 CÓD BB, IMPRIMI
-                        if (CodContaBanc.equalsIgnoreCase("1")) {
+                    String CodContaBanc = bd.getCodContaBancaria(contaBancFormPag);
 
-                            Intent i;
-                            String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
-                        /*if (configuracoes.GetDevice()) {
+                    // SE FOR IGUAL A 1 CÓD BB, IMPRIMI
+                    if (CodContaBanc.equalsIgnoreCase("001") || CodContaBanc.equalsIgnoreCase("237")) {
+
+                        Intent i;
+                        String val = classAuxiliar.maskMoney(new BigDecimal(listaFinanceiroCliente.get(a).getValor_financeiro()));
+                        if (configuracoes.GetDevice()) {
                             i = new Intent(context, ImpressoraPOS.class);
                         } else {
                             i = new Intent(context, Impressora.class);
-                        }*/
-                            i = new Intent(context, Impressora.class);
-
-                            i.putExtra("razao_social", nomeCliente);
-                            i.putExtra("tel_contato", "");
-                            //i.putExtra("numero", txtDocumentoFormaPagamento.getText().toString());
-                            i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
-                            i.putExtra("vencimento", listaFinanceiroCliente.get(a).getVencimento_financeiro());// txtVencimentoFormaPagamento.getText().toString());
-                            //i.putExtra("valor", val);
-                            i.putExtra("valor", val);
-                            i.putExtra("id_cliente", codigo_cliente);
-                            i.putExtra("cpfcnpj", cpfcnpjCliente);
-                            i.putExtra("endereco", enderecoCliente);
-                            i.putExtra("imprimir", "Boleto");
-                            i.putExtra("nota_fiscal", listaFinanceiroCliente.get(a).getNota_fiscal());
-
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(i);
-                        } else {
-                            finish();
                         }
+
+                        i.putExtra("razao_social", nomeCliente);
+                        i.putExtra("tel_contato", "");
+                        i.putExtra("numero", listaFinanceiroCliente.get(a).getDocumento_financeiro());
+                        i.putExtra("vencimento", listaFinanceiroCliente.get(a).getVencimento_financeiro());
+                        i.putExtra("valor", val);
+                        i.putExtra("id_cliente", codigo_cliente);
+                        i.putExtra("cpfcnpj", cpfcnpjCliente);
+                        i.putExtra("endereco", enderecoCliente);
+                        i.putExtra("imprimir", "Boleto");
+                        i.putExtra("nota_fiscal", listaFinanceiroCliente.get(a).getNota_fiscal());
+                        i.putExtra("nContaBanco", contaBancFormPag);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(i);
+                    } else {
+                        finish();
                     }
                 }
             }
@@ -772,7 +753,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
                 "" + prefs.getInt("id_vendedor", 1),//ID_VENDEDOR_FINANCEIRO
                 "" + prefs.getInt("id_venda_app", 1),
                 txtNotaFiscal.getText().toString(),
-                bd.getIdAliquota(sBandeira, sPrazo)
+                bd.getIdAliquota(bd.getIdFPG(fPag[0]), sBandeira, sPrazo)
         ));
 
         //if (fPag[0].equalsIgnoreCase("PROMISSORIA")) {
@@ -815,10 +796,19 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             bgTotal.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.transparente));
         }
 
+
+        // SELECT PIX
+        /*if (fPag[0].equals("PIX")) {
+            Intent i = new Intent(context, Pix.class);
+            startActivity(i);
+        }*/
+
+
         //
         txtDocumentoFormaPagamento.setText("");
         tilDocumento.setVisibility(View.VISIBLE);
         spFormasPagamentoCliente.setSelection(0);
+
 
         //ESCONDER O TECLADO
         // TODO Auto-generated method stub
@@ -838,6 +828,12 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         txtDocumentoFormaPagamento.setText("");
         String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
+        // SELECT PIX
+        if (fPag[0].equals("PIX")) {
+            runOnUiThread(() -> {
+
+            });
+        }
         if (fPag[1].equals("A PRAZO")) {
 
             runOnUiThread(() -> {

@@ -1,6 +1,26 @@
 package br.com.zenitech.siacmobile.domains;
 
+import java.util.List;
+
 public class Sincronizador {
+
+    public List<BaixarDadosDomain> retorno_cartoes_aliquotas;
+    public List<Clientes> retorno_clientes;
+    public List<BaixarDadosDomain> retorno_configuracoes;
+    public List<BaixarDadosDomain> retorno_contas_bancarias;
+    public List<BaixarDadosDomain> retorno_financeiro_receber;
+    public List<BaixarDadosDomain> retorno_formas_pagamento;
+    public List<BaixarDadosDomain> retorno_formas_pagamento_cliente;
+    public List<BaixarDadosDomain> retorno_margens_clientes;
+    public List<BaixarDadosDomain> retorno_pos;
+    public List<BaixarDadosDomain> retorno_produtos;
+    public List<BaixarDadosDomain> retorno_rotas_clientes;
+    public List<BaixarDadosDomain> retorno_rotas_precos;
+    public List<BaixarDadosDomain> retorno_unidades;
+    public List<BaixarDadosDomain> retorno_unidades_precos;
+    public List<BaixarDadosDomain> retorno_vale;
+
+
     private String serial;
     private String verificar_posicao_cliente;
     private String erro;

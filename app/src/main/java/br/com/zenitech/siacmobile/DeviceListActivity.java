@@ -1,5 +1,6 @@
 package br.com.zenitech.siacmobile;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -9,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
@@ -24,6 +27,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +140,8 @@ public class DeviceListActivity extends Activity {
     private final OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int location, long id) {
             // Cancel discovery because it's costly and we're about to connect
-            mBtAdapter.cancelDiscovery();
+            //mBtAdapter.cancelDiscovery();
+            cancelDiscovery();
 
             DeviceNode node = (DeviceNode) mDevicesAdapter.getItem(location);
             String address = node.getAddress();
@@ -157,6 +163,12 @@ public class DeviceListActivity extends Activity {
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (ActivityCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
+                        return;
+                    }
+                }
                 boolean bonded = Objects.requireNonNull(device).getBondState() == BluetoothDevice.BOND_BONDED;
                 int iconId = bonded ? R.drawable.ic_bluetooth_connected : R.drawable.ic_bluetooth;
                 // Find is device is already exists
@@ -244,6 +256,15 @@ public class DeviceListActivity extends Activity {
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, filter);
 
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                        128);
+                return;
+            }
+        }
+
         if (mBtAdapter != null && mBtAdapter.isEnabled()) {
             // Get a set of currently paired devices
             Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
@@ -314,16 +335,33 @@ public class DeviceListActivity extends Activity {
         findViewById(R.id.reload_bluetooth).setVisibility(View.VISIBLE);
 
         // If we're already discovering, stop it
-        if (mBtAdapter.isDiscovering()) {
+        /*if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
+        }*/
+        cancelDiscovery();
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                        128);
+                return;
+            }
         }
-
         // Request discover from BluetoothAdapter
         mBtAdapter.startDiscovery();
     }
 
     private void cancelDiscovery() {
-        if (mBtAdapter != null) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                        128);
+                return;
+            }
+        }
+
+        if (mBtAdapter != null && mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
         }
     }

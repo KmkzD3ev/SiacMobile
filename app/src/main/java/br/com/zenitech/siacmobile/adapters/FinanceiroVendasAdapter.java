@@ -1,39 +1,29 @@
 package br.com.zenitech.siacmobile.adapters;
 
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.bgTotal;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtTotalFinanceiro;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtTotalItemFinanceiro;
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtValorFormaPagamento;
+
 import android.content.Context;
-
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
-import br.com.zenitech.siacmobile.Impressora;
-import br.com.zenitech.siacmobile.ImpressoraPOS;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FinanceiroVendasDomain;
 import br.com.zenitech.siacmobile.domains.PosApp;
-import br.com.zenitech.siacmobile.domains.UnidadesDomain;
-
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.bgTotal;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.cpfcnpjCliente;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.enderecoCliente;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtDocumentoFormaPagamento;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtTotalFinanceiro;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtTotalItemFinanceiro;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtValorFormaPagamento;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.codigo_cliente;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.nomeCliente;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtVencimentoFormaPagamento;
 
 public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVendasAdapter.ViewHolder> {
 
@@ -142,8 +132,8 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
 
     public void excluirItem(String codigo, String codigo_financeiro_app, String totalVenda, int position, String fpagamento_financeiro) {
         FinanceiroVendasDomain financeiroVendasDomain = new FinanceiroVendasDomain(codigo, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-        DatabaseHelper bd;
-        bd = new DatabaseHelper(context);
+
+        DatabaseHelper bd = new DatabaseHelper(context);
         bd.deleteItemFinanceiro(financeiroVendasDomain);
         if (fpagamento_financeiro.equalsIgnoreCase("PROMISSORIA")) {
             PosApp posApp = bd.getPos();

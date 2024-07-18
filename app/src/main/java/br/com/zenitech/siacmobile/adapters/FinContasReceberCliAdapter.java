@@ -1,6 +1,7 @@
 package br.com.zenitech.siacmobile.adapters;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,6 @@ import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.domains.FormasPagamentoReceberTemp;
-
-//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.bgTotalReceber;
-//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalFinanceiroReceber;
-//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtTotalItemFinanceiroReceber;
-//import static br.com.zenitech.siacmobile.ContasReceberBaixarConta.txtValorFormaPagamento;
 
 public class FinContasReceberCliAdapter extends RecyclerView.Adapter<FinContasReceberCliAdapter.ViewHolder> {
 
@@ -119,8 +115,7 @@ public class FinContasReceberCliAdapter extends RecyclerView.Adapter<FinContasRe
 
     public void excluirItem(String codigo, String id_cliente, int position) {
         FormasPagamentoReceberTemp temp = new FormasPagamentoReceberTemp(codigo, null, null, null);
-        DatabaseHelper bd;
-        bd = new DatabaseHelper(context);
+        DatabaseHelper bd = new DatabaseHelper(context);
         bd.deleteItemFinanceiroReceberTemp(temp);
 
 

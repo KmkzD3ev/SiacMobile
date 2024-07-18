@@ -3,7 +3,6 @@ package br.com.zenitech.siacmobile.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,6 @@ import java.util.ArrayList;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.ValeListClientes;
 import br.com.zenitech.siacmobile.Vales;
-import br.com.zenitech.siacmobile.Vendas;
-import br.com.zenitech.siacmobile.VendasConsultarClientes;
 import br.com.zenitech.siacmobile.domains.Clientes;
 
 public class ValeClientesAdapter extends RecyclerView.Adapter<ValeClientesAdapter.ViewHolder> {
@@ -60,11 +57,11 @@ public class ValeClientesAdapter extends RecyclerView.Adapter<ValeClientesAdapte
 
         //
         TextView codigo = holder.tvCodigo;
-        codigo.setText(clientes.getCodigo());
+        codigo.setText(clientes.getCodigo_cliente());
 
         // + " " + clientes.getSaldo() + ", " + clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente()
         TextView nome = holder.tvNome;
-        nome.setText(clientes.getNome());
+        nome.setText(clientes.getNome_cliente());
 
         //
         TextView apelido = holder.tvApelido;
@@ -74,8 +71,8 @@ public class ValeClientesAdapter extends RecyclerView.Adapter<ValeClientesAdapte
 
             Intent in = new Intent(context, Vales.class);
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            in.putExtra("codigo", clientes.getCodigo());
-            in.putExtra("nome", clientes.getNome());
+            in.putExtra("codigo", clientes.getCodigo_cliente());
+            in.putExtra("nome", clientes.getNome_cliente());
             context.startActivity(in);
 
             ((ValeListClientes) context).finish();

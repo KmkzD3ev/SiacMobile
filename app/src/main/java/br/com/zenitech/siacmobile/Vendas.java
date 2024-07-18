@@ -3,6 +3,7 @@ package br.com.zenitech.siacmobile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -158,7 +159,7 @@ public class Vendas extends AppCompatActivity {
                     || valEtPreco.equals("0.0")
                     || valEtPreco.equals("0.00")) {
                 ShowMsgToast("Informe o valor unitário.");
-            }else {
+            } else {
                 addVenda();
             }
         });
@@ -414,7 +415,7 @@ public class Vendas extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        bd.close();
+        //bd.close();
         super.onDestroy();
     }
 

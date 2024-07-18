@@ -13,7 +13,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,8 +33,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public SQLiteDatabase myDataBase;
     final Context context;
     private final ClassAuxiliar aux = new ClassAuxiliar();
-
-
     //CONSTANTES CLIENTES
     private static final String TABELA_CLIENTES = "clientes";
     private static final String CODIGO_CLIENTE = "codigo_cliente";
@@ -52,21 +49,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String[] COLUNAS_PRODUTOS = {CODIGO_PRODUTO, DESCRICAO_PRODUTO};
 
-
-    /*public DatabaseHelper(Context context) {
-        super(context, DB_NAME, null, 10);
-        this.context = context;
-        this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
-        Log.e("Path 1", DB_PATH);
-    }*/
-
     @SuppressLint("SdCardPath")
     public DatabaseHelper(Context context) {
-        super(context, DB_NAME, null, VERSAO_BD);//12
+        super(context, DB_NAME, null, VERSAO_BD);
         this.context = context;
-        //this.DB_PATH = context.getFilesDir().getPath() + "/" + context.getPackageName() + "/" + "databases/";
-        //this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 
             //this.DB_PATH = context.getDatabasePath(DB_NAME).getPath() + File.separator;
             this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
@@ -75,12 +62,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             //String DB_PATH = Environment.getDataDirectory() + "/data/my.trial.app/databases/";
             //myPath = DB_PATH + dbName;
             this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
-        }
-
-        //this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
+        }*/
+        this.DB_PATH = "/data/data/" + context.getPackageName() + "/" + "databases/";
         Log.e(TAG, " DatabaseHelper - " + DB_PATH);
     }
-
 
     void createDataBase() {
         boolean dbExist = checkDataBase();
@@ -97,17 +82,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean checkDataBase() {
-        /*SQLiteDatabase checkDB = null;
-        try {
-            String myPath = DB_PATH + DB_NAME;
-            checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
-        } catch (SQLiteException e) {
-        }
-        if (checkDB != null) {
-            checkDB.close();
-        }
-        return checkDB != null ? true : false;*/
-
         File dbFile = context.getDatabasePath(DB_NAME);
         return dbFile.exists();
     }
@@ -117,7 +91,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         File arquivo = new File(path + "/siacmobileDB.db"); //.db pasta);
         FileInputStream myInput = new FileInputStream(arquivo);
-
 
         //InputStream myInput = myContext.getAssets().open(DB_NAME);
         String outFileName = DB_PATH + DB_NAME;
@@ -130,7 +103,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         myOutput.flush();
         myOutput.close();
         myInput.close();
-
     }
 
     public void openDataBase() throws SQLException {
@@ -167,7 +139,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(NOME_CLIENTE, clientes.getNome());
+        values.put(NOME_CLIENTE, clientes.getNome_cliente());
         db.insert(TABELA_CLIENTES, null, values);
         db.close();
     }
@@ -200,8 +172,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private Clientes cursorToCliente(Cursor cursor) {
         Clientes clientes = new Clientes(null, null, null, null, null, null, null, null);
         //clientes.setCodigo(Integer.parseInt(cursor.getString(0)));
-        clientes.setCodigo(cursor.getString(0));
-        clientes.setNome(cursor.getString(1));
+        clientes.setCodigo_cliente(cursor.getString(0));
+        clientes.setNome_cliente(cursor.getString(1));
         clientes.setLatitude_cliente(cursor.getString(2));
         clientes.setLongitude_cliente(cursor.getString(3));
         clientes.setSaldo(cursor.getString(4));
@@ -214,10 +186,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //LISTAR TODOS OS CLIENTES
     public ArrayList<Clientes> getAllClientes() {
         ArrayList<Clientes> listaClientes = new ArrayList<>();
-        //String query = "SELECT * FROM " + TABELA_CLIENTES + " ORDER BY " + NOME_CLIENTE;
-        //String query = "SELECT * FROM " + TABELA_CLIENTES + " ORDER BY " + CODIGO_CLIENTE + ", " + NOME_CLIENTE;
         String query = "SELECT * FROM clientes ORDER BY codigo_cliente, nome_cliente";
-        //Log.i("SQL_APP", query);
 
         myDataBase = this.getReadableDatabase();
         Cursor cursor = myDataBase.rawQuery(query, null);
@@ -225,9 +194,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Clientes clientes = cursorToCliente(cursor);
-                //Log.i("SQL_APP", clientes.getCodigo());
-                //Log.i("SQL_APP", clientes.getLatitude_cliente());
-                //Log.i("SQL_APP", clientes.getLongitude_cliente());
                 listaClientes.add(clientes);
             } while (cursor.moveToNext());
         }
@@ -239,13 +205,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public int updateCliete(Clientes clientes) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(NOME_CLIENTE, clientes.getNome());
+        values.put(NOME_CLIENTE, clientes.getNome_cliente());
 
         int i = db.update(
                 TABELA_CLIENTES,
                 values,
                 CODIGO_CLIENTE + " = ?",
-                new String[]{String.valueOf(clientes.getCodigo())}
+                new String[]{String.valueOf(clientes.getCodigo_cliente())}
         );
         db.close();
         return i;
@@ -258,13 +224,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int i = db.delete(
                 TABELA_CLIENTES,
                 CODIGO_CLIENTE + " = ?",
-                new String[]{String.valueOf(clientes.getCodigo())}
+                new String[]{String.valueOf(clientes.getCodigo_cliente())}
         );
         db.close();
         return i;
     }
-
-    ///////
 
     //
     private UnidadesDomain cursorToUnidades(Cursor cursor) {
@@ -961,7 +925,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         myDataBase = this.getReadableDatabase();
         Cursor cursor = myDataBase.rawQuery(query, null);
 
-        if (cursor.moveToFirst()) {
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
             do {
                 VendasPedidosDomain vendas = cursorToVendasPedidos(cursor);
                 listaVendas.add(vendas);
@@ -1332,7 +1297,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Kleilson Teste
     public ArrayList<String> getFormasPagamentoCliente(String codigoCliente) {
         ArrayList<String> list = new ArrayList<>();
-        String baixa = this.getPosBaixaPrazo();
+        String baixa = getPosBaixaPrazo();
         //
         myDataBase = this.getReadableDatabase();
         //db.beginTransaction();
@@ -1434,7 +1399,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Kleilson Teste
     public ArrayList<String> getFormasPagamentoClienteBaixa(String codigoCliente) {
         ArrayList<String> list = new ArrayList<>();
-        String baixa = this.getPosBaixaPrazo();
+        String baixa = getPosBaixaPrazo();
         //
         SQLiteDatabase db = this.getReadableDatabase();
         db.beginTransaction();
@@ -2041,6 +2006,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 clientes.codigo_pagamento = cursor.getString(10);
                 clientes.status_app = cursor.getString(11);
                 clientes.baixa_finalizada_app = cursor.getString(12);
+                clientes.endereco = cursor.getString(20);
                 clientes.apelido_cliente = cursor.getString(21);
 
                 listaClientes.add(clientes);
@@ -2345,7 +2311,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //
         ClassAuxiliar cAux = new ClassAuxiliar();
 
-        //
+        /*//
         String preco_unidade = null;
         String margem_cliente = null;
         String preco;
@@ -2381,7 +2347,111 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Log.e("MARGEN ", preco);
 
+        return preco;*/
+        //
+        String preco_unidade = null;
+        String preco_rota = null;
+        String margem_cliente = null;
+        String preco;
+        String rota = this.getRotaCliente(id);
+
+        // PREÇO PO UNIDADE
+        try {
+
+            //
+            Cursor cursor;
+            /* +
+                    "" +
+                    "SELECT unp.preco_unidade, mac.margem_cliente " +
+                    "FROM unidades_precos unp " +
+                    "INNER JOIN margens_clientes mac ON mac.produto_margem_cliente = unp.produto_preco " +
+                    "WHERE unp.produto_preco = '" + produto + "' AND mac.codigo_cliente_margem_cliente = '" + id + "'" +
+                    ""*/
+            String query = "SELECT (unp.preco_unidade - ( " + "           SELECT IFNULL( ( " +
+                    "               SELECT mar.margem_cliente " +
+                    "               FROM margens_clientes mar " +
+                    "                  WHERE mar.produto_margem_cliente = unp.produto_preco AND " +
+                    "                        mar.codigo_cliente_margem_cliente = '" + id + "' " +
+                    "               ), 0) " +
+                    "                            ) " +
+                    "       ) AS margem_cliente " +
+                    "  FROM unidades_precos unp " +
+                    " WHERE unp.produto_preco = '" + produto + "' AND unp.preco_unidade != '0.00'";
+            cursor = db.rawQuery(query, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    preco_unidade = cursor.getString(cursor.getColumnIndexOrThrow("margem_cliente"));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            preco_unidade = null;
+            e.printStackTrace();
+        }
+
+        // PREÇO POR ROTA
+        try {
+            //myDataBaseSiac = this.getReadableDatabase();
+            //
+            Cursor cursor;
+            String query = "SELECT (unp.preco_rota - ( " +
+                    "           SELECT IFNULL( ( " +
+                    "               SELECT mar.margem_cliente " +
+                    "               FROM margens_clientes mar " +
+                    "                  WHERE mar.produto_margem_cliente = unp.produto_preco_rota AND " +
+                    "                        mar.codigo_cliente_margem_cliente = '" + id + "' " +
+                    "               ), 0) " +
+                    "                            ) " +
+                    "       ) AS margem_cliente " +
+                    "  FROM rotas_precos unp " +
+                    " WHERE unp.rota_preco_rota = '" + rota + "' AND unp.preco_rota != '0.00' AND unp.produto_preco_rota = '" + produto + "'";
+            cursor = db.rawQuery(query, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    preco_rota = cursor.getString(cursor.getColumnIndexOrThrow("margem_cliente"));
+                } while (cursor.moveToNext());
+            }
+
+        } catch (Exception e) {
+            preco_rota = null;
+            e.printStackTrace();
+        }
+
+        //
+        //String[] sub = new String[]{preco_unidade, margem_cliente};
+        //preco = cAux.maskMoney(new BigDecimal(String.valueOf(cAux.subitrair(sub))));
+
+        if (preco_rota != null) {
+            preco = cAux.maskMoney(new BigDecimal(preco_rota));
+        } else if (preco_unidade != null) {
+            preco = cAux.maskMoney(new BigDecimal(preco_unidade));
+        } else {
+            preco = "0,00";
+        }
+
+        Log.e("MARGEN ", preco);
+
         return preco;
+    }
+
+    public String getRotaCliente(String codigo_cliente) {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selectQuery = "SELECT rota_cliente FROM rotas_clientes WHERE codigo_cliente = '" + codigo_cliente + "'";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        String rota = "";
+        try {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                rota = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return rota;
     }
 
     //
@@ -2972,11 +3042,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return conta;
     }
 
-    //ULTIMO PEDIDO
+    // LISTA TODAS AS CONTAS BANCARIA
     public ContasBancarias contasBancarias() {
 
         ContasBancarias contasBancarias = null;
         String query = "SELECT * FROM contas_bancarias ORDER BY codigo DESC LIMIT 1";
+
+        myDataBase = this.getReadableDatabase();
+        Cursor cursor = myDataBase.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                contasBancarias = cursorContasBancarias(cursor);
+            } while (cursor.moveToNext());
+        }
+
+        return contasBancarias;
+    }
+
+    //
+    public ContasBancarias ContaBancaria(String formaPG) {
+
+        ContasBancarias contasBancarias = null;
+        String query = "SELECT * FROM contas_bancarias cob WHERE cob.codigo = '" + formaPG + "'";
 
         myDataBase = this.getReadableDatabase();
         Cursor cursor = myDataBase.rawQuery(query, null);
@@ -3219,14 +3307,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    public String getIdAliquota(String bandeira, String parcela) {
+    public String getIdAliquota(String id_fpg, String bandeira, String parcela) {
         String id = "";
         myDataBase = this.getReadableDatabase();
 
         //
         String selectQuery = "SELECT caa.codigo " +
                 "FROM cartoes_aliquotas caa " +
-                "WHERE caa.bandeira = '" + bandeira + "' and caa.parcela = '" + parcela + "' LIMIT 1";
+                "WHERE caa.codigo_forma_pagamento = '" + id_fpg + "' AND caa.bandeira = '" + bandeira + "' and caa.parcela = '" + parcela + "' LIMIT 1";
         Cursor cursor = myDataBase.rawQuery(selectQuery, null);
         try {
             if (cursor.getCount() > 0) {
@@ -3265,6 +3353,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             //context.startActivity(new Intent(context, AtualizacaoApp.class));
         }
         return id;
+    }
+
+    // INSERTS DADOS TABELAS
+    public void insetDataBase(String sql) {
+        myDataBase = this.getWritableDatabase();
+        try {
+            myDataBase.execSQL(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertClientes(Clientes cli) {
+        ContentValues cv = new ContentValues();
+        cv.put("codigo_cliente", cli.getCodigo_cliente());
+        cv.put("nome_cliente", cli.getNome_cliente());
+        cv.put("latitude_cliente", cli.getLatitude_cliente());
+        cv.put("longitude_cliente", cli.getLongitude_cliente());
+        cv.put("saldo", cli.getSaldo());
+        cv.put("cpfcnpj", cli.getCpfcnpj());
+        cv.put("endereco", cli.getEndereco());
+        cv.put("apelido_cliente", cli.getApelido_cliente());
+
+        myDataBase = this.getWritableDatabase();
+        myDataBase.insertOrThrow("clientes", null, cv);
     }
 
     //

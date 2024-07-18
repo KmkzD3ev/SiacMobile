@@ -2,6 +2,7 @@ package br.com.zenitech.siacmobile.interfaces;
 
 import java.util.ArrayList;
 
+import br.com.zenitech.siacmobile.Configuracoes;
 import br.com.zenitech.siacmobile.domains.Conta;
 import br.com.zenitech.siacmobile.domains.EnviarDados;
 import retrofit2.Call;
@@ -82,7 +83,7 @@ public interface IEnviarDados {
     );
 
     Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("https://emissorweb.com.br/POSSIACN/")
+            .baseUrl(String.format("%s%s", new Configuracoes().GetUrlServer(), "/POSSIACN/"))
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 }

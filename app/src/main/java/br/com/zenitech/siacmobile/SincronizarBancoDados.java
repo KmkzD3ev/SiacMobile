@@ -12,10 +12,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.StatFs;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -70,7 +73,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
     Context context;
     boolean erro = false;
     String msgErro = "", msgErroTec;
-    //FloatingActionButton fabWhatsapp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +85,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
         context = this;
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         online = new VerificarOnline();
-        //fabWhatsapp = findViewById(R.id.fabWhatsapp);
         txt_msg_sincronizando = findViewById(R.id.txt_msg_sincronizando);
         txtAppFinalizado = findViewById(R.id.txtAppFinalizado);
         ll_sincronizar = findViewById(R.id.ll_sincronizar);
@@ -149,7 +150,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() == 3) {
-
                     //
                     _iniciarVerificacoes();
                 }
@@ -161,7 +161,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
 
                 //ESCODER O TECLADO
-                // TODO Auto-generated method stub
                 try {
                     InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(Objects.requireNonNull(getCurrentFocus()).getWindowToken(), 0);
@@ -182,7 +181,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
             serial.setEnabled(false);
             txtAppFinalizado.setVisibility(View.VISIBLE);
         }
-        //prefs.edit().putBoolean("cod_instalacao", false).apply();
         if (!Objects.requireNonNull(prefs.getString("serial_app", "")).equalsIgnoreCase("")
                 && prefs.getBoolean("cod_instalacao", false)) {
             findViewById(R.id.llCodInstalacao).setVisibility(View.GONE);
@@ -192,16 +190,19 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         //
         mgr = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        registerReceiver(onComplete,
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        registerReceiver(onNotificationClick,
-                new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED));
+
+        if (Build.VERSION.SDK_INT < 33) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_NOT_EXPORTED);
+                registerReceiver(onNotificationClick, new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED), Context.RECEIVER_NOT_EXPORTED);
+            }
+        }
 
         //
         findViewById(R.id.btn_sincronizar).setOnClickListener(view -> _iniciarVerificacoes());
-//
-        Intent intent = getIntent();
 
+        //
+        Intent intent = getIntent();
         if (intent != null) {
             Bundle params = intent.getExtras();
 
@@ -212,31 +213,14 @@ public class SincronizarBancoDados extends AppCompatActivity {
                 }
             }
         }
-        //
-        //fabWhatsapp.setOnClickListener(view -> enviarWhatsApp(msgErro + "\n\n" + (msgErroTec != null ? "Info.: " + msgErroTec : "")));
 
         //
         _limparDadosSincronizacao(true);
-
-        //
-        /*File dbfile = new File("data/data/br.com.zenitech.emissorweb/databases", "emissorwebDB");
-
-        /SE O BANCO NÃO EXISITR
-        if (dbfile.exists()) {
-            Intent i = new Intent(Sincronizar.this, Principal.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-            finish();
-        }*/
-        /*if (prefs.getBoolean("mostrar_alerta_versao", true)) {
-            _verificarVersaoAtual();
-        }*/
 
         findViewById(R.id.btnReset).setOnClickListener(view -> {
             prefs.edit().putBoolean("reset", true).apply();
 
             //APAGA O BANCO DE DADOS E VAI PARA TELA INICIAL DE SINCRONIZAÇÃO
-            //getContext().deleteDatabase("siacmobileDB");
             Intent i = new Intent(context, SplashScreen.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
@@ -249,20 +233,19 @@ public class SincronizarBancoDados extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
 
-        unregisterReceiver(onComplete);
-        unregisterReceiver(onNotificationClick);
+        try {
+            unregisterReceiver(onComplete);
+            unregisterReceiver(onNotificationClick);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // VERIFICA O TOTAL DE ARMAZENAMENTO DO APARELHO
     void _verificarTotalArmazenamento() {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
         long bytesAvailable;
-        if (android.os.Build.VERSION.SDK_INT >=
-                android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            bytesAvailable = stat.getBlockSizeLong() * stat.getAvailableBlocksLong();
-        } else {
-            bytesAvailable = (long) stat.getBlockSize() * (long) stat.getAvailableBlocks();
-        }
+        bytesAvailable = stat.getBlockSizeLong() * stat.getAvailableBlocksLong();
         long megAvailable = bytesAvailable / (1024 * 1024);
         if (megAvailable < 50) {
             txtTotMemoria.setText("Atenção:\nSeu aparelho está com pouca memória! \nPara um bom funcionamento do App Emissor, libere mais espaço na memória interna o quanto antes.");
@@ -285,7 +268,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
         }
 
         // VERIFICA SE O USUÁRIO INSERIU O SERIAL
-        if (serial.getText().toString().equals("") || serial.getText().toString().length() <= 8) {
+        if (serial.getText().toString().isEmpty() || serial.getText().toString().length() <= 8) {
             txtTotMemoria.setText(R.string.informe_um_serial);
 
         } else {
@@ -309,64 +292,35 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
     // VERIFICA AS PERMISSÕES DO APP
     boolean _verificarPermissoes() {
-        //VERIFICA SE O USUÁRIO DEU PERMISSÃO PARA ACESSAR O SDCARD
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            /*if (ActivityCompat.shouldShowRequestPermissionRationale(Sincronizar.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                callDialog(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE});
-            } else {
-                ActivityCompat.requestPermissions(Sincronizar.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS_CODE);
-            }*/
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS_CODE);
-
-            return false;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            //VERIFICA SE O USUÁRIO DEU PERMISSÃO PARA ACESSAR O SDCARD
+            var WRITE_EXTERNAL_STORAGE = ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (WRITE_EXTERNAL_STORAGE != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS_CODE);
+                return false;
+            }
         }
-
         return true;
     }
 
     // INICIA O PROCESSO DE SINCRONIZAR O BANCO DE DADOS
     void _iniciarSincronismo() {
-        //
         txtTotMemoria.setText("");
         ll_sincronizar.setVisibility(View.GONE);
         ll_sincronizando.setVisibility(View.VISIBLE);
 
-        //
         _verificarSerial();
-    }
-
-    // EXIBI A MENAGEM DE CONFIRMAÇÕES DAS PERMISSÕES
-    private void callDialog(final String[] permissions) {
-        //Cria o gerador do AlertDialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.logo_emissor_web);
-        //define o titulo
-        builder.setTitle("Permissão");
-        //define a mensagem
-        builder.setMessage("Conceder Permissão Para Acessar Dados Externos.");
-        //define um botão como positivo
-        builder.setPositiveButton("Conceder", (arg0, arg1) -> ActivityCompat.requestPermissions(SincronizarBancoDados.this, permissions, REQUEST_PERMISSIONS_CODE));
-        //cria o AlertDialog
-        alerta = builder.create();
-        //Exibe
-        alerta.show();
     }
 
     void _verificarSerial() {
         txt_msg_sincronizando.setText(R.string.verificando_serial);
 
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
+        final Call<Sincronizador> call = iSincronizar.verificarSerial("verificar_serial_siac2", serial.getText().toString());
 
-        final Call<Sincronizador> call = iSincronizar.verificarSerial(
-                "verificar_serial_siac2", serial.getText().toString());
-
-        call.enqueue(new Callback<Sincronizador>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
-
-                //
                 final Sincronizador sincronizacao = response.body();
 
                 if (prefs.getBoolean("cod_instalacao", false)) {
@@ -391,29 +345,30 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
                     if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")
                             && cod.equalsIgnoreCase("*0101010#")) {
+
                         // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
                         prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
                         prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
                         prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
                         prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
                         prefs.edit().putString("baixar_vale", sincronizacao.getBaixar_vale()).apply();
+
                         // INICIA A GERAÇÃO DO BANCO ONLINE
                         gerarBancoOnline(serial.getText().toString());
-                        //gerarBancoOnline(serial.getText().toString());
                     } else {
                         if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro") &&
                                 cod.equalsIgnoreCase(sincronizacao.getCodigo_instalacao())) {
+
                             // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
                             prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
                             prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
                             prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
                             prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
                             prefs.edit().putString("baixar_vale", sincronizacao.getBaixar_vale()).apply();
+
                             // INICIA A GERAÇÃO DO BANCO ONLINE
                             gerarBancoOnline(serial.getText().toString());
-                            //gerarBancoOnline(serial.getText().toString());
                         } else {
-                            //
                             erro = true;
                             msgErro = "O serial ou código de instalação é inválido ou já está sendo usado em outro aparelho! \nVerifique o serial e tente novamente.";
                             _limparDadosSincronizacao(false);
@@ -421,25 +376,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
                         }
                     }
                 }
-
-                /*if (!Objects.requireNonNull(sincronizacao).getErro().equalsIgnoreCase("erro")) {
-                    // INDICA QUE O VENDEDOR NÃO PRECISA VALIDAR A POSIÇÃO DO CLIENTE PARA FINALIZAR A VENDA
-                    prefs.edit().putString("verificar_posicao_cliente", sincronizacao.getVerificar_posicao_cliente()).apply();
-                    prefs.edit().putString("print_promissoria", sincronizacao.getPrint_promissoria()).apply();
-                    prefs.edit().putString("print_boleto", sincronizacao.getPrint_boleto()).apply();
-                    prefs.edit().putString("mostrar_contas_receber", sincronizacao.getMostrar_contas_receber()).apply();
-                    // INICIA A GERAÇÃO DO BANCO ONLINE
-                    gerarBancoOnline(serial.getText().toString());
-
-                    //prefs.edit().putString("serial", serial.getText().toString()).apply();
-                    //startDownload(serial.getText().toString());
-                } else {
-                    //
-                    erro = true;
-                    msgErro = "Serial inválido! Verifique o serial e tente novamente.";
-                    _limparDadosSincronizacao(false);
-                    _resetarSincronismo(5000, true);
-                }*/
             }
 
             @Override
@@ -461,12 +397,10 @@ public class SincronizarBancoDados extends AppCompatActivity {
         //
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
         final Call<Sincronizador> call = iSincronizar.sincronizar(serial, VERSAO_APP);
-        //final Call<Sincronizador> call = iSincronizar.sincronizar(serial, "196");
-        call.enqueue(new Callback<Sincronizador>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
 
-                //
                 final Sincronizador sincronizacao = response.body();
                 if (sincronizacao != null) {
                     runOnUiThread(() -> {
@@ -476,11 +410,10 @@ public class SincronizarBancoDados extends AppCompatActivity {
                             erro = true;
                             msgErro = "Não foi possível gerar o banco de dados no app. \nNOTAS PENDENTES DE ENVIO NO EMISSOR WEB!";
                             _limparDadosSincronizacao(false);
-                            //_resetarSincronismo(10000, true);
                             _resetarSincronismo(1000, true);
                         } else {
                             prefs.edit().putString("serial", serial).apply();
-                            _aguardarTempoParaDowload(20000, serial);
+                            _aguardarTempoParaDowload(60000, serial);
                         }
                     });
                 } else {
@@ -517,7 +450,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
             if (arquivo.isFile()) arquivo.delete();
             if (arquivoZip.isFile()) arquivoZip.delete();
-
 
             //
             File sdcard = Environment.getExternalStorageDirectory().getAbsoluteFile();
@@ -590,35 +522,46 @@ public class SincronizarBancoDados extends AppCompatActivity {
     public void startDownloadZip(final String serial) {
         txt_msg_sincronizando.setText(R.string.fazendo_dowloand_do_banco);
 
-        //String url = new Configuracoes().GetUrlServer() + "/POSSIAC/siacmobileDB" + serial + ".db";
-        String url = new Configuracoes().GetUrlServer() + "/POSSIACN/bancos/banco_siac_" + serial + ".db.zip";
-        Uri uri = Uri.parse(url);
-        /*String p = String.valueOf();
 
-        String nomeArquivo = "Emissor_Web/BD/";//emissorwebDB.db";
-        String pasta = Environment.getExternalStorageDirectory() + "/" + nomeArquivo;
-        Log.i(TAG, p);
-        Log.i(TAG, pasta);*/
+        if (Build.VERSION.SDK_INT >= 33) {
+            String url = new Configuracoes().GetUrlServer() + "/POSSIACN/bancos/banco_siac_" + serial + ".db";
+            Uri uri = Uri.parse(url);
 
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
 
-        lastDownload = mgr.enqueue(new DownloadManager.Request(uri)
-                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
-                .setAllowedOverRoaming(false)
-                .setTitle("siacmobileDBZip")
-                .setDescription("BD SIAC MOBILE.")
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                        "siacmobileDBZip.zip"));
-        // kleilson
-        //importarBD();
+            lastDownload = mgr.enqueue(new DownloadManager.Request(uri)
+                    .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                    .setAllowedOverRoaming(false)
+                    .setTitle("siacmobileDB")
+                    .setDescription("BD SIAC MOBILE.")
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                            "siacmobileDB.db"));
 
+            // Obtém o Looper principal
+            Looper mainLooper = Looper.getMainLooper();
+            new Handler(mainLooper).postDelayed(this::importarBD, 60000);
+        } else {
+            String url = new Configuracoes().GetUrlServer() + "/POSSIACN/bancos/banco_siac_" + serial + ".db.zip";
+            Uri uri = Uri.parse(url);
+
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+
+            lastDownload = mgr.enqueue(new DownloadManager.Request(uri)
+                    .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
+                    .setAllowedOverRoaming(false)
+                    .setTitle("siacmobileDBZip")
+                    .setDescription("BD SIAC MOBILE.")
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                            "siacmobileDBZip.zip"));
+            // kleilson
+            //importarBD();
+        }
     }
 
     // EXTRAIR BANCO DE DADOS COMPACTADO
     public void unzip(File zipFile, File targetDirectory) throws IOException {
-        ZipInputStream zis = new ZipInputStream(
-                new BufferedInputStream(new FileInputStream(zipFile)));
         try {
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
             ZipEntry ze;
             int count;
             byte[] buffer = new byte[8192];
@@ -642,10 +585,10 @@ public class SincronizarBancoDados extends AppCompatActivity {
             if (time > 0)
                 file.setLastModified(time);
             */
+                zis.close();
             }
         } finally {
             importarBD();
-            zis.close();
         }
     }
 
@@ -679,35 +622,15 @@ public class SincronizarBancoDados extends AppCompatActivity {
     }
 
     private String statusMessage(Cursor c) {
-        String msg;
 
-        switch (c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
-            case DownloadManager.STATUS_FAILED:
-                msg = "Download failed!";
-                break;
-
-            case DownloadManager.STATUS_PAUSED:
-                msg = "Download paused!";
-                break;
-
-            case DownloadManager.STATUS_PENDING:
-                msg = "Download pending!";
-                break;
-
-            case DownloadManager.STATUS_RUNNING:
-                msg = "Download in progress!";
-                break;
-
-            case DownloadManager.STATUS_SUCCESSFUL:
-                msg = "Download complete!";
-                break;
-
-            default:
-                msg = "Download is nowhere in sight";
-                break;
-        }
-
-        return (msg);
+        return (switch (c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
+            case DownloadManager.STATUS_FAILED -> "Download failed!";
+            case DownloadManager.STATUS_PAUSED -> "Download paused!";
+            case DownloadManager.STATUS_PENDING -> "Download pending!";
+            case DownloadManager.STATUS_RUNNING -> "Download in progress!";
+            case DownloadManager.STATUS_SUCCESSFUL -> "Download complete!";
+            default -> "Download is nowhere in sight";
+        });
     }
 
     BroadcastReceiver onComplete = new BroadcastReceiver() {
@@ -745,7 +668,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         final Call<Sincronizador> call = iSincronizar.ativarDesativarPOS("ativar", serial.getText().toString());
 
-        call.enqueue(new Callback<Sincronizador>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
 
@@ -782,7 +705,7 @@ public class SincronizarBancoDados extends AppCompatActivity {
 
         final Call<PosApp> call = iSincronizar.ultimoBoletoPOS("ultimoboleto", serial.getText().toString());
 
-        call.enqueue(new Callback<PosApp>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<PosApp> call, @NonNull Response<PosApp> response) {
 
@@ -867,7 +790,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
                     _resetarSincronismo(5000, true);
                 }
             }
-
         }, 3000);
     }
 
@@ -899,16 +821,9 @@ public class SincronizarBancoDados extends AppCompatActivity {
             prefs.edit().putString("data_movimento", cAux.inserirDataAtual()).apply();
 
             //ABRI A TELA PRINCIPAL
-            //Intent i = new Intent(context, Principal2.class);
-            /*Intent i = new Intent(context, Login.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);*/
-
             Intent i = new Intent(context, Principal2.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
-            finish();
-
             finish();
 
         }, 2000);
@@ -917,7 +832,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -937,79 +851,6 @@ public class SincronizarBancoDados extends AppCompatActivity {
             }
         }
     }
-
-    /*private void introducao() {
-        prefs.edit().putBoolean("introBtnWhats", true).apply();
-
-        final SpannableString sassyDesc = new SpannableString("Toque aqui, para enviar informações sobre o erro ao suporte.");
-        sassyDesc.setSpan(new StyleSpan(Typeface.ITALIC), 0, sassyDesc.length(), 0);
-
-
-        // We have a sequence of targets, so lets build it!
-        final TapTargetSequence sequence = new TapTargetSequence(this)
-                .targets(
-                        // BOTAO NOVO PEDIDO
-                        TapTarget.forView(fabWhatsapp, "Encontrou um erro?", sassyDesc)
-                                .dimColor(android.R.color.black)
-                                .outerCircleColor(R.color.colorAccent)
-                                .targetCircleColor(android.R.color.black)
-                                .textColor(android.R.color.white)
-                                .transparentTarget(true)
-                                .id(1)
-                )
-                .listener(new TapTargetSequence.Listener() {
-                    @Override
-                    public void onSequenceFinish() {
-                        //((TextView) findViewById(R.id.texto)).setText("Parabéns! Agora voce já sabe como usar o Emissor Web!");
-                    }
-
-                    @Override
-                    public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-                        Log.d("TapTargetView", "Clicked on " + lastTarget.id());
-                    }
-
-                    @Override
-                    public void onSequenceCanceled(TapTarget lastTarget) {
-                        final AlertDialog dialog = new AlertDialog.Builder(context)
-                                .setTitle("Uh oh")
-                                .setMessage("Você cancelou a seqüência")
-                                .setPositiveButton("Sair", null).show();
-                        TapTargetView.showFor(dialog,
-                                TapTarget.forView(dialog.getButton(DialogInterface.BUTTON_POSITIVE), "Uh oh!", "Você cancelou a seqüência no passo " + lastTarget.id())
-                                        .cancelable(false)
-                                        .tintTarget(false), new TapTargetView.Listener() {
-                                    @Override
-                                    public void onTargetClick(TapTargetView view) {
-                                        super.onTargetClick(view);
-                                        dialog.dismiss();
-                                    }
-                                });
-                    }
-                });
-
-        sequence.start();
-    }*/
-
-    /*
-    public void enviarWhatsApp_(String mensagem) {
-        PackageManager pm = getPackageManager();
-        try {
-
-            Intent waIntent = new Intent(Intent.ACTION_SEND);
-            waIntent.setType("text/plain");
-
-            PackageInfo info = pm.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
-            waIntent.setPackage("com.whatsapp");
-
-            waIntent.putExtra(Intent.EXTRA_TEXT, mensagem);
-            startActivity(waIntent);
-
-        } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(this, "WhatsApp não instalado", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-     */
 
     public void enviarWhatsApp(String mensagem) {
         if (online.isOnline(context)) {
@@ -1035,21 +876,16 @@ public class SincronizarBancoDados extends AppCompatActivity {
     private void _verificarVersaoAtual() {
         //
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);
-
         final Call<Sincronizador> call = iSincronizar.verificarVersaoApp("verificar_versao_app");
 
-        call.enqueue(new Callback<Sincronizador>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Sincronizador> call, @NonNull Response<Sincronizador> response) {
-
-                //
                 final Sincronizador sincronizacao = response.body();
                 if (sincronizacao != null) {
-
                     Log.i(TAG, sincronizacao.getErro());
 
                     if (!sincronizacao.getErro().equalsIgnoreCase(BuildConfig.VERSION_NAME)) {
-
                         _alertaNovaVersao();
                     }
                 }

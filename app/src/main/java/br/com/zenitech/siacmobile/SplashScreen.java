@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -54,8 +55,9 @@ public class SplashScreen extends AppCompatActivity {
             txtSerial.setVisibility(View.VISIBLE);
             txtSerial.setText(String.format("SERIAL\n%s", prefs.getString("serial_app", "")));
         }
-
-        //
+        /*DataBaseOpenHelper dataBaseOpenHelper = new DataBaseOpenHelper(context);
+        SQLiteDatabase conexao = dataBaseOpenHelper.getWritableDatabase();
+        //*/
         bd = new DatabaseHelper(this);
 
         final ISincronizar iSincronizar = ISincronizar.retrofit.create(ISincronizar.class);

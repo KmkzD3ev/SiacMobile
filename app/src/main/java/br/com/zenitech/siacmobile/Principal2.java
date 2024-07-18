@@ -75,8 +75,6 @@ public class Principal2 extends AppCompatActivity {
             }
         }
 
-
-        //
         bd = new DatabaseHelper(this);
         //bd.LimparDadosBanco();
         aux = new ClassAuxiliar();

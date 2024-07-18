@@ -3,20 +3,15 @@ package br.com.zenitech.siacmobile.fragments;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-//import androidx.core.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,22 +23,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 
 import br.com.zenitech.siacmobile.ClassAuxiliar;
 import br.com.zenitech.siacmobile.DatabaseHelper;
 import br.com.zenitech.siacmobile.R;
 import br.com.zenitech.siacmobile.Sincronizar;
-import br.com.zenitech.siacmobile.domains.EnviarDados;
 import br.com.zenitech.siacmobile.ftps.MyFTPClientFunctions;
-import br.com.zenitech.siacmobile.interfaces.IEnviarDados;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
 public class GerenciarContentFragment extends Fragment implements View.OnClickListener {
@@ -132,7 +123,7 @@ public class GerenciarContentFragment extends Fragment implements View.OnClickLi
         bd = new DatabaseHelper(context);
 
         // kleilson
-        if(bd.getAllVendas().size() > 0){
+        if (bd.getAllVendas().size() > 0) {
 
         }
 

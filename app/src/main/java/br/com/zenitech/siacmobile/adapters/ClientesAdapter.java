@@ -59,15 +59,18 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
 
         //
         TextView codigo = holder.tvCodigo;
-        codigo.setText(clientes.getCodigo());
+        codigo.setText(clientes.getCodigo_cliente());
 
         // + " " + clientes.getSaldo() + ", " + clientes.getLatitude_cliente() + ", " + clientes.getLongitude_cliente()
         TextView nome = holder.tvNome;
-        nome.setText(clientes.getNome());
+        nome.setText(clientes.getNome_cliente());
 
         //
         TextView apelido = holder.tvApelido;
         apelido.setText(clientes.getApelido_cliente());
+
+        //
+        holder.enderecoCliente.setText(clientes.getEndereco());
 
         holder.LlList.setOnClickListener(v -> {
 
@@ -80,8 +83,8 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
             Intent in = new Intent(context, Vendas.class);
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             in.putExtra("id_venda", "");
-            in.putExtra("codigo", clientes.getCodigo());
-            in.putExtra("nome", clientes.getNome());
+            in.putExtra("codigo", clientes.getCodigo_cliente());
+            in.putExtra("nome", clientes.getNome_cliente());
             in.putExtra("latitude_cliente", clientes.getLatitude_cliente());
             in.putExtra("longitude_cliente", clientes.getLongitude_cliente());
             in.putExtra("saldo", clientes.getSaldo());
@@ -101,7 +104,7 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout LlList;
-        TextView tvCodigo, tvNome, tvApelido;
+        TextView tvCodigo, tvNome, tvApelido, enderecoCliente;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -111,6 +114,7 @@ public class ClientesAdapter extends RecyclerView.Adapter<ClientesAdapter.ViewHo
             tvCodigo = itemView.findViewById(R.id.codCliente);
             tvNome = itemView.findViewById(R.id.nomeCliente);
             tvApelido =  itemView.findViewById(R.id.apelidoCliente);
+            enderecoCliente = itemView.findViewById(R.id.enderecoCliente);
         }
     }
 

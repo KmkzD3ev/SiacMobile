@@ -7,6 +7,7 @@ import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +16,6 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import br.com.zenitech.siacmobile.adapters.ClientesAdapter;
 import br.com.zenitech.siacmobile.adapters.ValeClientesAdapter;
 import br.com.zenitech.siacmobile.domains.Clientes;
 
@@ -78,10 +78,10 @@ public class ValeListClientes extends AppCompatActivity implements SearchView.On
             String codigo;
             //
             if (clientes.getApelido_cliente() != null) {
-                codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase() +
+                codigo = clientes.getCodigo_cliente().toLowerCase() + " - " + clientes.getNome_cliente().toLowerCase() +
                         " - " + clientes.getApelido_cliente().toLowerCase();
             } else {
-                codigo = clientes.getCodigo().toLowerCase() + " - " + clientes.getNome().toLowerCase();
+                codigo = clientes.getCodigo_cliente().toLowerCase() + " - " + clientes.getNome_cliente().toLowerCase();
             }
             if (codigo.contains(newText)) {
                 newlist.add(clientes);

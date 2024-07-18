@@ -1,7 +1,10 @@
 package br.com.zenitech.siacmobile;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,6 +13,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.Set;
 
@@ -19,7 +23,7 @@ import stone.utils.PinpadObject;
 
 public class DevicesActivityPinPad extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private boolean btConnected = false;
     private ListView listView;
 
@@ -39,6 +43,16 @@ public class DevicesActivityPinPad extends AppCompatActivity implements AdapterV
         ArrayAdapter<String> btArrayAdapter = new ArrayAdapter<>(this, R.layout.list_item_bluetooths);
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                        128);
+                return;
+            }
+        }
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
         // Lista todos os dispositivos pareados.
@@ -54,6 +68,15 @@ public class DevicesActivityPinPad extends AppCompatActivity implements AdapterV
 
     public void turnBluetoothOn() {
         try {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{android.Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT},
+                            128);
+                    return;
+                }
+            }
             mBluetoothAdapter.enable();
             do {
             } while (!mBluetoothAdapter.isEnabled());

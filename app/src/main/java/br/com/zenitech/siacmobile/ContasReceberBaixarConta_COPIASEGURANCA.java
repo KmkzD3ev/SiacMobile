@@ -5,6 +5,7 @@ import static br.com.zenitech.siacmobile.ContasReceberCliente.IdsCR;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -97,7 +98,6 @@ public class ContasReceberBaixarConta_COPIASEGURANCA extends AppCompatActivity i
         //
         id = prefs.getInt("id_financeiro_venda", 1);
 
-        //
         bd = new DatabaseHelper(this);
         try {
             bd.deleteFinanceiroReceberTemp();

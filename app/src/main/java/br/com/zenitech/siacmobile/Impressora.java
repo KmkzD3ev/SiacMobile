@@ -1,6 +1,5 @@
 package br.com.zenitech.siacmobile;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -9,10 +8,9 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,7 +25,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 
 import com.datecs.api.BuildInfo;
 import com.datecs.api.card.FinancialCard;
@@ -42,18 +39,13 @@ import com.datecs.api.rfid.ISO15693Card;
 import com.datecs.api.rfid.RC663;
 import com.datecs.api.rfid.STSRICard;
 import com.datecs.api.universalreader.UniversalReader;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,11 +57,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
-/*import br.com.zenitech.siacmobile.domains.AutorizacoesPinpad;
-import br.com.zenitech.siacmobile.domains.ItensPedidos;
-import br.com.zenitech.siacmobile.domains.Pedidos;
-import br.com.zenitech.siacmobile.domains.PedidosNFE;*/
-import br.com.stone.posandroid.providers.PosPrintProvider;
 import br.com.zenitech.siacmobile.controller.PrintViewHelper;
 import br.com.zenitech.siacmobile.domains.Clientes;
 import br.com.zenitech.siacmobile.domains.ContasBancarias;
@@ -78,13 +65,8 @@ import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import br.com.zenitech.siacmobile.network.PrinterServer;
 import br.com.zenitech.siacmobile.util.HexUtil;
-import stone.application.interfaces.StoneCallbackInterface;
 
 import static br.com.zenitech.siacmobile.DataPorExtenso.dataPorExtenso;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.codigo_cliente;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.nomeCliente;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtDocumentoFormaPagamento;
-import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtVencimentoFormaPagamento;
 import static br.com.zenitech.siacmobile.NumeroPorExtenso.*;
 
 public class Impressora extends AppCompatActivity {
@@ -119,7 +101,7 @@ public class Impressora extends AppCompatActivity {
     private ClassAuxiliar cAux;
 
     //DADOS PARA IMPRESSÃO
-    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, nota_fiscal, strFormPags;
+    String id_cliente, cliente, vencimento, numero, tel_contato, valor, tipoImpressao, cpfcnpj, endereco, nota_fiscal, strFormPags, nContaBanco;
 
     TextView total;
     public TextView imprimindo;
@@ -183,11 +165,10 @@ public class Impressora extends AppCompatActivity {
 
         liberaImpressao = false;
 
-        bd = new DatabaseHelper(this);
         //
         cAux = new ClassAuxiliar();
         context = this;
-
+        bd = new DatabaseHelper(this);
         unidade = bd.getUnidade();
 
         imprimindo = findViewById(R.id.imprimindo);
@@ -213,6 +194,7 @@ public class Impressora extends AppCompatActivity {
                 cpfcnpj = params.getString("cpfcnpj");
                 endereco = params.getString("endereco");
                 nota_fiscal = params.getString("nota_fiscal");
+                nContaBanco = params.getString("nContaBanco");
 
             } else {
                 Toast.makeText(context, "Envie algo para imprimir!", Toast.LENGTH_LONG).show();
@@ -236,18 +218,69 @@ public class Impressora extends AppCompatActivity {
             //valor = cAux.maskMoney(cAux.converterValores(String.valueOf(cAux.somar(a))));
             valor = cAux.maskMoney(cAux.somar(a));
 
-            ContasBancarias conta = bd.contasBancarias();
+            // PEGA OS DADOS DA CONTA BANCARIA
+            ContasBancarias conta = bd.ContaBancaria(nContaBanco);
+
+            // PEGA OS DADOS DO CLIENTE
             Clientes cliente = bd.cliente(id_cliente);
 
             //
-            String numCodBarraBB = cAux.numCodBarraBB(valor, cAux.exibirData(vencimento), numero, bd);
-            String numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarraBB);
+            //String numCodBarraBB = cAux.numCodBarraBB(valor, cAux.exibirData(vencimento), numero, bd, conta);
+            //String numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarraBB);
+
+
+            // REFERENCIAS LOGO DO BANCO
+            ImageView logoBoleto1 = findViewById(R.id.logoBanco1);
+            ImageView logoBoleto2 = findViewById(R.id.logoBanco2);
+            // IDS TEXT BOLETO
+            TextView txtCodBancoMoedaBoleto = findViewById(R.id.txtCodBancoMoedaBoleto);
+            // IDS TEXT BOLETO - CANHOTO
+            TextView txtCodBancoMoedaCanhoto = findViewById(R.id.txtCodBancoMoedaCanhoto);
+
+            String numCodBarra = "";
+            //
+            String numlinhaDigitavel = "";
+
+            // BANCO DO BRASIL
+            if (conta.getBanco_conta().equalsIgnoreCase("001")) {
+                //
+                numCodBarra = cAux.numCodBarraBB(valor, cAux.exibirData(vencimento), numero, bd, conta);
+                //
+                numlinhaDigitavel = cAux.numlinhaDigitavel(numCodBarra);
+
+                // LOGO
+                Drawable logobb = getResources().getDrawable(R.drawable.logo_bb);
+                logoBoleto1.setImageDrawable(logobb);
+                logoBoleto2.setImageDrawable(logobb);
+                // SET BOLETO
+                txtCodBancoMoedaBoleto.setText("001-9");
+                // SET BOLETO - CANHOTO
+                txtCodBancoMoedaCanhoto.setText("001-9");
+            }
+            // BRADESCO
+            else if (conta.getBanco_conta().equalsIgnoreCase("237")) {
+
+                //carteira/nosso nu/ digito ver nosso numero
+                // $nnum = formata_numero($dadosboleto["carteira"],2,0).formata_numero($dadosboleto["nosso_numero"],11,0);
+                numCodBarra = cAux.numCodBarraBradesco(valor, cAux.exibirData(vencimento), numero, bd, conta);
+                //
+                numlinhaDigitavel = cAux.numlinhaDigitavelBradesco(numCodBarra);
+
+                // LOGO
+                Drawable logobb = getResources().getDrawable(R.drawable.logobradesco);
+                logoBoleto1.setImageDrawable(logobb);
+                logoBoleto2.setImageDrawable(logobb);
+                // SET BOLETO
+                txtCodBancoMoedaBoleto.setText("237-9");
+                // SET BOLETO - CANHOTO
+                txtCodBancoMoedaCanhoto.setText("237-9");
+            }
 
             //
             imgCodBarraBoleto = findViewById(R.id.imgCodBarraBoleto);
 
             // IDS TEXT BOLETO
-            TextView txtCodBancoMoedaBoleto = findViewById(R.id.txtCodBancoMoedaBoleto);
+            //TextView txtCodBancoMoedaBoleto = findViewById(R.id.txtCodBancoMoedaBoleto);
             TextView txtValorBoleto = findViewById(R.id.txtValorBoleto);
             TextView txtLinhaDigitavelBoleto = findViewById(R.id.txtLinhaDigitavelBoleto);
             TextView txtLinhaDigitavelBoletoBaixo = findViewById(R.id.txtLinhaDigitavelBoletoBaixo);
@@ -268,7 +301,7 @@ public class Impressora extends AppCompatActivity {
             TextView txtDataProcessamentoBoleto = findViewById(R.id.txtDataProcessamentoBoleto);
             TextView txtValorCobradoBoleto = findViewById(R.id.txtValorCobradoBoleto);
             // IDS TEXT BOLETO - CANHOTO
-            TextView txtCodBancoMoedaCanhoto = findViewById(R.id.txtCodBancoMoedaCanhoto);
+            //TextView txtCodBancoMoedaCanhoto = findViewById(R.id.txtCodBancoMoedaCanhoto);
             TextView txtLinhaDigitavelCanhoto = findViewById(R.id.txtLinhaDigitavelCanhoto);
             TextView txtValorCanhotoBoleto = findViewById(R.id.txtValorCanhotoBoleto);
             TextView txtBeneficiarioBoletoCanhoto = findViewById(R.id.txtBeneficiarioBoletoCanhoto);
@@ -285,10 +318,10 @@ public class Impressora extends AppCompatActivity {
             TextView txtEnderecoPagadorBoletoCanhoto = findViewById(R.id.txtEnderecoPagadorBoletoCanhoto);
 
             // SET BOLETO
-            txtCodBancoMoedaBoleto.setText("001-9");
+            //txtCodBancoMoedaBoleto.setText("001-9");
             txtValorBoleto.setText(valor);
             txtLinhaDigitavelBoleto.setText(numlinhaDigitavel);
-            txtLinhaDigitavelBoletoBaixo.setText(cAux.soNumeros(numCodBarraBB));//numlinhaDigitavel
+            txtLinhaDigitavelBoletoBaixo.setText(cAux.soNumeros(numCodBarra));//numlinhaDigitavel
             txtBeneficiarioBoleto.setText(conta.getCedente());
             txtVencimentoBoleto.setText(cAux.exibirData(vencimento));
             txtAgenciaBeneficiarioBoleto.setText(String.format("%s/%s-%s", conta.getAgencia(), conta.getConta(), conta.getDv_conta()));
@@ -300,13 +333,13 @@ public class Impressora extends AppCompatActivity {
             txtEspecieBoleto.setText("9");
             txtQuantidadeBoleto.setText("1");
             txtValorBoletoMeio.setText(valor);
-            txtPagadorBoleto.setText(String.format("%s - %s", cliente.getNome(), cliente.getCpfcnpj()));
+            txtPagadorBoleto.setText(String.format("%s - %s", cliente.getNome_cliente(), cliente.getCpfcnpj()));
             txtEnderecoPagadorBoleto.setText(cliente.getEndereco());
             txtSacadorBoleto.setText("");
             txtDataProcessamentoBoleto.setText(cAux.exibirDataAtual());
             txtValorCobradoBoleto.setText(valor);
             // SET BOLETO - CANHOTO
-            txtCodBancoMoedaCanhoto.setText("001-9");
+            //txtCodBancoMoedaCanhoto.setText("001-9");
             txtValorCanhotoBoleto.setText(valor);
             txtLinhaDigitavelCanhoto.setText(numlinhaDigitavel);
             txtBeneficiarioBoletoCanhoto.setText(conta.getCedente());
@@ -319,20 +352,20 @@ public class Impressora extends AppCompatActivity {
             txtNumeroDocumentoBoletoCanhoto.setText(numero);//cAux.nossoNumero(conta.getConvenio(), 2));
             txtVencimentoBoletoCanhoto.setText(cAux.exibirData(vencimento));
             txtValorCobradoBoletoCanhoto.setText(valor);
-            txtPagadorBoletoCanhoto.setText(String.format("%s - %s", cliente.getNome(), cliente.getCpfcnpj()));
+            txtPagadorBoletoCanhoto.setText(String.format("%s - %s", cliente.getNome_cliente(), cliente.getCpfcnpj()));
             txtEnderecoPagadorBoletoCanhoto.setText(cliente.getEndereco());
 
             //
             MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
             try {
-                BitMatrix bitMatrix = multiFormatWriter.encode(numCodBarraBB, BarcodeFormat.ITF, 1000, 100);
+                BitMatrix bitMatrix = multiFormatWriter.encode(numCodBarra, BarcodeFormat.ITF, 1000, 100);
                 BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                 bp = barcodeEncoder.createBitmap(bitMatrix);
                 SaveImage(bp);
 
                 //ImageView imgCodBarraBoleto = findViewById(R.id.imgB);
                 imgCodBarraBoleto.setImageBitmap(bp);
-                imgCodBarraBoleto.setScaleType(ImageView.ScaleType.FIT_START);
+                //imgCodBarraBoleto.setScaleType(ImageView.ScaleType.FIT_START);
             } catch (WriterException e) {
                 e.printStackTrace();
             }
@@ -690,6 +723,16 @@ public class Impressora extends AppCompatActivity {
                 OutputStream out;
 
                 try {
+                    /*if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }*/
                     BluetoothSocket btSocket = btDevice.createRfcommSocketToServiceRecord(uuid);
                     btSocket.connect();
 

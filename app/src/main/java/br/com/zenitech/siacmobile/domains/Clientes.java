@@ -1,8 +1,9 @@
 package br.com.zenitech.siacmobile.domains;
 
 public class Clientes {
-    private String codigo;
-    private String nome;
+    public String sql_insert;
+    private String codigo_cliente;
+    private String nome_cliente;
     private String latitude_cliente;
     private String longitude_cliente;
     private String saldo;
@@ -10,9 +11,9 @@ public class Clientes {
     private String endereco;
     private String apelido_cliente;
 
-    public Clientes(String codigo, String nome, String latitude_cliente, String longitude_cliente, String saldo, String cpfcnpj, String endereco, String apelido_cliente) {
-        this.codigo = codigo;
-        this.nome = nome;
+    public Clientes(String codigo_cliente, String nome_cliente, String latitude_cliente, String longitude_cliente, String saldo, String cpfcnpj, String endereco, String apelido_cliente) {
+        this.codigo_cliente = codigo_cliente;
+        this.nome_cliente = nome_cliente;
         this.latitude_cliente = latitude_cliente;
         this.longitude_cliente = longitude_cliente;
         this.saldo = saldo;
@@ -21,20 +22,20 @@ public class Clientes {
         this.apelido_cliente = apelido_cliente;
     }
 
-    public String getCodigo() {
-        return codigo;
+    public String getCodigo_cliente() {
+        return codigo_cliente;
     }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
+    public void setCodigo_cliente(String codigo_cliente) {
+        this.codigo_cliente = codigo_cliente;
     }
 
-    public String getNome() {
-        return nome;
+    public String getNome_cliente() {
+        return nome_cliente;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setNome_cliente(String nome_cliente) {
+        this.nome_cliente = nome_cliente;
     }
 
     public String getLatitude_cliente() {

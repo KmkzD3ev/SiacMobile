@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,7 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
     private final Context context;
     private final ArrayList<FinanceiroReceberClientes> elementos;
     private final ClassAuxiliar classAuxiliar;
+    SQLiteDatabase conexao;
     private DatabaseHelper bd;
     private final TextView tvTotalPagarContasReceberCliente;
 
@@ -56,7 +58,6 @@ public class ContasReceberClientesAdapter extends RecyclerView.Adapter<ContasRec
         //
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-
         bd = new DatabaseHelper(getContext());
 
         //
