@@ -1,5 +1,5 @@
 package br.com.zenitech.siacmobile;
-
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.datecs.api.BuildInfo;
 import com.datecs.api.card.FinancialCard;
@@ -65,9 +68,8 @@ import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import br.com.zenitech.siacmobile.network.PrinterServer;
 import br.com.zenitech.siacmobile.util.HexUtil;
-
 import static br.com.zenitech.siacmobile.DataPorExtenso.dataPorExtenso;
-import static br.com.zenitech.siacmobile.NumeroPorExtenso.*;
+import static br.com.zenitech.siacmobile.NumeroPorExtenso.valorPorExtenso;
 
 public class Impressora extends AppCompatActivity {
 
@@ -76,6 +78,8 @@ public class Impressora extends AppCompatActivity {
 
     // Pedido para obter o dispositivo bluetooth
     private static final int REQUEST_GET_DEVICE = 0;
+
+    private static final int REQUEST_BLUETOOTH_CONNECT = 1;
 
     // Pedido para obter o dispositivo bluetooth
     private static final int DEFAULT_NETWORK_PORT = 9100;
@@ -157,6 +161,7 @@ public class Impressora extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
 
         if (prefs.getString("tamPapelImpressora", "").equalsIgnoreCase("58mm")) {
@@ -200,9 +205,34 @@ public class Impressora extends AppCompatActivity {
                 Toast.makeText(context, "Envie algo para imprimir!", Toast.LENGTH_LONG).show();
             }
         }
+        // Verificar permissões Bluetooth
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12 e acima
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_BLUETOOTH_CONNECT);
+            } else {
+                ativarBluetooth();
 
-        ativarBluetooth();
+                if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
+                    establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
+                } else {
+                    waitForConnection();
+                }
+            }
+        } else {
+            // Android 11 e abaixo
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN}, REQUEST_BLUETOOTH_CONNECT);
+            } else {
+                ativarBluetooth();
 
+                if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
+                    establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
+                } else {
+                    waitForConnection();
+                }
+            }
+        }
         if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
             establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
         } else {
@@ -378,9 +408,31 @@ public class Impressora extends AppCompatActivity {
             //SaveImage(bitmap1);
         }
 
+
         //
         tempo(1000);
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_BLUETOOTH_CONNECT) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permissão concedida, ativar Bluetooth e estabelecer conexão
+                ativarBluetooth();
+
+                if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
+                    establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
+                } else {
+                    waitForConnection();
+                }
+            } else {
+                // Permissão negada
+                Toast.makeText(this, "Permissão Bluetooth negada!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
     public String getNumPorExtenso(double valor) {
         return valorPorExtenso(valor);
@@ -427,7 +479,7 @@ public class Impressora extends AppCompatActivity {
     }
 
     private void ativarBluetooth() {
-        new AtivarDesativarBluetooth().enableBT();
+        new AtivarDesativarBluetooth().enableBT(this);
     }
 
     @Override
@@ -713,6 +765,16 @@ public class Impressora extends AppCompatActivity {
         final Thread t = new Thread(() -> {
             Log.d(LOG_TAG, "BluetoothConnection - Conectando à " + address + "...");
 
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             btAdapter.cancelDiscovery();
 
             try {
@@ -1177,7 +1239,7 @@ public class Impressora extends AppCompatActivity {
 
     // DESATIVAR BLUETOOTH
     private void desativarBluetooth() {
-        new AtivarDesativarBluetooth().disableBT();
+        new AtivarDesativarBluetooth().disableBT(this);
     }
 
     /***************************** - IMPRESSÃO - *********************************/

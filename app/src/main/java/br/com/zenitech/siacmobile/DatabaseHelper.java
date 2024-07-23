@@ -2692,6 +2692,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ret;
     }
 
+
     // ** Só para atualizar sem dar problemas, retiar rdepois pra não encher o código
     public String[] EnviarDadosFinanceiroTemp() {
 

@@ -47,7 +47,6 @@ public class Principal2 extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         // INFORMA QUE A VENDA NÃO ESTÁ SENDO EDITADA PARA NÃO APAGAR QUANDO VOLTAR
         prefs.edit().putBoolean("EditarVenda", false).apply();
@@ -57,83 +56,68 @@ public class Principal2 extends AppCompatActivity {
         if (intent != null) {
             Bundle params = intent.getExtras();
             if (params != null) {
-                //posicao = params.getString("enderecoBlt");
-                if (!Objects.requireNonNull(prefs.getString("enderecoBlt", "")).equalsIgnoreCase(params.getString("enderecoBlt"))) {
-                    prefs.edit().putBoolean("naoPerguntarImpressora", false).apply();
-                }
-                //prefs.edit().putBoolean("naoPerguntarImpressora", false).apply();
-                //prefs.edit().putString("enderecoBlt", "").apply();
+                String enderecoBltParam = params.getString("enderecoBlt");
+                if (enderecoBltParam != null && !enderecoBltParam.isEmpty()) {
+                    if (!Objects.requireNonNull(prefs.getString("enderecoBlt", "")).equalsIgnoreCase(enderecoBltParam)) {
+                        prefs.edit().putBoolean("naoPerguntarImpressora", false).apply();
+                    }
 
-                if (!Objects.requireNonNull(params.getString("enderecoBlt")).equalsIgnoreCase("") &&
-                        !prefs.getBoolean("naoPerguntarImpressora", false)) {
+                    if (!Objects.requireNonNull(enderecoBltParam).isEmpty() &&
+                            !prefs.getBoolean("naoPerguntarImpressora", false)) {
 
-                    if (!Objects.requireNonNull(prefs.getString("enderecoBlt", "")).equalsIgnoreCase(params.getString("enderecoBlt"))) {
-                        callDialog(params.getString("enderecoBlt"));
+                        if (!Objects.requireNonNull(prefs.getString("enderecoBlt", "")).equalsIgnoreCase(enderecoBltParam)) {
+                            callDialog(enderecoBltParam);
+                        }
                     }
                 }
-
             }
         }
 
         bd = new DatabaseHelper(this);
-        //bd.LimparDadosBanco();
         aux = new ClassAuxiliar();
 
-        /*elementosUnidades = bd.getUnidades();
-        unidades = elementosUnidades.get(0);
-        //elementosPos = bd.getPos();
-        posApp = bd.getPos();
-
-        //
+        // Inicialize todos os componentes da interface do usuário
         txtEmpresa = findViewById(R.id.txtEmpresa);
         txtCodUnidade = findViewById(R.id.txtCodUnidade);
         textView = findViewById(R.id.text_home);
         txtVersao = findViewById(R.id.txtVersao);
         txtDataUltimoSinc = findViewById(R.id.txtDataUltimoSinc);
 
+        elementosUnidades = bd.getUnidades();
+        if (!elementosUnidades.isEmpty()) {
+            unidades = elementosUnidades.get(0);
+            txtEmpresa.setText(unidades.getRazao_social());
+        }
 
-        txtEmpresa.setText(unidades.getRazao_social());
-        txtCodUnidade.setText(posApp.getUnidade());
-        //
-        textView.setText(String.format("%s | %s", posApp.getSerial(), posApp.getSerie()));
-        //txtVersao.setText(String.format("Versão %s", BuildConfig.VERSION_NAME));
+        posApp = bd.getPos();
+        if (posApp != null) {
+            txtCodUnidade.setText(posApp.getUnidade());
+            textView.setText(String.format("%s | %s", posApp.getSerial(), posApp.getSerie()));
+        }
+
         txtVersao.setText(BuildConfig.VERSION_NAME);
-        txtDataUltimoSinc.setText(prefs.getString("data_sincronizado", ""));*/
+        txtDataUltimoSinc.setText(prefs.getString("data_sincronizado", ""));
     }
 
     private void callDialog(String impressora) {
-
-        //
-        //Cria o gerador do AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.logo_emissor_web);
-        //define o titulo
         builder.setTitle("Nova Impressora");
-        //define a mensagem
         builder.setMessage("Deseja salvar como impressora padrão do app?");
 
-        //define um botão como positivo
         builder.setPositiveButton("Sim", (arg0, arg1) -> {
             prefs.edit().putString("enderecoBlt", impressora).apply();
         });
 
-        //define um botão como negativo.
         builder.setNegativeButton("Não", (arg0, arg1) -> {
-            //Toast.makeText(InformacoesVagas.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
             prefs.edit().putBoolean("naoPerguntarImpressora", true).apply();
         });
 
-        //define um botão como negativo.
         builder.setNeutralButton("Depois", (arg0, arg1) -> {
-            //Toast.makeText(InformacoesVagas.this, "negativo=" + arg1, Toast.LENGTH_SHORT).show();
-            //prefs.edit().putBoolean("naoPerguntarImpressora", true).apply();
+            // Nada a fazer
         });
 
-        //cria o AlertDialog
         alerta = builder.create();
-
-        //Exibe
         alerta.show();
     }
-
 }

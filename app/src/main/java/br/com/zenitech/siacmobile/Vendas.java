@@ -1,5 +1,7 @@
 package br.com.zenitech.siacmobile;
 
+import static br.com.zenitech.siacmobile.FinanceiroDaVenda.codigo_cliente;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,10 +35,16 @@ import android.widget.Toast;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 import br.com.zenitech.siacmobile.adapters.VendasAdapter;
+import br.com.zenitech.siacmobile.domains.ClientesContasReceber;
+import br.com.zenitech.siacmobile.domains.FinanceiroReceberClientes;
 import br.com.zenitech.siacmobile.domains.VendasDomain;
 
 public class Vendas extends AppCompatActivity {
@@ -212,6 +220,7 @@ public class Vendas extends AppCompatActivity {
                 //
                 String nomeCliente = classAuxiliar.maiuscula1(nome_cliente.toLowerCase());
                 getSupportActionBar().setSubtitle(nomeCliente);
+                consultarInadimplencia();
             }
         }
 
@@ -283,6 +292,8 @@ public class Vendas extends AppCompatActivity {
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
     }
+
+
 
     //ADICIONAR VENDAS
     private void addVenda() {
@@ -481,4 +492,60 @@ public class Vendas extends AppCompatActivity {
         cancelarVenda();
         //super.onBackPressed();
     }
+    private void consultarInadimplencia() {
+        Log.d("Inadimplencia", "Verificando inadimplência para o cliente: " + nome_cliente + " (ID: " + id_cliente + ")");
+        boolean isInadimplente = verificarInadimplencia(id_cliente);
+        Log.d("Inadimplencia", "Cliente " + nome_cliente + " (ID: " + id_cliente + ") inadimplente: " + isInadimplente);
+
+        if (isInadimplente) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Cliente Inadimplente");
+            builder.setMessage("O cliente " + nome_cliente + " está inadimplente.");
+            builder.setPositiveButton("OK", (dialog, which) -> {
+                dialog.dismiss();
+                // Navega para a atividade Principal e exibe o HomeFragment
+                Intent intent = new Intent(Vendas.this, Principal2.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("navigateToHome", true);
+                startActivity(intent);
+                finish();
+            });
+            builder.show();
+        } else {
+            //Toast.makeText(this, "O cliente " + nome_cliente + " não está inadimplente.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+
+    private boolean verificarInadimplencia(String clienteId) {
+        Log.d("Inadimplencia", "ID do cliente recebido: " + clienteId);
+        ArrayList<FinanceiroReceberClientes> contasReceber = bd.getContasReceberCliente(clienteId);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Date dataAtual = new Date();
+        Log.d("Inadimplencia", "Data atual: " + sdf.format(dataAtual));
+
+        for (FinanceiroReceberClientes conta : contasReceber) {
+            String vencimento = conta.getVencimento_financeiro();
+            Log.d("Inadimplencia", "Data de vencimento da conta: " + vencimento);
+            try {
+                Date dataVencimento = sdf.parse(vencimento);
+                if (dataVencimento != null) {
+                    Log.d("Inadimplencia", "Data de vencimento parsed: " + sdf.format(dataVencimento));
+                    if (dataVencimento.before(dataAtual)) {
+                        Log.d("Inadimplencia", "Conta vencida encontrada. Cliente inadimplente.");
+                        return true; // Cliente está inadimplente
+                    } else {
+                        Log.d("Inadimplencia", "Conta ainda não vencida.");
+                    }
+                }
+            } catch (ParseException e) {
+                Log.e("Inadimplencia", "Erro ao analisar a data de vencimento: " + vencimento, e);
+            }
+        }
+        Log.d("Inadimplencia", "Nenhuma conta vencida encontrada. Cliente não está inadimplente.");
+        return false; // Cliente não está inadimplente
+    }
+
+
 }
