@@ -974,7 +974,7 @@ public class Impressora extends AppCompatActivity {
 
 
 
-    private synchronized void closeBluetoothConnection() {
+     synchronized void closeBluetoothConnection() {
         // Close Bluetooth connection
         BluetoothSocket s = mBtSocket;
         mBtSocket = null;

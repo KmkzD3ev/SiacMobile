@@ -168,6 +168,6 @@ public class RelatorioVendasPedido extends AppCompatActivity {
 
     private synchronized void closeActiveConnection() {
         Impressora impressora = new Impressora();
-        impressora.closeActiveConnection();
+        impressora.closeBluetoothConnection();
     }
 }
