@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -73,10 +74,13 @@ import br.com.zenitech.siacmobile.util.HexUtil;
 
 import static br.com.zenitech.siacmobile.DataPorExtenso.dataPorExtenso;
 import static br.com.zenitech.siacmobile.NumeroPorExtenso.valorPorExtenso;
+import static stone.utils.GlobalInformations.bluetoothAdapter;
+
 
 public class Impressora extends AppCompatActivity {
 
     private static final String LOG_TAG = "Impressora";
+    private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1;
     public static boolean liberaImpressao;
 
     // Pedido para obter o dispositivo bluetooth
@@ -162,6 +166,20 @@ public class Impressora extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Solicitar permissões Bluetooth
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+            }, REQUEST_BLUETOOTH_PERMISSIONS);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, REQUEST_BLUETOOTH_PERMISSIONS);
+        }
+
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
 
         if (prefs.getString("tamPapelImpressora", "").equalsIgnoreCase("58mm")) {
@@ -213,6 +231,9 @@ public class Impressora extends AppCompatActivity {
         } else {
             waitForConnection();
         }
+        //// Remover a verificação inicial e tentar sempre estabelecer conexão
+       // establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
+
 
         // BOLETO
         if (tipoImpressao.equalsIgnoreCase("Boleto")) {
@@ -387,6 +408,25 @@ public class Impressora extends AppCompatActivity {
         tempo(1000);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    // Se alguma permissão não for concedida, mostrar mensagem e sair
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage("Permissões Bluetooth necessárias para imprimir o relatório.")
+                            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                            .show();
+                    return;
+                }
+            }
+            // Permissões concedidas, iniciar a impressora
+            ativarBluetooth();
+        }
+    }
+
     public String getNumPorExtenso(double valor) {
         return valorPorExtenso(valor);
     }
@@ -432,6 +472,13 @@ public class Impressora extends AppCompatActivity {
     }
 
     private void ativarBluetooth() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+            }, REQUEST_BLUETOOTH_PERMISSIONS);
+            return;
+        }
         new AtivarDesativarBluetooth().enableBT(this);
     }
 
@@ -444,7 +491,7 @@ public class Impressora extends AppCompatActivity {
                 // address = "192.168.11.136:9100";
                 if (BluetoothAdapter.checkBluetoothAddress(address)) {
                     Log.d(LOG_TAG, "establishBluetoothConnection(" + address + ")");
-                    establishBluetoothConnection(address);
+                    establishBluetoothConnection(address); //// Modificado para tentar sempre estabelecer uma nova conexão
                 } else {
                     Log.d(LOG_TAG, "establishNetworkConnection(" + address + ")");
                     establishNetworkConnection(address);
@@ -677,7 +724,7 @@ public class Impressora extends AppCompatActivity {
     private synchronized void waitForConnection() {
         //status(null);
 
-        closeActiveConnection();
+        //closeActiveConnection();
 
         // Show dialog to select a Bluetooth device.
         startActivityForResult(new Intent(this, DeviceListActivity.class), REQUEST_GET_DEVICE);
@@ -708,6 +755,19 @@ public class Impressora extends AppCompatActivity {
     }
 
     private void establishBluetoothConnection(final String address) {
+        //// Checar se o endereço é vazio, se sim, chamar waitForConnection
+       /* if (address.isEmpty()) {
+            waitForConnection();
+            return;
+        }*/
+        // Fechar qualquer conexão existente antes de tentar uma nova
+        bluetoothAdapter.cancelDiscovery();
+
+
+
+        closeBluetoothConnection();
+
+
         final ProgressDialog dialog = new ProgressDialog(Impressora.this);
         dialog.setTitle(getString(R.string.title_please_wait));
         dialog.setMessage(getString(R.string.msg_connecting));
@@ -787,6 +847,7 @@ public class Impressora extends AppCompatActivity {
                     out = mBtSocket.getOutputStream();
                     Log.d(LOG_TAG, "Conexão Bluetooth estabelecida com sucesso");
                 } catch (IOException e) {
+
                     error("Falhou ao conectar: " + e.getMessage());
                     waitForConnection();
                     return;
@@ -894,6 +955,7 @@ public class Impressora extends AppCompatActivity {
                 Log.i(LOG_TAG, e.getMessage());
             }
 
+
             mRC663.close();
         }
 
@@ -909,6 +971,8 @@ public class Impressora extends AppCompatActivity {
             mProtocolAdapter.close();
         }
     }
+
+
 
     private synchronized void closeBluetoothConnection() {
         // Close Bluetooth connection
@@ -943,11 +1007,11 @@ public class Impressora extends AppCompatActivity {
     private synchronized void closePrinterServer() {
         closeNetworkConnection();
 
-        // Close network server
+        // Fechar servidor de rede
         PrinterServer ps = mPrinterServer;
         mPrinterServer = null;
         if (ps != null) {
-            Log.d(LOG_TAG, "Close Network server");
+            Log.d(LOG_TAG, "Fechar servidor de rede");
             try {
                 ps.close();
             } catch (IOException e) {
@@ -956,7 +1020,7 @@ public class Impressora extends AppCompatActivity {
         }
     }
 
-    private synchronized void closeActiveConnection() {
+    synchronized void closeActiveConnection() {
         closePrinterConnection();
         closeBluetoothConnection();
         closeNetworkConnection();
@@ -1222,6 +1286,7 @@ public class Impressora extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     // DESATIVAR BLUETOOTH
     private void desativarBluetooth() {

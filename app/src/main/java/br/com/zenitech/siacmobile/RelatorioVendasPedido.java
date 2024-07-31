@@ -33,19 +33,14 @@ import stone.utils.Stone;
 
 public class RelatorioVendasPedido extends AppCompatActivity {
 
-    //
     private SharedPreferences prefs;
     private SharedPreferences.Editor ed;
-
     private AlertDialog alerta;
     private DatabaseHelper bd;
     ArrayList<VendasPedidosDomain> vendasDomains;
     RelatorioVendasPedidosAdapter adapter;
-    //
     private RecyclerView rvRelatorioVendas;
-
     ClassAuxiliar classAuxiliar;
-
     private Context context;
     private LinearLayout erroRelatorio;
     private Button venderProdutos;
@@ -53,7 +48,6 @@ public class RelatorioVendasPedido extends AppCompatActivity {
     VendasPedidosDomain pedidos;
     TextView txtProdutoRelatorioVendas, txtQuantidadeRelatorioVendas, txtTotalRelatorioVendas, txtFormsPagRelat;
     String strFormPags = "";
-
     private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1;
 
     @Override
@@ -62,39 +56,26 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         setContentView(R.layout.activity_relatorio_vendas_pedido);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        //
         context = this;
-
-        //
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
         ed = prefs.edit();
         bd = new DatabaseHelper(this);
-
-        //
         classAuxiliar = new ClassAuxiliar();
-
         rvRelatorioVendas = findViewById(R.id.rvRelatorioVendas);
         rvRelatorioVendas.setLayoutManager(new LinearLayoutManager(context));
-
-        //
         vendasDomains = bd.getRelatorioVendasPedidos();
         adapter = new RelatorioVendasPedidosAdapter(this, vendasDomains);
         rvRelatorioVendas.setAdapter(adapter);
-
-        //
         txtFormsPagRelat = findViewById(R.id.txtFormsPagRelat);
         strFormPags = bd.getFormPagRelatorioVendasPedidos();
         txtFormsPagRelat.setText(strFormPags);
-
         txtProdutoRelatorioVendas = findViewById(R.id.txtProdutoRelatorioVendas);
         txtQuantidadeRelatorioVendas = findViewById(R.id.txtQuantidadeRelatorioVendas);
         txtTotalRelatorioVendas = findViewById(R.id.txtTotalRelatorioVendas);
 
-        //
         if (vendasDomains.size() == 0) {
             erroRelatorio = findViewById(R.id.erroRelatorio);
             erroRelatorio.setVisibility(View.VISIBLE);
-
             venderProdutos = findViewById(R.id.venderProdutos);
             venderProdutos.setOnClickListener(v -> {
                 startActivity(new Intent(context, VendasConsultarClientes.class));
@@ -105,14 +86,9 @@ public class RelatorioVendasPedido extends AppCompatActivity {
             String valTotalPed = "0";
 
             for (int n = 0; n < vendasDomains.size(); n++) {
-                //DADOS DOS PEDIDO
                 pedidos = vendasDomains.get(n);
-
-                // SOMA A QUANTIDADE DE ITENS
                 String[] somarItens = {quantItens, pedidos.getQuantidade_venda()};
                 quantItens = String.valueOf(classAuxiliar.somar(somarItens));
-
-                // SOMA O VALOR TOTAL DOS PEDIDOS
                 String[] somarValTot = {valTotalPed, pedidos.getValor_total()};
                 valTotalPed = String.valueOf(classAuxiliar.somar(somarValTot));
             }
@@ -144,34 +120,13 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         }
     }
 
-    // MODULO STONE **
-    // Iniciar o Stone
     void iniciarStone() {
-        // O primeiro passo é inicializar o SDK.
         StoneStart.init(context);
-        /*Em seguida, é necessário chamar o método setAppName da classe Stone,
-        que recebe como parâmetro uma String referente ao nome da sua aplicação.*/
         Stone.setAppName(getApplicationName(context));
-        //Ambiente de Sandbox "Teste"
-        /*Stone.setEnvironment(new Configuracoes().Ambiente());
-        //Ambiente de Produção
-        //Stone.setEnvironment((Environment.PRODUCTION));
-
-        // Esse método deve ser executado para inicializar o SDK
-        List<UserModel> userList = StoneStart.init(context);
-
-        // Quando é retornado null, o SDK ainda não foi ativado
-        if (userList != null) {
-            // O SDK já foi ativado.
-            _pinpadAtivado();
-
-        } else {
-            // Inicia a ativação do SDK
-            ativarStoneCode();
-        }*/
     }
 
     private void iniciarImpressora() {
+        closeActiveConnection(); // Adiciona esta linha para fechar conexões ativas
         Intent i;
 
         if (configuracoes.GetDevice()) {
@@ -190,7 +145,6 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
             for (int grantResult : grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                    // Se alguma permissão não for concedida, mostrar mensagem e sair
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setMessage("Permissões Bluetooth necessárias para imprimir o relatório.")
                             .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
@@ -198,7 +152,6 @@ public class RelatorioVendasPedido extends AppCompatActivity {
                     return;
                 }
             }
-            // Permissões concedidas, iniciar a impressora
             iniciarImpressora();
         }
     }
@@ -211,5 +164,10 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private synchronized void closeActiveConnection() {
+        Impressora impressora = new Impressora();
+        impressora.closeActiveConnection();
     }
 }
