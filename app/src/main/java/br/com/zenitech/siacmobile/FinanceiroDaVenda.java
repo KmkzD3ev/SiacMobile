@@ -3,6 +3,7 @@ package br.com.zenitech.siacmobile;
 import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -77,6 +77,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     //
     private SharedPreferences prefs;
     private SharedPreferences.Editor ed;
+    private CreditoPrefs creditoPrefs;
 
     public static String totalFinanceiro;
     private LinearLayoutCompat bandPrazo;
@@ -94,6 +95,12 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     public static LinearLayout bgTotal;
     public EditText txtNotaFiscal;
     LinearLayout formFinan;
+
+    private ArrayList<String> formasPagamentoPrazo; // Array com a s formas de pagamento A_PRAZO
+    private ArrayList<String> valoresCompra;  // Armazena o valor da compra quando formas de pagamento A_PRAZO e Identificada
+    private BigDecimal valorTotalAPrazo = BigDecimal.ZERO; // Variável para armazenar o valor total das formas de pagamento a prazo
+
+
 
     //LISTAR VENDAS
     private ArrayList<FinanceiroVendasDomain> listaFinanceiroCliente;
@@ -144,6 +151,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
     //
     ArrayAdapter adapterSpBandeira, adapterSpParcela;
 
+    @SuppressLint("LongLogTag")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -153,6 +161,11 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //
+        formasPagamentoPrazo = new ArrayList<>();
+        valoresCompra = new ArrayList<>();
+        creditoPrefs = new CreditoPrefs(this);
+
+
         classAuxiliar = new ClassAuxiliar();
         context = this;
         coord = new GPStracker(context);
@@ -209,10 +222,24 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         txtTotalItemFinanceiro = findViewById(R.id.txtTotalItemFinanceiro);
 
+
         //
         formFinan = findViewById(R.id.formFinan);
         btnAddF = findViewById(R.id.btnAddF);
         btnAddF.setOnClickListener(v -> {
+
+            // Captura o valor inserido no campo txtValorFormaPagamento
+            String valorInserido = txtValorFormaPagamento.getText().toString().replaceAll("[^\\d.,]", "").replace(",", ".").trim();
+            String[] fPag1 = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
+
+            // Se a forma de pagamento for "A PRAZO", adicionar o valor ao array valoresCompra
+            if (fPag1.length > 1 && "A PRAZO".equals(fPag1[1])) {
+                valoresCompra.add(valorInserido);
+                Log.d("ValorAdicionado", "Valor adicionado ao array: " + valorInserido);
+            }
+            Log.d("ValoresCompraArray", "Valores atuais no array: " + valoresCompra.toString());
+
+
             //SE O USUÁRIO NÃO ADICIONAR NENHUM VALOR
             String val = classAuxiliar.soNumeros(txtValorFormaPagamento.getText().toString());
             /*if (txtValorFormaPagamento.getText().toString().equals("") ||
@@ -261,7 +288,14 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         //
         btnPagamento = findViewById(R.id.btnPagamento);
         btnPagamento.setOnClickListener(v -> {
+            Log.d("ValoresCompraAntesDeFinalizar", "Conteúdo do array valoresCompra: " + valoresCompra);
             //
+
+            BigDecimal totalValoresCompra = somarValoresCompra();
+            creditoPrefs.setValorAprazo(totalValoresCompra.toString());
+            Log.d("TotalValoresCompra", "Soma  valores  compra a prazo enviad SHARE: " + totalValoresCompra.toString());
+
+
             _salvarFinanceiro();
         });
 
@@ -276,7 +310,10 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
             if (params != null) {
 
-                //
+                codigo_cliente = params.getString("codigo_cliente");
+                Log.d("CREDITO PREFS", "onCreate:ENVIANDO PRO SHARE "+ codigo_cliente);
+
+
                 if (!Objects.requireNonNull(params.getString("saldo")).equalsIgnoreCase("")) {
                     Objects.requireNonNull(getSupportActionBar()).setTitle("Saldo: " + classAuxiliar.maskMoney(classAuxiliar.converterValores(params.getString("saldo"))));
                 } else {
@@ -369,6 +406,7 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         spFormasPagamentoCliente.setOnItemSelectedListener(FinanceiroDaVenda.this);
         atualizarValFin();
+        logFormasPagamentoPrazo();
 
         // Verificar se o GPS foi aceito pelo entregador
         isGPSEnabled();
@@ -594,9 +632,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         try {
             //
             listaFinanceiroCliente = bd.getFinanceiroCliente(prefs.getInt("id_venda_app", 1));
-            adapter = new FinanceiroVendasAdapter(this, listaFinanceiroCliente);
+            adapter = new FinanceiroVendasAdapter(this, listaFinanceiroCliente, valoresCompra);
             rvFinanceiro.setAdapter(adapter);
-
             //
             String tif = classAuxiliar.maskMoney(new BigDecimal(bd.getValorTotalFinanceiro(String.valueOf(prefs.getInt("id_venda_app", 1)))));
             txtTotalItemFinanceiro.setText(tif);
@@ -767,9 +804,8 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
 
         //
         listaFinanceiroCliente = bd.getFinanceiroCliente(prefs.getInt("id_venda_app", 1));
-        adapter = new FinanceiroVendasAdapter(this, listaFinanceiroCliente);
+        adapter = new FinanceiroVendasAdapter(this, listaFinanceiroCliente, valoresCompra);
         rvFinanceiro.setAdapter(adapter);
-
         //
         String tif = classAuxiliar.maskMoney(new BigDecimal(bd.getValorTotalFinanceiro(String.valueOf(prefs.getInt("id_venda_app", 1)))));
         txtTotalItemFinanceiro.setText(tif);
@@ -824,11 +860,38 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         txtVencimentoFormaPagamento.setText(data);
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         txtDocumentoFormaPagamento.setText("");
         String[] fPag = spFormasPagamentoCliente.getSelectedItem().toString().split(" _ ");
-        // SELECT PIX
+        String selectedItem = spFormasPagamentoCliente.getSelectedItem().toString(); // Captura o item selecionado no Spinner
+         creditoPrefs.setFormaPagamentoPrazo(selectedItem);
+        // Logando o item selecionado para visualização no Logcat
+        Log.d("ItemSelecionado", "Item selecionado ENVIADO AO PREFS: " + selectedItem);
+
+        // Verificar se a forma de pagamento selecionada é "A PRAZO"
+        String[] detalhesPagamento = selectedItem.split(" _ ");
+
+
+
+        /*if (fPag.length > 1 && "A PRAZO".equals(fPag[1])) {
+            Log.d("FormaPagamentoSelecionada", "Forma de pagamento selecionada a prazo: " + selectedItem);
+
+            // Capturar o valor da compra inserido no campo txtValorFormaPagamento
+            String valorCompraAtual = txtValorFormaPagamento.getText().toString(); // Assumindo que o valor da compra está no campo txtValorFormaPagamento
+
+            // Limpar a lista e adicionar o valor atual para garantir que só tenha o valor atual
+            valoresCompra.add(valorCompraAtual);
+            Log.d("ValorCompra", "Valor da compra: " + valorCompraAtual);
+            Log.d("ValoresCompra", "Valores da compra: " + valoresCompra);
+        } else {
+            Log.d("FormaPagamentoSelecionada", "Forma de pagamento selecionada não é a prazo: " + selectedItem);
+            // Limpar a lista de valores caso a forma de pagamento não seja a prazo
+            valoresCompra.clear();
+        }*/
+
+    // SELECT PIX
         if (fPag[0].equals("PIX")) {
             runOnUiThread(() -> {
 
@@ -1164,6 +1227,26 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
         }
     }
 
+
+// Função para somar os valores do array valoresCompra
+    private BigDecimal somarValoresCompra() {
+        BigDecimal somaTotal = BigDecimal.ZERO; // Inicializa a variável somaTotal com zero
+
+        // Percorre todos os valores do array valoresCompra
+        for (String valor : valoresCompra) {
+            try {
+                // Converte o valor de String para BigDecimal e adiciona à somaTotal
+                BigDecimal valorBigDecimal = new BigDecimal(valor);
+                somaTotal = somaTotal.add(valorBigDecimal);
+            } catch (NumberFormatException e) {
+                Log.e("SomarValoresCompra", "Erro ao converter valor para BigDecimal: " + valor, e);
+            }
+        }
+
+        return somaTotal; // Retorna a soma dos valores
+    }
+
+
     // VERIFICAR AS CORDENADAS DO CLIENTE
     private void verifClienteCordenada() {
 
@@ -1303,6 +1386,24 @@ public class FinanceiroDaVenda extends AppCompatActivity implements AdapterView.
             }
         });
     }
+
+    //captura e armazena da list somente as formas de pagamento A_PRAZO
+    public void logFormasPagamentoPrazo() {
+        formasPagamentoPrazo.clear(); // Limpa a lista antes de adicionar novos valores
+        if (listaFormasPagamentoCliente != null && !listaFormasPagamentoCliente.isEmpty()) {
+            for (String formaPagamento : listaFormasPagamentoCliente) {
+                String[] detalhesPagamento = formaPagamento.split(" _ ");
+                if (detalhesPagamento.length > 1 && "A PRAZO".equals(detalhesPagamento[1])) {
+                    formasPagamentoPrazo.add(formaPagamento); // Adiciona à lista
+                    Log.d("FormasPagamentoPrazo", "Forma de pagamento a prazo: " + formaPagamento);
+                }
+            }
+        } else {
+            Log.d("FormasPagamentoPrazo", "Nenhuma forma de pagamento encontrada.");
+        }
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

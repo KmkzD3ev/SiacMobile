@@ -7,6 +7,7 @@ import static br.com.zenitech.siacmobile.FinanceiroDaVenda.txtValorFormaPagament
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +31,13 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
     private ClassAuxiliar classAuxiliar;
     private Context context;
     private ArrayList<FinanceiroVendasDomain> elementos;
+    private ArrayList<String> valoresCompra;
 
-    public FinanceiroVendasAdapter(Context context, ArrayList<FinanceiroVendasDomain> elementos) {
+    // Construtor do Adapter, recebe o contexto, a lista de elementos e a lista de valores de compra
+    public FinanceiroVendasAdapter(Context context, ArrayList<FinanceiroVendasDomain> elementos, ArrayList<String> valoresCompra) {
         this.context = context;
         this.elementos = elementos;
+        this.valoresCompra = valoresCompra;
     }
 
     // Easy access to the context object in the recyclerview
@@ -143,6 +147,24 @@ public class FinanceiroVendasAdapter extends RecyclerView.Adapter<FinanceiroVend
             PosApp posApp = bd.getPos();
             bd.updateUltimoBoleto(String.valueOf(Integer.parseInt(posApp.getUltboleto()) - 1));
         }
+
+
+        // Log antes da tentativa de remoção
+        Log.d("ValoresCompra", "Array antes da remoção: " + valoresCompra.toString());
+
+        // Formatar o valor antes de tentar removê-lo do array valoresCompra
+        BigDecimal valorFormatadoBD = new BigDecimal(totalVenda.replaceAll("[^\\d.,]", "").replace(",", ".").trim());
+        String valorFormatado = String.format("%.2f", valorFormatadoBD).replace(",", ".");
+
+        if (valoresCompra.contains(valorFormatado)) {
+            valoresCompra.remove(valorFormatado);
+            Log.d("ValoresCompra", "Valor removido: " + valorFormatado);
+        } else {
+            Log.d("ValoresCompra", "Valor não encontrado no array: " + valorFormatado);
+        }
+
+        // Log após a tentativa de remoção
+        Log.d("ValoresCompra", "Array após remoção: " + valoresCompra.toString());
 
         elementos.remove(position);
         notifyItemRemoved(position);

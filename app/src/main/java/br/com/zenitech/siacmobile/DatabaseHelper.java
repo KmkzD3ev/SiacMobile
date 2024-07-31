@@ -39,8 +39,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String NOME_CLIENTE = "nome_cliente";
     private static final String LATITUDE_CLIENTE = "latitude_cliente";
     private static final String LONGITUDE_CLIENTE = "longitude_cliente";
+    private static final String SALDO_CLIENTE = "saldo"; // Constante para o campo saldo
 
-    private static final String[] COLUNAS_CLIENTES = {CODIGO_CLIENTE, NOME_CLIENTE, LATITUDE_CLIENTE, LONGITUDE_CLIENTE};
+    private static final String[] COLUNAS_CLIENTES = {CODIGO_CLIENTE, NOME_CLIENTE, LATITUDE_CLIENTE, LONGITUDE_CLIENTE,SALDO_CLIENTE};
 
     //CONSTANTES PRODUTOS
     private static final String TABELA_PRODUTOS = "produtos";
@@ -1262,6 +1263,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();*/
         return baixa_a_prazo;
     }
+    public boolean isInadimplenteBloqueado() {
+        int bloqueio = 0;  // Valor padrão para inativo
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT bloqueio_inadimplente FROM pos";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        try {
+            if (cursor.moveToFirst()) {
+                bloqueio = cursor.getInt(cursor.getColumnIndexOrThrow("bloqueio_inadimplente"));
+                Log.d("isInadimplenteBloqueado", "Valor retornado pelo banco: " + bloqueio);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            cursor.close();
+            db.close();
+        }
+
+        return bloqueio == 1;  // Retorna true se o bloqueio for 1 (ativo), false se for 0 (inativo)
+    }
+
+
 
 //########## FORMAS PAGAMENTO CLIENTE ############
 
@@ -1393,6 +1416,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         /*db.endTransaction();
         db.close();*/
+        // Logando o conteúdo da lista
+        Log.d("FormasPagamentoCliente", "Lista de formas de pagamento: " + list.toString());
+
         return list;
     }
 
@@ -1905,6 +1931,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return listaFinanceiroVendas;
     }
+
+    // Método para obter o saldo de um cliente
+    public BigDecimal getSaldoCliente(String codigoCliente) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        BigDecimal saldo = BigDecimal.ZERO;
+
+        Cursor cursor = null;
+        try {
+            cursor = db.query(
+                    TABELA_CLIENTES,
+                    new String[]{SALDO_CLIENTE},
+                    CODIGO_CLIENTE + " = ?",
+                    new String[]{codigoCliente},
+                    null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                saldo = new BigDecimal(cursor.getString(cursor.getColumnIndexOrThrow(SALDO_CLIENTE)));
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Erro ao consultar saldo: ", e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+        return saldo;
+    }
+
+
 
     /*//LISTAR TODOS OS CLIENTES
     public ArrayList<Clientes> getAllClientesContasReceber() {

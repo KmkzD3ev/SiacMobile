@@ -2,10 +2,12 @@ package br.com.zenitech.siacmobile;
 
 import static br.com.zenitech.siacmobile.Configuracoes.getApplicationName;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,8 +15,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,6 +53,8 @@ public class RelatorioVendasPedido extends AppCompatActivity {
     VendasPedidosDomain pedidos;
     TextView txtProdutoRelatorioVendas, txtQuantidadeRelatorioVendas, txtTotalRelatorioVendas, txtFormsPagRelat;
     String strFormPags = "";
+
+    private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,9 +104,7 @@ public class RelatorioVendasPedido extends AppCompatActivity {
             String quantItens = "0";
             String valTotalPed = "0";
 
-
             for (int n = 0; n < vendasDomains.size(); n++) {
-
                 //DADOS DOS PEDIDO
                 pedidos = vendasDomains.get(n);
 
@@ -117,33 +121,30 @@ public class RelatorioVendasPedido extends AppCompatActivity {
             Double s = Double.parseDouble(quantItens);
             txtQuantidadeRelatorioVendas.setText(String.valueOf(s.intValue()));
             txtTotalRelatorioVendas.setText(String.valueOf(classAuxiliar.maskMoney(new BigDecimal(valTotalPed))));
-
         }
+
         configuracoes = new Configuracoes();
         findViewById(R.id.btnPrintRelPed).setOnClickListener(v -> {
-            Intent i;
-
-            if (configuracoes.GetDevice()) {
-                i = new Intent(context, ImpressoraPOS.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.BLUETOOTH_SCAN
+                }, REQUEST_BLUETOOTH_PERMISSIONS);
             } else {
-                i = new Intent(context, Impressora.class);
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_ADMIN,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                }, REQUEST_BLUETOOTH_PERMISSIONS);
             }
-
-            //
-            i.putExtra("imprimir", "relatorio");
-
-            //i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
         });
 
         if (configuracoes.GetDevice()) {
             iniciarStone();
         }
-
     }
 
     // MODULO STONE **
-
     // Iniciar o Stone
     void iniciarStone() {
         // O primeiro passo é inicializar o SDK.
@@ -168,6 +169,38 @@ public class RelatorioVendasPedido extends AppCompatActivity {
             // Inicia a ativação do SDK
             ativarStoneCode();
         }*/
+    }
+
+    private void iniciarImpressora() {
+        Intent i;
+
+        if (configuracoes.GetDevice()) {
+            i = new Intent(context, ImpressoraPOS.class);
+        } else {
+            i = new Intent(context, Impressora.class);
+        }
+
+        i.putExtra("imprimir", "relatorio");
+        startActivity(i);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    // Se alguma permissão não for concedida, mostrar mensagem e sair
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage("Permissões Bluetooth necessárias para imprimir o relatório.")
+                            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                            .show();
+                    return;
+                }
+            }
+            // Permissões concedidas, iniciar a impressora
+            iniciarImpressora();
+        }
     }
 
     @Override

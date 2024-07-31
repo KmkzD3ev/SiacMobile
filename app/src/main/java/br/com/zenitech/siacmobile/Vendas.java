@@ -492,31 +492,42 @@ public class Vendas extends AppCompatActivity {
         cancelarVenda();
         //super.onBackPressed();
     }
+
+
     private void consultarInadimplencia() {
         Log.d("Inadimplencia", "Verificando inadimplência para o cliente: " + nome_cliente + " (ID: " + id_cliente + ")");
         boolean isInadimplente = verificarInadimplencia(id_cliente);
-        Log.d("Inadimplencia", "Cliente " + nome_cliente + " (ID: " + id_cliente + ") inadimplente: " + isInadimplente);
 
         if (isInadimplente) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Cliente Inadimplente");
-            builder.setMessage("O cliente " + nome_cliente + " está inadimplente.");
-            builder.setPositiveButton("OK", (dialog, which) -> {
-                dialog.dismiss();
-                // Navega para a atividade Principal e exibe o HomeFragment
-                Intent intent = new Intent(Vendas.this, Principal2.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("navigateToHome", true);
-                startActivity(intent);
-                finish();
-            });
-            builder.show();
+            boolean isBloqueioInadimplente = bd.isInadimplenteBloqueado();
+            Log.d("Inadimplencia", "Bloqueio por inadimplência ativo: " + isBloqueioInadimplente);
+
+            if (isBloqueioInadimplente) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Cliente Inadimplente");
+                builder.setMessage("O cliente " + nome_cliente + " está inadimplente.");
+                builder.setPositiveButton("OK", (dialog, which) -> {
+                    dialog.dismiss();
+                    // Navega para a atividade Principal e exibe o HomeFragment
+                    Intent intent = new Intent(Vendas.this, Principal2.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("navigateToHome", true);
+                    startActivity(intent);
+                    finish();
+                });
+                AlertDialog alerta = builder.create();
+                alerta.setCancelable(false);
+                alerta.show();
+                builder.show();
+            } else {
+                Log.d("Inadimplencia", "O cliente está inadimplente, mas o bloqueio por inadimplência não está ativo.");
+                // Segue o fluxo normal se o bloqueio não está ativo
+            }
         } else {
-            //Toast.makeText(this, "O cliente " + nome_cliente + " não está inadimplente.", Toast.LENGTH_LONG).show();
+            Log.d("Inadimplencia", "O cliente " + nome_cliente + " não está inadimplente.");
+            // Segue o fluxo normal se o cliente não estiver inadimplente
         }
     }
-
-
 
     private boolean verificarInadimplencia(String clienteId) {
         Log.d("Inadimplencia", "ID do cliente recebido: " + clienteId);
@@ -524,6 +535,8 @@ public class Vendas extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         Date dataAtual = new Date();
         Log.d("Inadimplencia", "Data atual: " + sdf.format(dataAtual));
+
+        boolean isInadimplente = false;
 
         for (FinanceiroReceberClientes conta : contasReceber) {
             String vencimento = conta.getVencimento_financeiro();
@@ -534,7 +547,8 @@ public class Vendas extends AppCompatActivity {
                     Log.d("Inadimplencia", "Data de vencimento parsed: " + sdf.format(dataVencimento));
                     if (dataVencimento.before(dataAtual)) {
                         Log.d("Inadimplencia", "Conta vencida encontrada. Cliente inadimplente.");
-                        return true; // Cliente está inadimplente
+                        isInadimplente = true;
+                        break;
                     } else {
                         Log.d("Inadimplencia", "Conta ainda não vencida.");
                     }
@@ -543,9 +557,23 @@ public class Vendas extends AppCompatActivity {
                 Log.e("Inadimplencia", "Erro ao analisar a data de vencimento: " + vencimento, e);
             }
         }
-        Log.d("Inadimplencia", "Nenhuma conta vencida encontrada. Cliente não está inadimplente.");
-        return false; // Cliente não está inadimplente
+
+        if (isInadimplente) {
+            boolean isBloqueioInadimplente = bd.isInadimplenteBloqueado();
+            if (isBloqueioInadimplente) {
+                Log.d("Inadimplencia", "Bloqueio por inadimplência ativo.");
+                return true; // Cliente está inadimplente e o bloqueio está ativo
+            } else {
+                Log.d("Inadimplencia", "Bloqueio por inadimplência não está ativo.");
+            }
+        } else {
+            Log.d("Inadimplencia", "Nenhuma conta vencida encontrada. Cliente não está inadimplente.");
+        }
+
+        return false; // Cliente não está inadimplente ou bloqueio não está ativo
     }
+
+
 
 
 }

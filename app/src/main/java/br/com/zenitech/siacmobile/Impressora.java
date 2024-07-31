@@ -1,5 +1,7 @@
 package br.com.zenitech.siacmobile;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -68,6 +70,7 @@ import br.com.zenitech.siacmobile.domains.UnidadesDomain;
 import br.com.zenitech.siacmobile.domains.VendasPedidosDomain;
 import br.com.zenitech.siacmobile.network.PrinterServer;
 import br.com.zenitech.siacmobile.util.HexUtil;
+
 import static br.com.zenitech.siacmobile.DataPorExtenso.dataPorExtenso;
 import static br.com.zenitech.siacmobile.NumeroPorExtenso.valorPorExtenso;
 
@@ -78,8 +81,6 @@ public class Impressora extends AppCompatActivity {
 
     // Pedido para obter o dispositivo bluetooth
     private static final int REQUEST_GET_DEVICE = 0;
-
-    private static final int REQUEST_BLUETOOTH_CONNECT = 1;
 
     // Pedido para obter o dispositivo bluetooth
     private static final int DEFAULT_NETWORK_PORT = 9100;
@@ -161,7 +162,6 @@ public class Impressora extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         prefs = getSharedPreferences("preferencias", MODE_PRIVATE);
 
         if (prefs.getString("tamPapelImpressora", "").equalsIgnoreCase("58mm")) {
@@ -205,34 +205,9 @@ public class Impressora extends AppCompatActivity {
                 Toast.makeText(context, "Envie algo para imprimir!", Toast.LENGTH_LONG).show();
             }
         }
-        // Verificar permissões Bluetooth
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12 e acima
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_BLUETOOTH_CONNECT);
-            } else {
-                ativarBluetooth();
 
-                if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
-                    establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
-                } else {
-                    waitForConnection();
-                }
-            }
-        } else {
-            // Android 11 e abaixo
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN}, REQUEST_BLUETOOTH_CONNECT);
-            } else {
-                ativarBluetooth();
+        ativarBluetooth();
 
-                if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
-                    establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
-                } else {
-                    waitForConnection();
-                }
-            }
-        }
         if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
             establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
         } else {
@@ -408,31 +383,9 @@ public class Impressora extends AppCompatActivity {
             //SaveImage(bitmap1);
         }
 
-
         //
         tempo(1000);
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_BLUETOOTH_CONNECT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permissão concedida, ativar Bluetooth e estabelecer conexão
-                ativarBluetooth();
-
-                if (!prefs.getString("enderecoBlt", "").equalsIgnoreCase("")) {
-                    establishBluetoothConnection(prefs.getString("enderecoBlt", ""));
-                } else {
-                    waitForConnection();
-                }
-            } else {
-                // Permissão negada
-                Toast.makeText(this, "Permissão Bluetooth negada!", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
 
     public String getNumPorExtenso(double valor) {
         return valorPorExtenso(valor);
@@ -473,7 +426,7 @@ public class Impressora extends AppCompatActivity {
                 liberaImpressao = false;
             } else {
                 //
-                tempo(2000);
+                tempo(4000);
             }
         }, tempo);
     }
@@ -553,6 +506,7 @@ public class Impressora extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
                 error("I/O error occurs: " + e.getMessage());
+
                 Log.d(LOG_TAG, e.getMessage(), e);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -569,7 +523,7 @@ public class Impressora extends AppCompatActivity {
 
     protected void initPrinter(InputStream inputStream, OutputStream outputStream)
             throws IOException {
-        Log.d(LOG_TAG, "Initialize printer...");
+        Log.d(LOG_TAG, "Initialize printer... RASTREANDO TOASTS");
 
         // Here you can enable various debug information
         //ProtocolAdapter.setDebug(true);
@@ -580,14 +534,14 @@ public class Impressora extends AppCompatActivity {
         // without closing base streams.
         mProtocolAdapter = new ProtocolAdapter(inputStream, outputStream);
         if (mProtocolAdapter.isProtocolEnabled()) {
-            Log.d(LOG_TAG, "Protocol mode is enabled");
+            Log.d(LOG_TAG, "Modo de protocolo está habilitado ANTES DO TOAST");
 
             // Into protocol mode we can callbacks to receive printer notifications
             mProtocolAdapter.setPrinterListener(new ProtocolAdapter.PrinterListener() {
                 @Override
                 public void onThermalHeadStateChanged(boolean overheated) {
                     if (overheated) {
-                        Log.d(LOG_TAG, "Thermal head is overheated");
+                        Log.d(LOG_TAG, "Estado do cabeçote térmico mudou: " + (overheated ? "Superaquecido" : "Normal"));
                         status("OVERHEATED");
                     } else {
                         status(null);
@@ -597,7 +551,7 @@ public class Impressora extends AppCompatActivity {
                 @Override
                 public void onPaperStateChanged(boolean hasPaper) {
                     if (hasPaper) {
-                        Log.d(LOG_TAG, "Event: Paper out");
+                        Log.d(LOG_TAG, "Estado do papel mudou: " + (hasPaper ? "Sem papel" : "Com papel"));
                         status("PAPER OUT");
                     } else {
                         status(null);
@@ -607,7 +561,7 @@ public class Impressora extends AppCompatActivity {
                 @Override
                 public void onBatteryStateChanged(boolean lowBattery) {
                     if (lowBattery) {
-                        Log.d(LOG_TAG, "Low battery");
+                        Log.d(LOG_TAG, "Estado da bateria mudou: " + (lowBattery ? "Bateria fraca" : "Bateria ok"));
                         status("LOW BATTERY");
                     } else {
                         status(null);
@@ -707,6 +661,7 @@ public class Impressora extends AppCompatActivity {
         }
 
         mPrinter.setConnectionListener(() -> {
+            Log.d(LOG_TAG, "A impressora está desconectada");
             toast("A impressora está desconectada");
 
             runOnUiThread(() -> {
@@ -715,6 +670,7 @@ public class Impressora extends AppCompatActivity {
                 }
             });
         });
+
 
     }
 
@@ -759,13 +715,41 @@ public class Impressora extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
 
+        closeActiveConnection();
+
         closePrinterServer();
 
+
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        if (btAdapter.isDiscovering()) {
+            btAdapter.cancelDiscovery();
+        }
+
+
         final Thread t = new Thread(() -> {
             Log.d(LOG_TAG, "BluetoothConnection - Conectando à " + address + "...");
 
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -801,6 +785,7 @@ public class Impressora extends AppCompatActivity {
                     mBtSocket = btSocket;
                     in = mBtSocket.getInputStream();
                     out = mBtSocket.getOutputStream();
+                    Log.d(LOG_TAG, "Conexão Bluetooth estabelecida com sucesso");
                 } catch (IOException e) {
                     error("Falhou ao conectar: " + e.getMessage());
                     waitForConnection();
@@ -810,6 +795,7 @@ public class Impressora extends AppCompatActivity {
                 try {
                     initPrinter(in, out);
                 } catch (IOException e) {
+                    Log.e(LOG_TAG, "Falha na inicialização: " + e.getMessage(), e); // Log detalhado
                     error("Falha na inicialização: " + e.getMessage());
                     return;
                 }
@@ -1244,8 +1230,11 @@ public class Impressora extends AppCompatActivity {
 
     /***************************** - IMPRESSÃO - *********************************/
 
-    // ** RELATÓRIO 58mm
+    // ** PROMISSORIA 58mm
+    @SuppressLint({"MissingPermission", "LongLogTag"})
     private void printPromissoria() {
+
+
 
         runTask((dialog, printer) -> {
             Log.d(LOG_TAG, "Print Relatório NFC-e");
@@ -1254,11 +1243,19 @@ public class Impressora extends AppCompatActivity {
             //
             String txtTel = "TEL. CONTATO: " + unidade.getTelefone();
             String txtNumVen = "N: " + numero + " / VENCIMENTO: " + vencimento;
-            String txtValor = "VALOR: R$ " + valor;
+
+            // Formata o valor antes de imprimir usando o novo método
+            BigDecimal valorFormatado = cAux.converterValores(cAux.soNumeros(valor));
+            String valorMascarado = cAux.formatarValorMonetario(valorFormatado); // Mudança aqui
+            String txtValor = "VALOR: " + valorMascarado; // Mudança aqui
+
+            // Adicionar logs para verificar o valor formatado e mascarado
+            Log.i("ValorFormatado", valorFormatado.toString());
+            Log.i("ValorMascarado", valorMascarado);
 
             //
             String txtCorpo = "Ao(s) " + getDataPorExtenso(vencimento) +
-                    "pagarei por esta unica via de NOTA PROMISSORIA a " + unidade.getRazao_social() +
+                    " pagarei por esta unica via de NOTA PROMISSORIA a " + unidade.getRazao_social() +
                     " ou a sua ordem, " +
                     "a quantidade de: " + getNumPorExtenso(Double.parseDouble(String.valueOf(cAux.converterValores(cAux.soNumeros(valor))))) + " em moeda corrente deste pais.";
 
@@ -1277,7 +1274,7 @@ public class Impressora extends AppCompatActivity {
             //
             String txtNum = "N: " + numero;
             String txtCli = "CLIENTE: " + id_cliente + " - " + cliente;
-            String txtVal = "VALOR: R$ " + valor;
+            String txtVal = "VALOR: " + valorMascarado; // Mudança aqui
 
             //
             String txtLinAss1 = "-------------------------------";
@@ -1393,13 +1390,13 @@ public class Impressora extends AppCompatActivity {
             textBuffer.append(tamFont).append(txtLinAss1).append("{br}");
             textBuffer.append(tamFont).append(txtAss1).append("{br}");
 
+
+            Log.i("TextoCompletoParaImpressao1", textBuffer.toString());
+
             printer.reset();
             printer.printTaggedText(textBuffer.toString());
             printer.feedPaper(100);
             printer.flush();
-
-            //
-            //desativarBluetooth();
 
             finalizarImpressao();
 
@@ -1464,7 +1461,7 @@ public class Impressora extends AppCompatActivity {
                     //textBuffer.append(tamFont).append("PRODUTO | QTDE. | VL.UNIT | VL.TOTAL{br}");
                     textBuffer.append(tamFont).append("PRODUTO: ").append(pedidos.getProduto_venda()).append("{br}");
                     textBuffer.append(tamFont).append("QTDE.: ").append(" | VL.UNIT: ").append(" | VL.TOTAL: ").append("{br}");
-                    textBuffer.append(tamFont).append(pedidos.getQuantidade_venda()).append("       | ").append(cAux.maskMoney(new BigDecimal(pedidos.getPreco_unitario()))).append("    | ").append(cAux.maskMoney(new BigDecimal(pedidos.getValor_total()))).append("{br}");
+                    textBuffer.append(tamFont).append(pedidos.getQuantidade_venda()).append("       | ").append(cAux.formatarValorMonetario(new BigDecimal(pedidos.getPreco_unitario()))).append("    | ").append(cAux.formatarValorMonetario(new BigDecimal(pedidos.getValor_total()))).append("{br}");
 
                     textBuffer.append(tamFont).append("FORMA(S) PAGAMENTO: ").append("{br}");
                     textBuffer.append(tamFont).append(pedidos.getFormas_pagamento()).append("{br}");
@@ -1491,8 +1488,8 @@ public class Impressora extends AppCompatActivity {
             Double s = Double.parseDouble(quantItens);
             textBuffer.append(tamFont).append("TOTAL DE VENDAS: ").append(elementosPedidos.size()).append("{br}");
             textBuffer.append(tamFont).append("TOTAL DE ITENS: ").append(s.intValue()).append("{br}");
-            textBuffer.append(tamFont).append("FORMAS PAGAMENTO: ").append("{br}").append(strFormPags).append("{br}");
-            textBuffer.append(tamFont).append("VALOR TOTAL: R$ ").append(cAux.maskMoney(new BigDecimal(valTotalPed))).append("{br}");
+            textBuffer.append(tamFont).append("FORMAS PAGAMENTO: ").append("{br}").append(formatarFormasPagamento(strFormPags)).append("{br}");
+            textBuffer.append(tamFont).append("VALOR TOTAL: ").append(cAux.formatarValorMonetario(new BigDecimal(valTotalPed))).append("{br}");
 
             textBuffer.append("{br}{br}");
 
@@ -1515,6 +1512,31 @@ public class Impressora extends AppCompatActivity {
 
         }, R.string.msg_printing_relatorio);
     }
+
+//FORMATAÇAO PARA TODOS OS VALORES DE FORMAS DE PAGAMENTO RELATORIOS
+    private String formatarFormasPagamento(String strFormPags) {
+        StringBuilder formattedFormPags = new StringBuilder();
+        String[] formasPagamento = strFormPags.split("\\r?\\n");
+        for (String forma : formasPagamento) {
+            if (forma.contains(":")) {
+                String[] parts = forma.split(":");
+                String descricao = parts[0].trim();
+                try {
+                    // Retira os caracteres não numéricos, exceto ponto e vírgula
+                    String valorStr = parts[1].replaceAll("[^\\d,]", "").replace(",", ".");
+                    BigDecimal valor = new BigDecimal(valorStr);
+                    formattedFormPags.append(descricao).append(": ")
+                            .append(cAux.formatarValorMonetario(valor)).append("{br}");
+                } catch (NumberFormatException e) {
+                    formattedFormPags.append(forma).append("{br}"); // Caso ocorra um erro na conversão
+                }
+            } else {
+                formattedFormPags.append(forma).append("{br}");
+            }
+        }
+        return formattedFormPags.toString();
+    }
+
 
     private void printRelatorioBaixas58mm() {
         runTask((dialog, printer) -> {
@@ -1559,7 +1581,7 @@ public class Impressora extends AppCompatActivity {
 
             textBuffer.append(tamFont).append("{br}").append("         *** TOTAIS ***").append("{br}{br}");
             textBuffer.append(tamFont).append("FORMAS DE PAGAMENTO: ").append(elementosRecebidos.size()).append("{br}");
-            textBuffer.append(tamFont).append("VALOR TOTAL: R$ ").append(cAux.maskMoney(new BigDecimal(valTotalPed))).append("{br}");
+            textBuffer.append(tamFont).append("VALOR TOTAL: R$ ").append(cAux.formatarValorMonetario(new BigDecimal(valTotalPed))).append("{br}");
 
             textBuffer.append("{br}{br}");
 

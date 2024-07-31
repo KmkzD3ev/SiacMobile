@@ -165,13 +165,26 @@ public class ClassAuxiliar {
         BigDecimal parsed = null;
         try {
             //String cleanString = value.replaceAll("[R,$,.]", "");
-            parsed = new BigDecimal(this.soNumeros(value)).setScale(2, BigDecimal.ROUND_FLOOR).divide(new BigDecimal(100), BigDecimal.ROUND_FLOOR);
+            parsed = new BigDecimal(this.soNumeros(value))
+                    .setScale(2, BigDecimal.ROUND_FLOOR)
+                    .divide(new BigDecimal(100), BigDecimal.ROUND_FLOOR);
 
             Log.e("TOTAL", "FORAMATAR NUMERO: " + parsed);
         } catch (Exception e) {
             Log.e("sua_tag", e.getMessage(), e);
         }
         return parsed;
+    }
+
+    // Método para formatar valores monetários com "R$" e duas casas decimais
+    public String formatarValorMonetario(BigDecimal valor) {
+        DecimalFormat df = new DecimalFormat("R$ #,##0.00");
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setCurrencySymbol("R$ ");
+        dfs.setMonetaryDecimalSeparator(',');
+        dfs.setGroupingSeparator('.');
+        df.setDecimalFormatSymbols(dfs);
+        return df.format(valor);
     }
 
     //SÓ NÚMEROS
