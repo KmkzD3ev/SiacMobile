@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -88,6 +89,7 @@ public class Impressora extends AppCompatActivity {
 
     // Pedido para obter o dispositivo bluetooth
     private static final int DEFAULT_NETWORK_PORT = 9100;
+
 
     // Interface, usado para invocar a operação da impressora assíncrona.
     private interface PrinterRunnable {
@@ -165,6 +167,8 @@ public class Impressora extends AppCompatActivity {
         setContentView(R.layout.activity_impressora);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
 
         // Solicitar permissões Bluetooth
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -408,24 +412,23 @@ public class Impressora extends AppCompatActivity {
         tempo(1000);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
-            for (int grantResult : grantResults) {
-                if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                    // Se alguma permissão não for concedida, mostrar mensagem e sair
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Permissões Bluetooth necessárias para imprimir o relatório.")
-                            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                            .show();
-                    return;
-                }
-            }
-            // Permissões concedidas, iniciar a impressora
-            ativarBluetooth();
-        }
+    String getPrinterAddress() {
+        return prefs.getString("enderecoBlt", "");
     }
+
+
+    boolean isPrinterAvailable() {
+        String address = getPrinterAddress();
+        if (address != null && !address.isEmpty()) {
+            BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (btAdapter != null) {
+                BluetoothDevice device = btAdapter.getRemoteDevice(address);
+                return device != null;
+            }
+        }
+        return false;
+    }
+
 
     public String getNumPorExtenso(double valor) {
         return valorPorExtenso(valor);
@@ -708,8 +711,8 @@ public class Impressora extends AppCompatActivity {
         }
 
         mPrinter.setConnectionListener(() -> {
-            Log.d(LOG_TAG, "A impressora está desconectada");
-            toast("A impressora está desconectada");
+            Log.d(LOG_TAG, "Configurando Impressora");
+            toast("Iniciando Impressora");
 
             runOnUiThread(() -> {
                 if (!isFinishing()) {
@@ -721,7 +724,7 @@ public class Impressora extends AppCompatActivity {
 
     }
 
-    private synchronized void waitForConnection() {
+    synchronized void waitForConnection() {
         //status(null);
 
         //closeActiveConnection();
@@ -754,19 +757,53 @@ public class Impressora extends AppCompatActivity {
         }
     }
 
+    //Mnitoramento dos estados de BluetoothSocket
+    /*
+    private void logSocketState(BluetoothSocket socket) {
+        try {
+            Field mSocketStateField = BluetoothSocket.class.getDeclaredField("mSocketState");
+            mSocketStateField.setAccessible(true);
+            Object mSocketState = mSocketStateField.get(socket);
+
+            Log.d(LOG_TAG, "Estado do Socket: " + mSocketState);
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            Log.e(LOG_TAG, "Erro ao acessar o estado do socket: " + e.getMessage(), e);
+        }
+    }*/
+
+    private void requestBluetoothPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+            }, REQUEST_BLUETOOTH_PERMISSIONS);
+        } else {
+            // Permissões já concedidas, continuar com a ativação do Bluetooth
+            ativarBluetooth();
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                ativarBluetooth();
+            } else {
+                Log.e(LOG_TAG, "Permissões Bluetooth não concedidas.");
+                Toast.makeText(this, "Permissões Bluetooth necessárias", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+    //Abrindo Conexao
     private void establishBluetoothConnection(final String address) {
-        //// Checar se o endereço é vazio, se sim, chamar waitForConnection
-       /* if (address.isEmpty()) {
-            waitForConnection();
-            return;
-        }*/
-        // Fechar qualquer conexão existente antes de tentar uma nova
-        bluetoothAdapter.cancelDiscovery();
-
-
-
-        closeBluetoothConnection();
-
+        final int maxRetries = 5; //tentavivas maximas de conexao
 
         final ProgressDialog dialog = new ProgressDialog(Impressora.this);
         dialog.setTitle(getString(R.string.title_please_wait));
@@ -775,104 +812,84 @@ public class Impressora extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
 
+        //Fechar Conexoes antigas
         closeActiveConnection();
-
         closePrinterServer();
 
-
+        //PERMISSOES
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+
+            requestBluetoothPermissions();
+            dialog.dismiss();
             return;
         }
+
+        /*
         if (btAdapter.isDiscovering()) {
             btAdapter.cancelDiscovery();
-        }
-
+            Log.d(LOG_TAG, "Descoberta Bluetooth cancelada");
+        }*/
 
         final Thread t = new Thread(() -> {
             Log.d(LOG_TAG, "BluetoothConnection - Conectando à " + address + "...");
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
             btAdapter.cancelDiscovery();
 
-            try {
-                UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-                BluetoothDevice btDevice = btAdapter.getRemoteDevice(address);
-
-                InputStream in;
-                OutputStream out;
-
+            boolean connected = false;  //realiza as tentativas de Conexao
+            int attempt = 0;
+            while (attempt < maxRetries && !connected) {
                 try {
-                    /*if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        return;
-                    }*/
+                    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+                    BluetoothDevice btDevice = btAdapter.getRemoteDevice(address);
+
                     BluetoothSocket btSocket = btDevice.createRfcommSocketToServiceRecord(uuid);
+                    Log.d(LOG_TAG, "Tentando conectar ao socket Bluetooth...");
                     btSocket.connect();
+                    Log.d(LOG_TAG, "Conexão Bluetooth estabelecida com sucesso");
 
                     mBtSocket = btSocket;
-                    in = mBtSocket.getInputStream();
-                    out = mBtSocket.getOutputStream();
-                    Log.d(LOG_TAG, "Conexão Bluetooth estabelecida com sucesso");
-                } catch (IOException e) {
+                  //  logSocketState(mBtSocket);  // Captura o estado do socket após a conexão bem-sucedida
+                    InputStream in = mBtSocket.getInputStream();
+                    OutputStream out = mBtSocket.getOutputStream();
+                    Log.d(LOG_TAG, "Streams de entrada e saída obtidos com sucesso");
 
-                    error("Falhou ao conectar: " + e.getMessage());
-                    waitForConnection();
-                    return;
-                }
-
-                try {
                     initPrinter(in, out);
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "Falha na inicialização: " + e.getMessage(), e); // Log detalhado
-                    error("Falha na inicialização: " + e.getMessage());
-                    return;
-                }
-
-                if (in != null && out != null) {
+                    Log.d(LOG_TAG, "Impressora inicializada com sucesso");
 
                     liberaImpressao = true;
                     enderecoBlt = address;
-                }
+                    Log.d(LOG_TAG, "Pronto para impressão");
 
-            } finally {
-                dialog.dismiss();
+                    connected = true;
+                } catch (IOException e) {
+                    attempt++;
+                    Log.e(LOG_TAG, "Erro ao conectar ao socket Bluetooth: " + e.getMessage() + ". Tentativa " + attempt + "/" + maxRetries, e);
+
+                    if (attempt >= maxRetries) {
+                        Log.e(LOG_TAG, "Máximo de tentativas de conexão atingido. Falha ao conectar.");
+                        runOnUiThread(() -> {
+                            dialog.dismiss();
+                            Toast.makeText(Impressora.this, "Erro ao conectar após várias tentativas: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
+
+                    try {
+                        Thread.sleep(1000); // Esperar um segundo antes de tentar novamente
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
+
+            runOnUiThread(dialog::dismiss);
         });
         t.start();
     }
+
+
 
     private void establishNetworkConnection(final String address) {
         closePrinterServer();
@@ -886,6 +903,7 @@ public class Impressora extends AppCompatActivity {
 
         closePrinterServer();
 
+        // Aqui é onde a conexão Bluetooth é enviada para uma nova thread em segundo plano
         final Thread t = new Thread(() -> {
             Log.d(LOG_TAG, "NetworkConnection - Conectando à " + address + "...");
             try {
@@ -944,7 +962,7 @@ public class Impressora extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
-        t.start();
+        t.start();  // Inicia a thread em segundo plano
     }
 
     private synchronized void closePrinterConnection() {
@@ -974,20 +992,31 @@ public class Impressora extends AppCompatActivity {
 
 
 
-     synchronized void closeBluetoothConnection() {
-        // Close Bluetooth connection
-        BluetoothSocket s = mBtSocket;
-        mBtSocket = null;
-        if (s != null) {
-            Log.d(LOG_TAG, "Close Bluetooth socket");
+    synchronized void closeBluetoothConnection() {
+        Log.d(LOG_TAG, "Iniciando fechamento do socket Bluetooth");
+        if (mBtSocket != null) {
+            //logSocketState(mBtSocket);  // Captura o estado do socket antes de fechar
             try {
-                s.close();
+                if (mBtSocket.getInputStream() != null) {
+                    mBtSocket.getInputStream().close();
+                    Log.d(LOG_TAG, "InputStream fechado com sucesso");
+                }
+                if (mBtSocket.getOutputStream() != null) {
+                    mBtSocket.getOutputStream().close();
+                    Log.d(LOG_TAG, "OutputStream fechado com sucesso");
+                }
+                mBtSocket.close();
+                Log.d(LOG_TAG, "Socket Bluetooth fechado com sucesso");
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "Erro ao fechar o socket Bluetooth: " + e.getMessage(), e);
+            } finally {
+                mBtSocket = null;
+                Log.d(LOG_TAG, "mBtSocket definido como nulo");
             }
+        } else {
+            Log.d(LOG_TAG, "Socket Bluetooth é nulo");
         }
     }
-
     private synchronized void closeNetworkConnection() {
         // Close network connection
         Socket s = mNetSocket;
@@ -1019,13 +1048,29 @@ public class Impressora extends AppCompatActivity {
             }
         }
     }
-
-    synchronized void closeActiveConnection() {
-        closePrinterConnection();
-        closeBluetoothConnection();
-        closeNetworkConnection();
-        closePrinterServer();
+    private void closeActiveConnection() {
+        try {
+            if (mBtSocket != null) {
+                if (mBtSocket.getInputStream() != null) {
+                    mBtSocket.getInputStream().close();
+                }
+                if (mBtSocket.getOutputStream() != null) {
+                    mBtSocket.getOutputStream().close();
+                }
+                mBtSocket.close();
+                Log.d(LOG_TAG, "Socket Bluetooth fechado com sucesso");
+            } else {
+                Log.d(LOG_TAG, "Socket Bluetooth é nulo");
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Erro ao fechar o socket Bluetooth: " + e.getMessage(), e);
+        } finally {
+            mBtSocket = null;
+        }
     }
+
+
+
 
     private void readCard() {
         Log.d(LOG_TAG, "Read card");
