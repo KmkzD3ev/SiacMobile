@@ -493,7 +493,7 @@ public class Vendas extends AppCompatActivity {
         //super.onBackPressed();
     }
 
-
+    //==================Consulta Inadimplencia=======================//
     private void consultarInadimplencia() {
         Log.d("Inadimplencia", "Verificando inadimplência para o cliente: " + nome_cliente + " (ID: " + id_cliente + ")");
         boolean isInadimplente = verificarInadimplencia(id_cliente);
@@ -529,15 +529,23 @@ public class Vendas extends AppCompatActivity {
         }
     }
 
+
+    //Verificador do parametro na banco de dados
     private boolean verificarInadimplencia(String clienteId) {
         Log.d("Inadimplencia", "ID do cliente recebido: " + clienteId);
+
+        //Metodo que faz a consulta no banco referente a cada cliente
         ArrayList<FinanceiroReceberClientes> contasReceber = bd.getContasReceberCliente(clienteId);
+
+        //Comparativo com a data atual
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         Date dataAtual = new Date();
         Log.d("Inadimplencia", "Data atual: " + sdf.format(dataAtual));
 
+        //Começa com false e responde a consulta do banco para alterar estado
         boolean isInadimplente = false;
 
+          //Percorre o array e busca contas vencidas
         for (FinanceiroReceberClientes conta : contasReceber) {
             String vencimento = conta.getVencimento_financeiro();
             Log.d("Inadimplencia", "Data de vencimento da conta: " + vencimento);

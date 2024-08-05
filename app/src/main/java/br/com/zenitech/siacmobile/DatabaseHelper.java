@@ -1263,6 +1263,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();*/
         return baixa_a_prazo;
     }
+
+    //===============METODO PARA CONSULTAR PARAMETRO INADIMPLENCIA==============///
     public boolean isInadimplenteBloqueado() {
         int bloqueio = 0;  // Valor padrão para inativo
         SQLiteDatabase db = this.getReadableDatabase();

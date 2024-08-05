@@ -125,8 +125,10 @@ public class RelatorioVendasPedido extends AppCompatActivity {
         Stone.setAppName(getApplicationName(context));
     }
 
+    //=============SOLICITANDO PERMISSOES AQUI CASO USUARIO VENHA DIRETAMENTE IMPRIMIR RELATORIO========////
+
     private void iniciarImpressora() {
-        closeActiveConnection(); // Adiciona esta linha para fechar conexões ativas
+        closeActiveConnection(); //  linha para fechar conexões ativas
         Intent i;
 
         if (configuracoes.GetDevice()) {
@@ -165,6 +167,8 @@ public class RelatorioVendasPedido extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    ///==========HERDANDO METODOS DE IMPRESSORA PRA GERENCIAR ESTADOS DE IMPRESAO==============///
 
     private synchronized void closeActiveConnection() {
         Impressora impressora = new Impressora();

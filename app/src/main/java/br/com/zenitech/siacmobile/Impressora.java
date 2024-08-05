@@ -168,7 +168,7 @@ public class Impressora extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+///===========ALTERAÇOES Bluetooth ============//////
 
         // Solicitar permissões Bluetooth
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -474,6 +474,9 @@ public class Impressora extends AppCompatActivity {
         }, tempo);
     }
 
+
+    ///======ATIVAÇAO Bluetooth=======////
+
     private void ativarBluetooth() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{
@@ -504,6 +507,7 @@ public class Impressora extends AppCompatActivity {
             }
         }
     }
+///=======================================================///
 
     private void toast(final String text) {
         Log.d(LOG_TAG, text);
@@ -541,6 +545,7 @@ public class Impressora extends AppCompatActivity {
             }
         });
     }
+
 
     private void runTask(final PrinterRunnable r, final int msgResId) {
         final ProgressDialog dialog = new ProgressDialog(Impressora.this);
@@ -757,7 +762,7 @@ public class Impressora extends AppCompatActivity {
         }
     }
 
-    //Mnitoramento dos estados de BluetoothSocket
+    //Monitoramento dos estados de BluetoothSocket
     /*
     private void logSocketState(BluetoothSocket socket) {
         try {
@@ -771,6 +776,7 @@ public class Impressora extends AppCompatActivity {
             Log.e(LOG_TAG, "Erro ao acessar o estado do socket: " + e.getMessage(), e);
         }
     }*/
+
 
     private void requestBluetoothPermissions() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
@@ -889,7 +895,7 @@ public class Impressora extends AppCompatActivity {
         t.start();
     }
 
-
+///=========VALIDANDO CONEXAO EM NOVA THREAD=====================////
 
     private void establishNetworkConnection(final String address) {
         closePrinterServer();
